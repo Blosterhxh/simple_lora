@@ -1,5 +1,7 @@
 # Modifier une image en utilisant le styleGAN
 
+Article : https://arxiv.org/pdf/2102.02766
+
 Pour modifier une image, on peut tirer parti de la représentation des facteurs de variation en sous-espaces vectoriels dans W. On prend une image, on l'inverse dans l'espace latent W, on se déplace dans le sous-espace d'un facteur de variation, puis on applique G à notre nouveau latent et on récupère notre image modifiée. Cette méthode fonctionne, mais elle pose plusieurs problèmes.
 
 ## Le problème de l'inversion
