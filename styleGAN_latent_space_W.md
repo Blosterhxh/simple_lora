@@ -37,7 +37,7 @@ déplacer G va faire varier le facteur de variation de manière continue. On peu
 pas être représentés par des sous-espaces dans Z, l'espace est entangled. 
 
 On résout ce problème en créant un espace latent après Z : f(Z) = W.
-L'espace latent résout le problème car il n'a pas la contrainte spaciale que les vecteurs dans l'hypersphère donne des images proches
+L'espace latent résout le problème car il n'a pas la contrainte spaciale de Z que les vecteurs dans l'hypersphère donne des images proches
 du dataset. Il peut donc choisir librement les valeurs que G prend sur chaque zone de l'espace. Avec l'optimisation on peut alors approcher
 la représentation des facteurs de variation par des sous-espaces.
 
@@ -47,7 +47,7 @@ L'article utilise ce schéma pour illustrer le problème :
 
 ## Modifier une image avec W
 
-Maintenant que l'espace est disentangled, on peut se dire que pour modifier une image il suffit de l'inverser dans R**512, et de 
+Maintenant que l'espace est disentangled, on peut se dire que pour modifier une image il suffit de l'inverser dans R512, et de 
 se déplacer dans les sous-espaces des facteurs de variation. 
 Le problème est que si G a appris à se déplacer sur un sous-espace pour faire varier un facteur de variation, il ne l'a appris
 que sur l'intersection entre ce sous-espace et W, donc en sortant de W les résultats vont être moins précis. 
