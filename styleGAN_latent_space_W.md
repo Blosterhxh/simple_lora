@@ -27,7 +27,11 @@ notre facteur de variation.
 Le problème ici est que Z est sensé suivre la distribution du dataset sur lequel
 le GAN est entrainé. Cela veut dire que si certaines valeurs d'un facteur de variation sont absentes du dataset, elle ne seront
 pas dans Z. Or pour représenter ce facteur de variation par un sous-espace vectoriel il faut que toutes les valeurs qu'il
-prend soient possibles.
+prend soient possibles. Pour illustrer ce problème, voici un schéma tiré de l'article. On prend Z = R**2, et deux facteurs
+de variations (dans leur cas masculunité et longueur de cheveux). Si je veux modifier la longeur des cheveux, je dois trouver un
+sous-espace qui modifie uniquement ce facteur donc de dimension 1 (un sous espace de dimension 2 modifierait aussi la 
+masculunité) c'est-à-dire une droite. En observant Z, on voit qu'on ne peut pas tracer de droites pour faire évoluer ce facteur.
+
 
 L'espace de départ Z est entangled (emmêlé) : les attributs d'une image (couleur, partie physique, position etc.) sont mélangés 
 dans les différentes dimensions, et se déplacer
