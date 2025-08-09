@@ -14,7 +14,7 @@ de bruit, qui permet de donner une base au générateur pour construire de l'al�
 pour construire des cheveux). Sans cela il devrait lui-même trouver un moyen de construire de l'aléatoire avec 
 ses poids et les autres capacités de reconstruction en seraient donc diminuées.
 
-![styleGAN.png](styleGAN.png)
+![styleGAN.PNG](styleGAN.PNG)
 
 ## L'espace latent W
 
@@ -43,7 +43,7 @@ la représentation des facteurs de variation par des sous-espaces.
 
 L'article utilise ce schéma pour illustrer le problème :
 
-![styleganW.png](styleganW.png)
+![styleganW.PNG](styleganW.PNG)
 
 ## Modifier une image avec W
 
