@@ -24,35 +24,35 @@ cheveux, vieillissement) modifient des attributs communs entre eux (couleur des 
 et cheveux), donc pour créer un sous-espace il faut trouver les directions qui modifient les attributs conformément à
 notre facteur de variation.
 
-Le problème ici est que Z est sensé suivre la distribution du dataset sur lequel
-le GAN est entrainé. Cela veut dire que si certaines valeurs d'un facteur de variation sont absentes du dataset, elle ne seront
+Analysons Z pour voir si l'espace est disentangled. Z peut-être représenté comme une hypersphère de rayon racine de 512 de R**512, dans laquelle
+la majorité des vecteurs vont être tirés d'après la loi normale. Avec l'entrainement, sur cette sphère, le générateur va prendre
+des valeurs qui sont proches de celles du dataset. Supposons maintenant qu'un facteur de variation à une zone de valeur absente du dataset.
+Si on peut représenter ce facteur de variation avec un sous-espace dans Z, on peut prendre une direction de cette espace sur laquelle
+déplacer G va faire varier le facteur de variation de manière continue. On peut donc trouver une portion de droite, dans le cercle de
+rayon 1, où G va prendre des valeurs pour le facteur de variation qui sont impossibles. Ainsi les facteurs de variation ne peuvent
+pas être représentés par des sous-espaces dans Z, l'espace est entangled.
+
+de Z ne générera cette zone de valeur avec G, donc on ne pourra pas représenter ce facteur de variation avec un sous-espace car 
+aucune direction ne pasn bbbbbbbbbbbbbbbbbb
+le GAN est entrainé.
+Cela veut dire que si certaines valeurs d'un facteur de variation sont absentes du dataset, elle ne seront
 pas dans Z. Or pour représenter ce facteur de variation par un sous-espace vectoriel il faut que toutes les valeurs qu'il
 prend soient possibles. Pour illustrer ce problème, voici un schéma tiré de l'article. On prend Z = R**2, et deux facteurs
-de variations (dans leur cas masculunité et longueur de cheveux). Si je veux modifier la longeur des cheveux, je dois trouver un
-sous-espace qui modifie uniquement ce facteur donc de dimension 1 (un sous espace de dimension 2 modifierait aussi la 
-masculunité) c'est-à-dire une droite. En observant Z, on voit qu'on ne peut pas tracer de droites pour faire évoluer ce facteur.
-
-
-L'espace de départ Z est entangled (emmêlé) : les attributs d'une image (couleur, partie physique, position etc.) sont mélangés 
-dans les différentes dimensions, et se déplacer
-dans une direction ne contrôle pas un attribut spécifique (par exemple on ne trouve pas de direction pour quantifier
-la rotation du visage). Pour le comprendre, on peut raisonner par l'absurde en supposant qu'il est disentangled.
-En étant disentangled, on pourrait se déplacer dans une direction pour modifier un attribut, et donc cela 
-signifie que toutes les combinaisons d'attributs sont possibles. Or le dataset est limité et l'espace Z suit
-la distribution du dataset donc une combinaison absente de la distribution du dataset est absente de Z, donc 
-Z ne peut pas être disentangled. C'est ce qui est illustré sur la figure,où l'on voit
-que l'absence d'une combinaison d'attributs dans le dataset fait varier les attributs de façon non linéaire
-dans l'espace Z.
-
-L'espace latent W :
+de variations (dans leur cas masculinité et longueur de cheveux). Si je veux modifier la longueur des cheveux, je dois trouver un
+sous-espace qui modifie ce facteur donc dans ce cas une droite. En observant Z, on voit que la direction pour faire évoluer ce 
+facteur de variation de manière continue change, on ne pas donc pas trouver de telle droite.
 
 On résout ce problème en créant un espace latent après Z : f(Z) = W.
-L'espace latent résout le problème car il peut occuper une partie de l'espace dans lequel il est inclus et pas sa
+L'espace latent résout le problème car il est libre de positionner les latents où il veut dans l'espace R**512, là où
+dans le cas de Z ces latents sont concentrés uniformément dans une sphère de rayon racine de d à cause de la loi normale.
+Ainsi si on veut représenter un facteur de variation par un sous-espace dans W, mais que certaines valeurs ne sont pas prises
+par ce facteur dans le dataset, et bien on peut quand même placer les latents en suivant ce sous-espace, en laissant
+des parties vides là où les valeurs ne sont pas dans le dataset.
+
+il peut occuper une partie de l'espace dans lequel il est inclus et pas sa
 totalité, ce qui n'est pas le cas de Z car le tirage selon la loi normale implique que l'on peut prendre des vecteurs
-de tout l'espace Z. Ainsi si W est inclus dans W*, et que une combinaison d'attributs est impossible, et bien
-cette combinaison sera dans W* mais exclu de W ce qui permet quand même à W de faire varier les attributs de
-façon linéaire, seulement quand une certaine combinaison n'existera pas et bien elle ne sera plus dans W et 
-on n'a pas besoin de déformer les features comme on le fait sur Z.
+de tout l'espace Z. Ainsi dans W on a des sous-espaces pour les facteurs de variation, et si une valeur d'un facteur de variation
+est impossible et bien elle ne sera pas dans W : on aura un "trou" dans l'espace vectoriel où G ne prendra pas valeurs.
 
 Comment modifier une image quelconque en utilisant les propriétés du styleGAN  :
 
