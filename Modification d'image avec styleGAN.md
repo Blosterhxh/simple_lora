@@ -10,6 +10,8 @@ L'idée est qu'une image peut ressembler esthétiquement à une autre, mais n'av
 Comme l'inversion dans W n'est pas toujours satisfaite, on propose de l'améliorer en agrandissant l'espace de départ sur lequel est réalisé l'optimisation. Cela peut être fait de différentes manières : prendre k vecteurs latents dans W (un par couche du générateur) au lieu d'un, prendre un vecteur dans 
 W* = R512 dans lequel est inclus W, prendre k vecteurs dans W*k. Un graphique de l'article illustre comme s'organisent ces différents espaces.
 
+![inversionamelioree.PNG](inversionamelioree.PNG)
+
 Note : Pourquoi prendre k vecteurs dans W au lieu d'un pourrait marcher alors qu'on a entrainé le générateur à n'utiliser
 qu'un seul vecteur ?
 
@@ -22,7 +24,11 @@ pas restituer parfaitement les informations précises, et inversement, d'où la 
 
 On est maintenant capable de faire des reconstructions plus précises en inversant dans des espaces plus grands, mais cela n'est pas sans coût. Premièrement, il y a une perte de la perceptual quality. Si les images ont une meilleur distortion, elles ont par contre moins de sens que celles inversées dans W, comme on peut le voir dans cet exemple entre une image inversée dans W et dans W*k.
 
+![perceptualquality.PNG](perceptualquality.PNG)
+
 De plus, on constate également une perte en editability. Les modifications apportées à des images inversées dans W donnent de meilleurs résultats que celles inversées dans W*k, comme on peut le voir sur cette image.
+
+![editability.PNG](editability.PNG)
 
 En fait, il y a un compromis entre la distortion, et la perceptual quality + editability. Plus on s'écarte de l'espace W, plus on gagne en distortion mais en perdant sur les deux autres caractéristiques. Cela s'explique car c'est sur W que le générateur a été entrainé à produire des images qui ont du sens.
 
@@ -33,7 +39,7 @@ individuelle des k vecteur de W* à W. En minimisant ces deux critères, un vect
 
 Ce graphique issu de l'article reprend la représentation précédente de W*k, et introduit deux couleurs de flèche pour les deux moyens de s'approcher de W : la flèche rouge pour diminuer la variation entre vecteurs, et la flèche bleue pour le rapprochement des vecteurs individuellement à ceux de W.
 
-
+![distanceaW.PNG](distanceaW.PNG)
 
 
 
