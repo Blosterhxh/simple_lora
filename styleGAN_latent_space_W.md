@@ -1,6 +1,7 @@
 # Le styleGAN et l'espace latent W
 
 Pré-requis : savoir ce qu'est un GAN
+
 Article original : https://arxiv.org/pdf/1812.04948
 
 ## Le styleGAN : un GAN où le générateur est modifié.
@@ -13,7 +14,7 @@ de bruit, qui permet de donner une base au générateur pour construire de l'al�
 pour construire des cheveux). Sans cela il devrait lui-même trouver un moyen de construire de l'aléatoire avec 
 ses poids et les autres capacités de reconstruction en seraient donc diminuées.
 
-![styleGAN.png](img/styleGAN.png)
+![styleGAN.png](styleGAN.png)
 
 ## L'espace latent W
 
@@ -42,7 +43,7 @@ la représentation des facteurs de variation par des sous-espaces.
 
 L'article utilise ce schéma pour illustrer le problème :
 
-![styleganW.png](img/styleganW.png)
+![styleganW.png](styleganW.png)
 
 ## Modifier une image avec W
 
