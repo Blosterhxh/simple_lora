@@ -1,4 +1,4 @@
-#Le styleGAN et l'espace latent W
+# Le styleGAN et l'espace latent W
 
 Pré-requis : savoir ce qu'est un GAN
 
@@ -14,7 +14,7 @@ ses poids et les autres capacités de reconstruction en seraient donc diminuées
 
 ## L'espace latent W
 
-Dans cette partie on prend comme exemple pour illustrer un styleGAN entrainé sur des visages humains.
+Dans cette partie on prend comme exemple pour illustrer un styleGAN entrainé sur des visages.
 
 Dans l'idéal, on aimerait que l'espace Z soit disentangled (désemmêlé) : cela signifie que pour chaque
 facteur de variation de l'image (ex : rotation du visage), on peut trouver un sous-espace vectoriel dans Z, dont les directions
@@ -26,37 +26,21 @@ notre facteur de variation.
 
 Analysons Z pour voir si l'espace est disentangled. Z peut-être représenté comme une hypersphère de rayon racine de 512 de R**512, dans laquelle
 la majorité des vecteurs vont être tirés d'après la loi normale. Avec l'entrainement, sur cette sphère, le générateur va prendre
-des valeurs qui sont proches de celles du dataset. Supposons maintenant qu'un facteur de variation à une zone de valeur absente du dataset.
+des valeurs qui sont proches de celles du dataset. Supposons maintenant qu'un facteur de variation à une zone de valeur absente du dataset,
+par exemple supposons que sur le dataset ils prennent des valeurs de [0,1] puis de [2,+oo] .
 Si on peut représenter ce facteur de variation avec un sous-espace dans Z, on peut prendre une direction de cette espace sur laquelle
-déplacer G va faire varier le facteur de variation de manière continue. On peut donc trouver une portion de droite, dans le cercle de
-rayon 1, où G va prendre des valeurs pour le facteur de variation qui sont impossibles. Ainsi les facteurs de variation ne peuvent
-pas être représentés par des sous-espaces dans Z, l'espace est entangled.
-
-de Z ne générera cette zone de valeur avec G, donc on ne pourra pas représenter ce facteur de variation avec un sous-espace car 
-aucune direction ne pasn bbbbbbbbbbbbbbbbbb
-le GAN est entrainé.
-Cela veut dire que si certaines valeurs d'un facteur de variation sont absentes du dataset, elle ne seront
-pas dans Z. Or pour représenter ce facteur de variation par un sous-espace vectoriel il faut que toutes les valeurs qu'il
-prend soient possibles. Pour illustrer ce problème, voici un schéma tiré de l'article. On prend Z = R**2, et deux facteurs
-de variations (dans leur cas masculinité et longueur de cheveux). Si je veux modifier la longueur des cheveux, je dois trouver un
-sous-espace qui modifie ce facteur donc dans ce cas une droite. En observant Z, on voit que la direction pour faire évoluer ce 
-facteur de variation de manière continue change, on ne pas donc pas trouver de telle droite.
+déplacer G va faire varier le facteur de variation de manière continue. On peut donc trouver une portion de droite, dans l'hypersphère, où G va prendre des valeurs pour le facteur de variation qui sont impossibles [1,2]. Ainsi les facteurs de variation ne peuvent
+pas être représentés par des sous-espaces dans Z, l'espace est entangled. Une illustration de l'article qui montre ce problème
+avec R**2.
 
 On résout ce problème en créant un espace latent après Z : f(Z) = W.
-L'espace latent résout le problème car il est libre de positionner les latents où il veut dans l'espace R**512, là où
-dans le cas de Z ces latents sont concentrés uniformément dans une sphère de rayon racine de d à cause de la loi normale.
-Ainsi si on veut représenter un facteur de variation par un sous-espace dans W, mais que certaines valeurs ne sont pas prises
-par ce facteur dans le dataset, et bien on peut quand même placer les latents en suivant ce sous-espace, en laissant
-des parties vides là où les valeurs ne sont pas dans le dataset.
+L'espace latent résout le problème car il n'a pas la contrainte spaciale que les vecteurs dans l'hypersphère donne des images proches
+du dataset. Il peut donc choisir librement les valeurs que G prend sur chaque zone de l'espace. Avec l'optimisation on peut alors approcher
+la représentation des facteurs de variation par des sous-espaces.
 
-il peut occuper une partie de l'espace dans lequel il est inclus et pas sa
-totalité, ce qui n'est pas le cas de Z car le tirage selon la loi normale implique que l'on peut prendre des vecteurs
-de tout l'espace Z. Ainsi dans W on a des sous-espaces pour les facteurs de variation, et si une valeur d'un facteur de variation
-est impossible et bien elle ne sera pas dans W : on aura un "trou" dans l'espace vectoriel où G ne prendra pas valeurs.
+## Modifier une image avec W
 
-Comment modifier une image quelconque en utilisant les propriétés du styleGAN  :
-
-L'espace latent du styleGAN est disentangled : des dimensions différentes codent des attributs différents.
-Cela permet en se déplaçant dans des directions précises de modifier un attribut particulier et donc de modifier
-une image à son souhait. Toutefois toutes les images ne sont pas dans W, certaines sont dans W* donc on ne peut pas
-modifier n'importe quelle image. 
+Maintenant que l'espace est disentangled, on peut se dire que pour modifier une image il suffit de l'inverser dans R**512, et de 
+se déplacer dans les sous-espaces des facteurs de variation. 
+Le problème est que si G a appris à se déplacer sur un sous-espace pour faire varier un facteur de variation, il ne l'a appris
+que sur l'intersection entre ce sous-espace et W, donc en sortant de W les résultats vont être moins précis. 
