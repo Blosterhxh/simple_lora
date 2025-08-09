@@ -45,9 +45,3 @@ L'article utilise ce schéma pour illustrer le problème :
 
 ![styleganW.PNG](styleganW.PNG)
 
-## Modifier une image avec W
-
-Maintenant que l'espace est disentangled, on peut se dire que pour modifier une image il suffit de l'inverser dans R512, et de 
-se déplacer dans les sous-espaces des facteurs de variation. 
-Le problème est que si G a appris à se déplacer sur un sous-espace pour faire varier un facteur de variation, il ne l'a appris
-que sur l'intersection entre ce sous-espace et W, donc en sortant de W les résultats vont être moins précis. 
