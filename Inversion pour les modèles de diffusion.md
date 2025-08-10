@@ -142,3 +142,5 @@ l'unet va prendre en compte le prompt pour générer l'image) plus élevé : 1,2
 ## d) Augmenter le nombre d'images dans le dataset
 
 Le nombre d'image affecte peu la reconstruction, un nombre optimal de 5 est trouvé pour l'editability.
+
+![datasetsize.PNG](datasetsize.PNG)
