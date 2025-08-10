@@ -36,7 +36,12 @@ interagir entre eux (il peut les faire interagir avec des concepts qu'il connaî
 pose problème). Il est possible que réaliser un entrainement où ils sont en interaction
 avec d'autres nouveaux objets et non plus au coeur de la scène débloque cette situation.
 
-# Evaluation du modèle :
+# Evaluation de la méthode :
+
+On peut faire varier la méthode d'inversion en changeant  certains hyperparamètres : learning rate, formule de la loss, nombre de tokens choisis ...
+La variation de ces hyperparamètres ne modifie pas les capacités/limites qu'on a vu avant qui sont propres à la méthode.
+Néanmoins, en restant dans le cadre de ces capacités/limites, ils peuvent améliorer la reconstruction et l'editability s'ils sont bien choisis.
+Il faut donc des méthodes pour évaluer ces deux critères afin de les choisir au mieux.
 
 ## Reconstruction
 
