@@ -1,5 +1,7 @@
 # Se libérer de la limite distortion/perceptual quality + editability
 
+Article : https://arxiv.org/pdf/2106.05744
+
 Quand on inverse une image dans W, on préserve la perceptual quality + editability, et même si la distortion
 est plus élevée que dans W*k, l'image générée reste proche de l'image d'origine. On peut donc essayer de finetuner
 le générateur pour que en ce point w, on obtienne exactement l'image d'origine, ce qui devrait pouvoir se faire
