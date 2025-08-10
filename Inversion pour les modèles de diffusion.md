@@ -9,7 +9,7 @@ On créé un ou plusieurs tokens (on choisit combien de tokens on veut pour repr
 Ensuite on place ces tokens dans différents prompts pour modifier l'image.
 
 Pour initialiser les embeddings de ces tokens, on peut choisir comme valeur de départ l'embedding de la classe à laquelle appartient notre concept (par exemple si c'est un animal
-on peut prendre l'embedding du token lion, tigre ...). On choisit un prompt comme "a photo of s*1 s*2 s*3 etc." pour générer les images lors de l'entrainement.
+on peut prendre l'embedding du token lion, tigre ...). On choisit un prompt comme "a photo of s1 s2 s3 etc." pour générer les images lors de l'entrainement.
 
 Dans l'article, les auteurs ont exploré cette méthode d'inversion sous différents angles pour voir ses capacités et ses limites dans le cas du modèle de diffusion.
 
