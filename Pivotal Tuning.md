@@ -37,6 +37,9 @@ terme de régularisation qui a pour but de forcer le tuning à rester local auto
 
 Pour le terme de régularisation, on tire un vecteur dans Z, on le transforme en latent wz, et on réalise une interpolation entre
 wp et wz, dont la distance à wp est mesurée par un coefficient alpha.
+
+![interpolation.PNG](interpolation.PNG)
+
 Une fois qu'on a ce vecteur interpolé wz, on génère une image
 avec l'ancien générateur et une image avec le nouveau et on fait la différence, le but étant de ne pas s'éloigner
 de ce que produisait le générateur d'origine. Le but est d'appliquer la régularisation à 
