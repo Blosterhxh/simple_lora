@@ -47,18 +47,21 @@ Il faut donc des méthodes pour évaluer ces deux critères afin de les choisir 
 
 On veut évaluer si le concept généré ressemble au concept du dataset.
 On génère 64 images, on les encode ainsi que les images du dataset dans l'espace d'embeddings de CLIP, on calcule
-la cosine-similarity de toutes les pairs image générée/image du dataset et on en fait la moyenne
+la cosine-similarity de toutes les pairs image générée/image du dataset et on en fait la moyenne.
 
-b) Flexibilité
+## Editability
 
-On veut évaluer à quel point le concept généré est modifiable. Pour cela on créé des prompts avec des variations
+On veut évaluer à quel point le concept appris est modifiable. Pour cela on créé des prompts avec des variations
 de décor, de style, et d'interaction avec d'autres objets. Pour chaque prompt, on génère 64 images, on fait une
 moyenne du vecteur dans l'espace des embeddings de CLIP, et on calcule sa cosine-similarity avec le prompt utilisé
-pour la génération à qui on a enlevé le nouveau mot : "a photo a S* on the moon" -> "a photo of on the moon".
+pour la génération à qui on a enlevé le nouveau token "a photo of S* on the moon" -> "a photo of on the moon".
 
-Choix des hyper-paramètres :
+# Choix des hyper-paramètres
 
-a) Implémentation de base
+Les auteurs de l'article ont analysé l'impact des différents hyperparamètres sur la reconstruction et l'editability en utilisant les méthodes ci-dessus,
+ce qui donne une idée de quoi changer selon notre objectif.
+
+## Implémentation de base
 
 L'implémentation a été faite sur un ancien modèle précédent Stable Diffusion donc les paramètres ne sont peut
 être pas exactement les mêmes dans ce cas, mais ils donnent quand même une idée du point de départ :
@@ -70,43 +73,47 @@ notre objet (ex : chat, homme, arbre ...)
 - 4 batch-size
 - 5000 steps
 
-b) Déplacement sur la courbe flexibilité/distorsion
+## Déplacement sur la courbe editability/distorsion
 
-En entrainant le modèle avec différents hyperparamètres ou avec des variations structurelles, on remarque
-une l'apparition d'une courbe de flexibilité/distorsion. Quand le nouvel embedding est plus proche de l'espace
-des embeddings de départ, il y a une meilleur flexibiltié, et quand il en est éloigné, il a une meilleure 
-reconstruction mais est moins modifiable.
+Les auteurs ont observé l'existence d'une courbe editability/reconstruction, et plus le/les vecteurs pris dans l'espace des embeddings
+s'éloignent de l'embedding initiale de la classe (ex : lion, tigre ...), plus on gagne en reconstruction tout en perdant en editability. C'est la même chose que l'on observait
+avec les styleGAN lorsque le/les latents s'éloignaient de l'espace W où le générateur avait été entrainé. 
+La variation des hyperparamètres va éloigner plus ou moins les nouveaux tokens de l'embedding initial, il faut donc les choisir selon là où l'on veut être sur la courbe : soit on veut privilégier la reconstruction, soit l'editability.
 
-b1) Gagner en flexibilité
+#### Gagner en editability
 
-Pour gagner en flexibilité il faut se rapprocher de l'espace des embeddings de départ. 
+Pour gagner en editability il faut se rapprocher de l'embedding de départ. 
 
-b.1.1) Diminuer le learning rate
+##### Diminuer le learning rate
 
 Avec un learning rate plus faible on s'éloigne moins de l'embedding de départ avec un même nombre de steps.
 
-b.1.2) Régularisation
+##### Régularisation
 
-On peut introduire dans la loss la norme L2 entre le nouvel embedding et l'embedding de la classe de l'objet.
+On peut introduire dans la loss une norme L2 entre le nouvel embedding et l'embedding de la classe de l'objet, de manière à privilégier avec l'optimisation le changement de
+direction du nouvel embedding plutôt que son éloignement de l'embedding de départ.
 
-b2) Gagner en reconstruction
+#### Gagner en reconstruction
 
-b.2.1) Augmenter le learning rate
+##### Augmenter le learning rate
 
-Augmenter le learning rate pour les mêmes raisons que le diminuer augmente la flexibilité.
+Augmenter le learning rate augmente la reconstruction pour les mêmes raisons que le diminuer augmente l'editability.
 
-b.2.2) Augmenter le nombre de tokens appris
+##### Augmenter le nombre de tokens appris
 
 On peut choisir d'apprendre plusieurs embeddings au lieu d'un, ou même d'apprendre un embedding
 commun pour toutes les images et un différent de manière à ce que le modèle concentre les informations communes
 dans l'embedding partagé et que les emebeddings spécifiques récupères les informations particulières à chaque image
-qui ne nous sont pas utiles. Toutefois ces méthodes par rapport au token unique apporte un très léger gain en
+qui ne nous sont pas utiles. Ces méthodes se rapprochent de celles du styleGAN lorsqu'on choisissait d'inverser dans W*k au lieu d'W* pour avoir une meilleure reconstruction,
+et de la même manière elles éloignent plus les nouveaux tokens de l'embedding initial en multipliant les vecteurs.
+
+Toutefois ces méthodes par rapport au token unique apporte un très léger gain en
 reconstruction et une perte beaucoup plus importante en flexibilité comme on peut le voir sur le graphe.
 
 Au final, le réglage du learning rate est la méthode la plus simple pour choisir quoi prioriser entre reconstruction
 et flexibilité.
 
-c) S'affranchir de la courbe flexibilité/reconstruction : le pivotal tuning
+## S'affranchir de la courbe editability/reconstruction : le pivotal tuning
 
 Dans le styleGAN pour s'affranchir de la limite imposée par la courbe, on découpe l'inversion en deux étapes.
 On inverse l'image dans W pour avoir une bonne flexibilité, et ensuite on finetune le générateur afin de modifier
