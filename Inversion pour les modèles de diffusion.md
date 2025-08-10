@@ -1,4 +1,4 @@
-# Modifier une image dans un modèle de diffusion
+# A/ Modifier une image dans un modèle de diffusion
 
 Article : https://arxiv.org/pdf/2208.01618
 
@@ -14,9 +14,9 @@ on peut prendre l'embedding du token lion, tigre ...). On choisit un prompt comm
 Dans l'article, les auteurs ont exploré cette méthode d'inversion sous différents angles pour voir ses capacités et ses limites dans le cas du modèle de diffusion.
 
 
-# Capacités :
+# B/ Capacités :
 
-## Compréhension sémantique
+## a) Compréhension sémantique
 
 Même si le modèle est entrainé à représenter l'image de l'objet en entier et pas son interaction avec l'environnement, il comprend sémantiquement
 sa constitution et peut le faire interagir avec d'autres objets. Par exemple si on apprend un bol spécifique il va pouvoir contenir
@@ -24,48 +24,48 @@ des objets à l'intérieur, comme tout autre bol.
 
 ![capacite1.PNG](capacite1.PNG)
 
-## Idées abstraites
+## b) Idées abstraites
 
 Le modèle ne se limite pas à l'apprentissage d'objets concrets mais peu aussi saisir des idées abstraites comme
 un style de dessin avec ce type de prompt : “A painting in the style of s*”
 
 ![capacite2.PNG](capacite2.PNG)
 
-# Limites :
+# C/ Limites :
 
-## Interaction entre nouveaux objets
+## a) Interaction entre nouveaux objets
 
 Les objets étant appris avec un set d'image où ils sont au coeur de la scène, le modèle a du mal a les faire
 interagir entre eux (il peut les faire interagir avec des concepts qu'il connaît déjà comme on l'a vu, c'est l'interaction entre nouveaux concepts qui
 pose problème). Il est possible que réaliser un entrainement où ils sont en interaction
 avec d'autres nouveaux objets et non plus au coeur de la scène débloque cette situation.
 
-# Evaluation de la méthode :
+# D/ Evaluation de la méthode :
 
 On peut faire varier la méthode d'inversion en changeant  certains hyperparamètres : learning rate, formule de la loss, nombre de tokens ...
 La variation de ces hyperparamètres ne modifie pas les capacités/limites qu'on a vu avant qui sont propres à la méthode.
 Néanmoins, en restant dans le cadre de ces capacités/limites, ils peuvent améliorer la reconstruction et l'editability s'ils sont bien choisis.
 Il faut donc des méthodes pour évaluer ces deux critères afin de prendre les meilleurs hyperparamètres.
 
-## Reconstruction
+## a) Reconstruction
 
 On veut évaluer si le concept généré ressemble au concept du dataset.
 On génère 64 images, on les encode ainsi que les images du dataset dans l'espace d'embeddings de CLIP, on calcule
 la cosine-similarity de toutes les pairs image générée/image du dataset et on en fait la moyenne.
 
-## Editability
+## b) Editability
 
 On veut évaluer à quel point le concept appris est modifiable. Pour cela on créé des prompts avec des variations
 de décor, de style, et d'interaction avec d'autres objets. Pour chaque prompt, on génère 64 images, on fait une
 moyenne du vecteur dans l'espace des embeddings de CLIP, et on calcule sa cosine-similarity avec le prompt utilisé
 pour la génération à qui on a enlevé le nouveau token "a photo of S* on the moon" -> "a photo of on the moon".
 
-# Choix des hyper-paramètres
+# E/ Choix des hyper-paramètres
 
 Les auteurs de l'article ont analysé l'impact des différents hyperparamètres sur la reconstruction et l'editability en utilisant les méthodes ci-dessus,
 ce qui donne une idée de quoi changer selon notre objectif.
 
-## Implémentation de base
+## a) Implémentation de base
 
 L'implémentation a été faite sur un ancien modèle précédent Stable Diffusion donc les paramètres ne sont peut
 être pas exactement les mêmes dans ce cas, mais ils donnent quand même une idée du point de départ :
@@ -77,7 +77,7 @@ notre objet (ex : chat, homme, arbre ...)
 - 4 batch-size
 - 5000 steps
 
-## Déplacement sur la courbe editability/distorsion
+## b) Déplacement sur la courbe editability/distorsion
 
 Les auteurs ont observé l'existence d'une courbe editability/reconstruction, et plus le/les vecteurs pris dans l'espace des embeddings
 s'éloignent de l'embedding initial de la classe (ex : lion, tigre ...), plus on gagne en reconstruction tout en perdant en editability. 
@@ -92,26 +92,26 @@ avec les styleGAN  : lorsque le/les latents s'éloignaient de l'espace W où le 
 
 Au final, la variation des hyperparamètres va éloigner plus ou moins les nouveaux tokens de l'embedding initial, il faut donc les choisir selon là où l'on veut être sur la courbe : soit on veut privilégier la reconstruction, soit l'editability.
 
-#### Gagner en editability
+### b.1) Gagner en editability
 
 Pour gagner en editability il faut se rapprocher de l'embedding de départ. 
 
-##### Diminuer le learning rate
+#### b.1.1) Diminuer le learning rate
 
 Avec un learning rate plus faible on s'éloigne moins de l'embedding de départ avec un même nombre de steps.
 
-##### Régularisation
+#### b.1.2) Régularisation
 
 On peut introduire dans la loss une norme L2 entre le nouvel embedding et l'embedding de la classe de l'objet, de manière à privilégier avec l'optimisation le changement de
 direction du nouvel embedding plutôt que son éloignement de l'embedding de départ.
 
-#### Gagner en reconstruction
+### b.2) Gagner en reconstruction
 
-##### Augmenter le learning rate
+#### b.2.1) Augmenter le learning rate
 
 Augmenter le learning rate augmente la reconstruction pour les mêmes raisons que le diminuer augmente l'editability.
 
-##### Augmenter le nombre de tokens appris
+#### b.2.2) Augmenter le nombre de tokens appris
 
 On peut choisir d'apprendre plusieurs embeddings au lieu d'un, ou même d'apprendre un embedding
 commun pour toutes les images et un différent de manière à ce que le modèle concentre les informations communes
@@ -125,7 +125,7 @@ comparées à "ours".
 
 Au final, le réglage du learning rate est la méthode la plus simple pour se déplacer sur la courbe.
 
-## S'affranchir de la courbe editability/reconstruction : le pivotal tuning
+## c) S'affranchir de la courbe editability/reconstruction : le pivotal tuning
 
 Dans le styleGAN pour s'affranchir de la limite imposée par la courbe, on découpe l'inversion en deux étapes.
 On inverse l'image dans W pour avoir une bonne editability, et ensuite on finetune le générateur afin de modifier
@@ -139,6 +139,6 @@ Toutefois, les auteurs de l'article ont observé  qu'appliquer cette méthode da
 Ces images correspondent à la génération d'un prompt étant censé placée la sculpture dans un tableau, avec à chaque fois un guidance scale s (paramètre qui influe sur a quel point
 l'unet va prendre en compte le prompt pour générer l'image) plus élevé : 1,2 et 5. Au final le modèle est incapable de placer la statue dans un tableau donc on a perdu en editability.
 
-## Augmenter le nombre d'images dans le dataset
+## d) Augmenter le nombre d'images dans le dataset
 
 Le nombre d'image affecte peu la reconstruction, un nombre optimal de 5 est trouvé pour l'editability.
