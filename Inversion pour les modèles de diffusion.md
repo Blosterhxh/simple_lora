@@ -1,5 +1,6 @@
-# Modifier une image dans un modèle de diffusion
+<img width="720" height="553" alt="image" src="https://github.com/user-attachments/assets/e0a8ccf7-708b-46df-b8ea-60237380dd19" /># Modifier une image dans un modèle de diffusion
 
+Article : https://arxiv.org/pdf/2208.01618
 
 Dans un modèle de diffusion, on génère l'image à partir d'un prompt là où avec un GAN on part d'un latent w. Pour modifier une image dans le modèle de diffusion, on modifie les mots
 du prompt là où dans le GAN on se déplace selon des directions spécifiques dans W.
@@ -8,8 +9,7 @@ On créé un ou plusieurs tokens (on choisit combien de tokens on veut pour repr
 Ensuite on place ces tokens dans différents prompts pour modifier l'image.
 
 Pour initialiser les embeddings de ces tokens, on peut choisir comme valeur de départ l'embedding de la classe à laquelle appartient notre concept (par exemple si c'est un animal
-on peut prendre l'embedding du token lion, tigre ...). On choisit un prompt comme "a photo of <tok1>
-<tok2> <tok3> ... etc." pour générer les images lors de l'entrainement.
+on peut prendre l'embedding du token lion, tigre ...). On choisit un prompt comme "a photo of s*1 s*2 s*3 etc." pour générer les images lors de l'entrainement.
 
 Dans l'article, les auteurs ont exploré cette méthode d'inversion sous différents angles pour voir ses capacités et ses limites dans le cas du modèle de diffusion.
 
@@ -19,13 +19,17 @@ Dans l'article, les auteurs ont exploré cette méthode d'inversion sous différ
 ## Compréhension sémantique
 
 Même si le modèle est entrainé à représenter l'image de l'objet en entier et pas son interaction avec l'environnement, il comprend sémantiquement
-sa constitution et peut le faire interagir avec d'autres objets. Par exemple, un type de bol appris peut contenir
-des objets à l'intérieur.
+sa constitution et peut le faire interagir avec d'autres objets. Par exemple si on apprend un bol spécifique il va pouvoir contenir
+des objets à l'intérieur, comme tout autre bol.
+
+![capacite1.PNG](capacite1.PNG)
 
 ## Idées abstraites
 
 Le modèle ne se limite pas à l'apprentissage d'objets concrets mais peu aussi saisir des idées abstraites comme
-un style de dessin avec ce type de prompt : “A painting in the style of <tok1>”
+un style de dessin avec ce type de prompt : “A painting in the style of s*”
+
+![capacite2.PNG](capacite2.PNG)
 
 # Limites :
 
@@ -38,10 +42,10 @@ avec d'autres nouveaux objets et non plus au coeur de la scène débloque cette 
 
 # Evaluation de la méthode :
 
-On peut faire varier la méthode d'inversion en changeant  certains hyperparamètres : learning rate, formule de la loss, nombre de tokens choisis ...
+On peut faire varier la méthode d'inversion en changeant  certains hyperparamètres : learning rate, formule de la loss, nombre de tokens ...
 La variation de ces hyperparamètres ne modifie pas les capacités/limites qu'on a vu avant qui sont propres à la méthode.
 Néanmoins, en restant dans le cadre de ces capacités/limites, ils peuvent améliorer la reconstruction et l'editability s'ils sont bien choisis.
-Il faut donc des méthodes pour évaluer ces deux critères afin de les choisir au mieux.
+Il faut donc des méthodes pour évaluer ces deux critères afin de prendre les meilleurs hyperparamètres.
 
 ## Reconstruction
 
@@ -76,9 +80,17 @@ notre objet (ex : chat, homme, arbre ...)
 ## Déplacement sur la courbe editability/distorsion
 
 Les auteurs ont observé l'existence d'une courbe editability/reconstruction, et plus le/les vecteurs pris dans l'espace des embeddings
-s'éloignent de l'embedding initiale de la classe (ex : lion, tigre ...), plus on gagne en reconstruction tout en perdant en editability. C'est la même chose que l'on observait
-avec les styleGAN lorsque le/les latents s'éloignaient de l'espace W où le générateur avait été entrainé. 
-La variation des hyperparamètres va éloigner plus ou moins les nouveaux tokens de l'embedding initial, il faut donc les choisir selon là où l'on veut être sur la courbe : soit on veut privilégier la reconstruction, soit l'editability.
+s'éloignent de l'embedding initial de la classe (ex : lion, tigre ...), plus on gagne en reconstruction tout en perdant en editability. 
+
+![tradeoff.PNG](tradeoff.PNG)
+
+Sur ce graphique, une augmentation en image similarity indique une meilleure reconstruction, et une augmentation en text similarity indique une meilleure editability (conformément
+aux deux méthodes d'évaluation qu'on a vu précédemment). Il y a donc une courbe en haut a droite sur laquelle les différentes configurations sont positionnées, chaque configuration privilégiant plus ou moins la reconstruction/editability par rapport aux autres.
+
+Ce compromis est le même que l'on observait
+avec les styleGAN  : lorsque le/les latents s'éloignaient de l'espace W où le générateur avait été entrainé, on gagnait en reconstruction et perdait en editability.
+
+Au final, la variation des hyperparamètres va éloigner plus ou moins les nouveaux tokens de l'embedding initial, il faut donc les choisir selon là où l'on veut être sur la courbe : soit on veut privilégier la reconstruction, soit l'editability.
 
 #### Gagner en editability
 
@@ -108,10 +120,10 @@ qui ne nous sont pas utiles. Ces méthodes se rapprochent de celles du styleGAN 
 et de la même manière elles éloignent plus les nouveaux tokens de l'embedding initial en multipliant les vecteurs.
 
 Toutefois ces méthodes par rapport au token unique apporte un très léger gain en
-reconstruction et une perte beaucoup plus importante en flexibilité comme on peut le voir sur le graphe.
+reconstruction voir aucun, et une perte beaucoup plus importante en flexibilité. On peut le voir sur le graphe avec les configurations "3-words", "2-words" et "per image token"
+comparées à "ours".
 
-Au final, le réglage du learning rate est la méthode la plus simple pour choisir quoi prioriser entre reconstruction
-et flexibilité.
+Au final, le réglage du learning rate est la méthode la plus simple pour se déplacer sur la courbe.
 
 ## S'affranchir de la courbe editability/reconstruction : le pivotal tuning
 
@@ -121,6 +133,11 @@ les valeurs prises localement près de w. Ainsi on obtient une bonne reconstruct
 des points de W. Pour le modèle de diffusion, on peut appliquer cette même méthode en finetunant l'unet (on ne finetune pas aussi le text encoder car on ne veut pas
 modifier la sémantique dans l'espace des embeddings mais seulement modifier l'apparence de certains embeddings ce qui est géré par l'unet).
 Toutefois, les auteurs de l'article ont observé  qu'appliquer cette méthode dans le cas du modèle de diffusion n'est pas aussi efficace et fait perdre l'editability qui aura du être préservée par le finetuning. Ils proposent des idées pour modifier ce finetuning, mais qu'ils n'ont pas encore exploré.
+
+![pivotaltuningdiffusion.PNG](pivotaltuningdiffusion.PNG)
+
+Ces images correspondent à la génération d'un prompt étant censé placée la sculpture dans un tableau, avec à chaque fois un guidance scale s (paramètre qui influe sur a quel point
+l'unet va prendre en compte le prompt pour générer l'image) plus élevé : 1,2 et 5. Au final le modèle est incapable de placer la statue dans un tableau donc on a perdu en editability.
 
 ## Augmenter le nombre d'images dans le dataset
 
