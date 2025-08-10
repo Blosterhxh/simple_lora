@@ -1,4 +1,4 @@
-<img width="720" height="553" alt="image" src="https://github.com/user-attachments/assets/e0a8ccf7-708b-46df-b8ea-60237380dd19" /># Modifier une image dans un modèle de diffusion
+# Modifier une image dans un modèle de diffusion
 
 Article : https://arxiv.org/pdf/2208.01618
 
