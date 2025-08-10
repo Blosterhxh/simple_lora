@@ -116,36 +116,12 @@ et flexibilité.
 ## S'affranchir de la courbe editability/reconstruction : le pivotal tuning
 
 Dans le styleGAN pour s'affranchir de la limite imposée par la courbe, on découpe l'inversion en deux étapes.
-On inverse l'image dans W pour avoir une bonne flexibilité, et ensuite on finetune le générateur afin de modifier
-localement les valeurs prises sur W. Ainsi on obtient une bonne reconstruction en profitant de la flexibilité
-des points de W. Pour le modèle de diffusion, cette méthode est applicable, mais on perd quand même la flexibilité
-avec le finetuning là où elle était préservée avec le styleGAN ce qui rend la méthode peu intéressante. On finetune 
-dans notre cas seulement le unet, pas le text encoder, car notre objectif est un changement léger de l'apparence en
-conservant la sémantique de l'espace des embeddings de texte (de la même manière qu'on ne va pas entrainer le 
-mapping network dans styleGAN).
+On inverse l'image dans W pour avoir une bonne editability, et ensuite on finetune le générateur afin de modifier
+les valeurs prises localement près de w. Ainsi on obtient une bonne reconstruction en profitant de l'editability
+des points de W. Pour le modèle de diffusion, on peut appliquer cette même méthode en finetunant l'unet (on ne finetune pas aussi le text encoder car on ne veut pas
+modifier la sémantique dans l'espace des embeddings mais seulement modifier l'apparence de certains embeddings ce qui est géré par l'unet).
+Toutefois, les auteurs de l'article ont observé  qu'appliquer cette méthode dans le cas du modèle de diffusion n'est pas aussi efficace et fait perdre l'editability qui aura du être préservée par le finetuning. Ils proposent des idées pour modifier ce finetuning, mais qu'ils n'ont pas encore exploré.
 
-d) Augmenter le nombre d'images dans le dataset
+## Augmenter le nombre d'images dans le dataset
 
-Le nombre d'image affecte peu la reconstruction, un total de 5 est optimal pour la flexibilité.
-
-
-
-Avantage :
-
-a) Guidage avec un prompt
-
-On peut guider avec un prompt précis le modèle pour obtenir notre image. Mais cela pose plusieurs problèmes.
-Premièrement, certains structures complexes sont difficiles à détailler avec des mots. Ensuite, il a été observé
-que le modèle lorsqu'il a en entré de longs prompts se concentrent sur certains mots et ignorent les autres, ce qui
-peut poser problème s'ils se concentrent sur des détails au lieu du coeur du prompt.
-
-b) Guidage avec une image
-
-On peut aussi guider un modèle avec une image en entrée comme avec DALL-E 2. Le problème ici est qu'avec une 
-structure singulière l'encodeur CLIP aura du mal à trouver un bon embedding et donc on aura un résultat peu
-ressemblant à l'image de départ. 
-
-
-
-
-
+Le nombre d'image affecte peu la reconstruction, un nombre optimal de 5 est trouvé pour l'editability.
