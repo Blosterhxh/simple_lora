@@ -40,11 +40,13 @@ wp et wz, dont la distance à wp est mesurée par un coefficient alpha.
 
 ![interpolation.PNG](interpolation.PNG)
 
-Une fois qu'on a ce vecteur interpolé wz, on génère une image
-avec l'ancien générateur et une image avec le nouveau et on fait la différence, le but étant de ne pas s'éloigner
-de ce que produisait le générateur d'origine. Le but est d'appliquer la régularisation à 
-bonne distance de wp, suffisament loin pour que le finetuning local ait lieux, mais pas trop éloigné car les
-latents trop distants ne seront de toutes façons pas affectés par le finetuning donc il faut cibler ceux juste
-après la zone délimitée par le finetuning local. Pour cela il faut choisir la bonne valeur de alpha.
+L'idée de cette interpolation est que  si wz est trop loin de wp l'effet du finetuning sera faible sur wz donc le terme de régularisation
+aura peu d'effet, et à l'inverse s'il est trop proche de wp, le terme principal de la loss va forcer le finetuning du point et la régularisation sera faible. Il faut donc trouver un point à bonne distance. En testant plusieurs alpha, les chercheurs ont trouvé que
+que un alpha de 60 donnait une image presque identique à wz, et que un alpha 30 donnait un bon compromis entre wz et wp. 
 
+![alpha60.PNG](alpha60.PNG)
 
+Les tests de reconstruction montre que la loss entre les images générées pour wz par le nouveau et l'ancien générateur est plus faible
+dans le cas alpha 30.
+
+![alpha30.PNG](alpha30.PNG)
