@@ -1,6 +1,6 @@
-distance de malahadonis
+# Distance de malahadonis
 
-On souhaite trouver une distance qui permet de savoir si un point est proche de la distribution ou pas : plus la 
+On souhaite trouver une distance qui permet de savoir si un point est proche d'une distribution ou pas : plus la 
 distance est faible plus le point à une densité de probabilité élevé, et plus il est loin plus il a une densité de 
 probabilitié faible.
 
