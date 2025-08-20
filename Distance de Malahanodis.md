@@ -16,9 +16,10 @@ Rappel :
 Dans une distribution de probabilités, la variance nous donne les bornes dans lesquelles les données se trouvent,
 tandis que la covariance nous indique la direction que ces données prennent.
 
-| ![Image1](variance.PNG) | ![Image2](covariance.PNG) |
-|-----------------------------|-----------------------------|
-| Légende 1                   | Légende 2                   |
+<p float="left">
+  <img src="variance.PNG" width="300" />
+  <img src="covariance.PNG" width="300" />
+</p>
 
 
 Pour construire une distance de malahanobis à partir de notre distance euclidenne, il faut normaliser les distances sur 
