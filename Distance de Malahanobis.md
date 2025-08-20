@@ -1,4 +1,4 @@
-# Distance de malahadonis
+# Distance de malahanobis
 
 On souhaite trouver une norme qui permette de calculer la similarité entre deux vecteurs issus d'une distribution.
 La norme euclidienne n'est pas adaptée, car elle est invariante selon les directions, donc un vecteur qui est modifié de manière égale
