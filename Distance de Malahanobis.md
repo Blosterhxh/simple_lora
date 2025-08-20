@@ -17,7 +17,7 @@ Dans une distribution de probabilités, la variance nous donne les bornes dans l
 tandis que la covariance nous indique la direction que ces données prennent.
 
 <p float="left">
-  <img src="variance.PNG" width="500" />
+  <img src="variance.png" width="500" />
   <img src="covariance.PNG" width="500" />
 </p>
 
