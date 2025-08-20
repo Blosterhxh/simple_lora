@@ -9,7 +9,7 @@ sur une variable aléatoire à petite ou grande variance gardera la même distan
 
 
 
-Solution :
+# Solution :
 
 Rappel : 
 
