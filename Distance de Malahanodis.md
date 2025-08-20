@@ -5,7 +5,7 @@ La norme euclidienne n'est pas adaptée, car elle est invariante selon les direc
 sur une variable aléatoire à petite ou grande variance gardera la même distance au nouveau vecteur, alors que l'éloignement par rapport 
 à la distribution est plus important dans le cas de la modification sur la petite variance.
 
-![mahalanobis3.PNG](mahalanobis3.PNG)
+![mahalanobis3.png](mahalanobis3.png)
 
 
 
@@ -17,15 +17,15 @@ Dans une distribution de probabilités, la variance nous donne les bornes dans l
 tandis que la covariance nous indique la direction que ces données prennent.
 
 <p float="left">
-  <img src="variance.PNG" width="300" />
-  <img src="covariance.PNG" width="300" />
+  <img src="variance.PNG" width="500" />
+  <img src="covariance.PNG" width="500" />
 </p>
 
 
 Pour construire une distance de malahanobis à partir de notre distance euclidenne, il faut normaliser les distances sur 
 l'axe de corrélation et l'axe perpendiculaire proportionnellement aux variances des variables aléatoires. 
 
-![mahalanobis4.PNG](mahalanobis4.PNG)
+![mahalanobis4.png](mahalanobis4.png)
 
 On utilise pour cela la 
 racine de la matrice de covariance (on prend la racine car on normalise avec les écarts-types et pas la variance). 
