@@ -78,10 +78,10 @@ probabilités en même temps permet de ne pas éloigner les vecteurs les uns des
 passerait si on maximisait la proba d'une seule paire. Là chaque vecteur s'éloigne les uns des autres en prenant
 en compte le fait qu'il ne doit pas s'approcher d'une autre paire.
 
-![representation6.PNG](representation6.PNG)
+![representation6.png](representation6.png)
 
 Cette loss n'est pas écrite comme dans l'article mais elle vaut exactement la même chose, elle montre cependant plus
 explicitement la maximisation des deux probabilités pour chaque modalité. Pour s'en convaincre il suffit de faire
 le changement de varibale j=k sur la deuxème espérance de cette formule.
 
-![representation7.png](representation7.png)
+![representation7.PNG](representation7.PNG)
