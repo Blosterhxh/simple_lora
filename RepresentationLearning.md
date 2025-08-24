@@ -10,7 +10,7 @@ Pour construire g(x) à partir d'une image x, on créé C embeddings zi, un pour
 entre ces embeddings pour retrouver une distribution de probabilités. Par exemple, la probabilité que x appartienne
 à la classe i est : 
 
-![representation1.png](representation1.png)
+![representation1.PNG](representation1.PNG)
 
 # Representation learning non supervisé : instance discrimination
 
@@ -35,9 +35,9 @@ décrites dans l'article et pour l'instant je n'ai pas lu les justifications. En
 dans une banque M pour ne pas recalculer gtheta(xi) à chaque étape, et réduisent le dénominateur du softmax de N
 à K<<N tirer uniformément dans N, certainement parce que beaucoup de termes ont une contribution proche de zero.
 
-![representation3.png](representation3.png)
+![representation3.PNG](representation3.PNG)
 
-Representation learning non-supervisé : local aggregation
+# Representation learning non-supervisé : local aggregation
 
 On aimerait maintenant regrouper les images qui font partie d'une même classe entre elles, et pas avoir une
 classe pour une image ce qui éloigne inutilement des images similaires.
@@ -59,9 +59,11 @@ x, et comme on utilise un softmax, les éléments hors du cluster vont s'en élo
 pas le cas où un élément est dans le cluster mais n'est pas un voisin proche de x. Dans ce cas, il va être un 
 voisin proche d'un autre embedding et se faire déplacer par sa loss.
 
-![representation4.png](representation4.png)
+![representation4.PNG](representation4.PNG)
+![representation5.PNG](representation5.PNG)
 
-Loss NT-Xent :
+
+# Loss NT-Xent :
 
 C'est la loss utilisée sur CLIP, qui est bimodale contrairement aux loss précédentes car on a les embeddings d'image
 et de texte. Elle fonctionne sur le principe de l'instance discrimination : il y a une classe pour tous les textes et
@@ -74,10 +76,10 @@ probabilités en même temps permet de ne pas éloigner les vecteurs les uns des
 passerait si on maximisait la proba d'une seule paire. Là chaque vecteur s'éloigne les uns des autres en prenant
 en compte le fait qu'il ne doit pas s'approcher d'une autre paire.
 
-![representation5.png](representation5.png)
+![representation5.png](representation6.PNG)
 
 Cette loss n'est pas écrite comme dans l'article mais elle vaut exactement la même chose, elle montre cependant plus
 explicitement la maximisation des deux probabilités pour chaque modalité. Pour s'en convaincre il suffit de faire
 le changement de varibale j=k sur la deuxème espérance de cette formule.
 
-![representation6.png](representation6.png)
+![representation6.png](representation7.png)
