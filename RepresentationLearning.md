@@ -1,3 +1,5 @@
+Articles : https://arxiv.org/pdf/2005.13149 , https://arxiv.org/pdf/2411.14517
+
 # Representation learning supervisé :
 
 On veut apprendre à associer des images à une classe, sachant que les images du dataset sont labellisées et qu'on 
@@ -76,10 +78,10 @@ probabilités en même temps permet de ne pas éloigner les vecteurs les uns des
 passerait si on maximisait la proba d'une seule paire. Là chaque vecteur s'éloigne les uns des autres en prenant
 en compte le fait qu'il ne doit pas s'approcher d'une autre paire.
 
-![representation5.png](representation6.PNG)
+![representation6.PNG](representation6.PNG)
 
 Cette loss n'est pas écrite comme dans l'article mais elle vaut exactement la même chose, elle montre cependant plus
 explicitement la maximisation des deux probabilités pour chaque modalité. Pour s'en convaincre il suffit de faire
 le changement de varibale j=k sur la deuxème espérance de cette formule.
 
-![representation6.png](representation7.png)
+![representation7.png](representation7.png)
