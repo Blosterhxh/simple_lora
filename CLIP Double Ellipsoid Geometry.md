@@ -44,7 +44,7 @@ la norme faible par rapport
 à la moyenne de la norme, ces vecteurs sont placés sur un cercle de rayon la moyenne de la norme. Comme x et y ont
 une variance différente, on doit élargir/rétrécir le cercle sur les axes x et y, ce qui ne modifie pas la norme moyenne
 à condition que  la différence de variance entre x et y est faible par rapport à cette norme moyenne. Au final tous
-les points sont sur une ellipse, qui a pour rayon les écarts-types de x et y. Ils sont ainsi environ sur un cercle
+les points sont sur une ellipse, et environ sur un cercle
 de rayon la racine de la trace de la matrice de covariance.
 
 ![ellipse4.png](ellipse4.png)
