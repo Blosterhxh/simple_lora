@@ -49,7 +49,9 @@ de rayon la racine de la trace de la matrice de covariance.
 
 ![ellipse4.png](ellipse4.png)
 
-En réalité dans des espaces de grandes dimensions les coordonnées n'ont pas besoin de valoir pile +/- l'écart-type,
-elles peuvent êtres centrées autour de 0 suivant une loi normale, et on aura quand même des vecteurs de norme
-moyenne la racine de la trace mais cela est du au nombre important de dimensions qui permet d'avoir un vecteur de
-norme moyenne avec peu de fluctuations ce qui n'est pas représentable sur un graphe en 2d.
+Dans cet exemple, les coordonées x et y suivent une loi uniforme sur leur valeurs possibles. Par exemple pour x, il y a pour toute valeur
+possible xi 2 points correspondant (xi,+yi) et (xi,-yi). Dans CLIP, on va voir que les coordonnées suivent individuellement une loi normale
+centrée en 0. En deux dimensions, on ne voit pas comment une telle loi permettrait de garder une norme moyenne de racine(tr(C)), on devrait
+être proche de 0. Sauf que dans CLIP, on a 512 dimensions et comme on l'a vu dans le 3e résultat même si on a pas ici exactement les mêmes
+conditions, plus il y a de dimension plus l'épaisseur de l'ellipsoide va diminuer. Cela explique qu'on puisse dans CLIP avoir une norme
+moyenne racine(tr(C)) bien que les coordonnées suivent une loi normale centrée en 0.
