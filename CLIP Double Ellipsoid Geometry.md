@@ -10,11 +10,11 @@ Avant cela ils donnent des définitions
 
 ![ellipse01.PNG](ellipse01.PNG)
 
-Distribution log concave :
+## Distribution log concave :
 
 ![ellipse02.PNG](ellipse02.PNG)
 
-1er résultat :
+## 1er résultat :
 
 Pour une distribution isotropique, la norme moyenne de x vaut racine de n le nombre de dimensions. Les évènements
 élémentaires sont donc sur une sphère de rayon racine de n.
@@ -22,14 +22,14 @@ Pour une distribution isotropique, la norme moyenne de x vaut racine de n le nom
 ![ellipse1.PNG](ellipse1.PNG)
 
 
-2e résultat :
+## 2e résultat :
 
 Pour une distribution isotropique et log concave, on a l'épaisseur de la coquille de la sphère qui est majorée par la
 racine du logarithme de n.
 
 ![ellipse2.PNG](ellipse2.PNG)
 
-3e résultat :
+## 3e résultat :
 
 Si on sait seulement que les coordonées de la variable aléatoire X sont toutes de moyenne 0, et que les fluctuations
 de la norme de x autour de sa moyenne sont faibles comparées à cette moyenne, on a que la norme moyenne de x
