@@ -116,3 +116,82 @@ de malahanodis constante, si les variances des coordonées sont en moyenne les m
 Pour savoir si les points sont plus sur une shell ellispoïdale que sphérique, on pourrait recalculer la norme de 
 malahanodis pour ces points et voir si la variance autour de la valeur moyenne est plus faible que dans le cas euclidien,
 mais je ne l'ai pas vu dans l'article.
+
+## d) Orientation des ellipsoïdes :
+
+Les auteurs calculent la off-diagonal dominance pour chaque ligne de la matrice de covariance pour voir si
+la diagonale est prépondérante par rapport aux restes des coefficients, autrement dit si les variables sont corrélées
+ou non. 
+
+![ellipse12.PNG](ellipse12.PNG)
+
+Ils observent des valeurs significatives, signifiant que les variables sont corrélées et que donc les ellipses
+sont penchées (comme en dimension 2 où une covariance implique que l'axe de l'ellipse est orientée selon cette
+covariance).
+
+![ellipse13.PNG](ellipse13.PNG)
+
+## e) Centre des ellipsoïdes :
+
+Les auteurs veulent évaluer la distance du centre des ellipsoïdes à l'origine. Pour cela, ils comparent l'écart-type
+au vecteur moyen.
+
+![ellipse14.PNG](ellipse14.PNG)
+
+Ils trouvent le même ordre de grandeur. Cela signifie que les ellipsoïdes sont significativement éloignés de l'origine.
+
+# 3/ Justification de la structure en deux ellipsoïdes
+
+Les auteurs montrent ensuite que cette répartition en deux ellipsoides est optimale pour la loss CLIP.
+
+## a) La transformation par un encodeur d'une distribution d'entrée en une distribution contenue dans une ellipsoïde
+
+Je n'ai pas l'explication de pourquoi un encodeur transforme la distribution de départ en une distribution qui est 
+centrée autour d'une valeur pour chaque coordonées.
+En tout cas une fois qu'on a une distribution centrée pour chaque coordonée, les points de la distribution sont
+dans une ellispoïde qui a pour chaque coordonée pour rayon environ la variance de la coordonnée.
+
+## b) Le fonctionnement des deux encodeurs
+
+Avant d'expliquer l'origine des autres propriétés des ellipsoïdes, il faut comprendre comment fonctionne les deux encodeurs.
+Chaque encodeur fonctionne grâce à des transformers qui permettent de comprendre le sens des entrées. L'encodeur va synthétiser
+l'information qu'il a extraite de l'entrée dans un vecteur de l'espace des embeddings.
+Les encodeurs ne peuvent pas extraire exhaustivement toute l'information contenue dans l'entrée. Par exemple dans une image, les
+informations contenues sont infinies si on va chercher tous les détails précis. L'encodeur apprend donc à extraire les informations
+qui sont en moyenne les plus utiles pour diminuer la loss.
+
+La loss de CLIP correspond à la somme de la distance de la distribution des images de celles du texte et de la distance de la distribution
+du texte à celle des images. Pour minimiser cette somme, il faut que chaque paire du dataset est une cosine similarity de 1, et que les
+vecteurs de cette paire aient une cosine similarity de 0 avec les vecteurs de paires différentes. Cette optimum global, si il existe
+avec les fonctions d'encodeur d'image et de texte qui ont été choisies, est difficile à trouver. Il existe cependant un optimum
+local plus facile. Pour cela, il faut que des images/textes sémantiquement proches aient des embeddings similaires. De cette manière,
+la loss diminue car au lieu d'avoir une cosine similarity moyenne entre tous les vecteurs, on aura une cosine similarity moyenne
+pour les vecteurs correspondant à des entrées sémantiquement proches, et une cosine similarity proche de 0 pour les autres.
+Cet optimum local, en plus d'être plus facilement atteignable que l'optimum global, est favorisé par la forme des fonctions des encodeurs
+qui avec les transformers ont la capacité de comprendre le sens des entrées.
+
+
+
+## b) L'existence de deux ellipsoïdes distinctes pour l'encodeur d'image et l'encodeur de texte
+
+On a vu que sur certaines coordonées (93,134) les distributions de valeur sont nettement séparées pour l'encodeur d'image et de texte.
+Pour le comprendre on va revenir à l'objectif que doivent satisfaire les deux encodeurs pour diminuer la loss.
+Les encodeurs doivent être capables de rapprocher des paires image/texte sémantiquement proches pour que la loss diminue.
+Pour cela, ils apprennent à extraire des informations depuis leurs entrées. Cela est permis grâce à la construction
+avec les transfomers qui permet d'analyser et faire le lien entre les différents composants de l'image/texte.
+Les informations possibles à extraire d'une image sont très nombreuses : il existe une infinité de descriptions plus
+ou moins précises pour la décrire. L'encodeur image doit donc faire un choix des informations en moyenne les plus utiles
+à extraire pour faire correspondre ces images avec le texte. Ainsi les informations extraites par deux encodeurs pour 
+une même paire ne sont pas identiques : le texte peut avoir été très descriptif pour une image simple, l'encodeur image
+voyant une image simple va extraire peu d'informations contrairement à l'encodeur texte.
+
+Maintenant il faut comprendre en quoi cette asymétrie d'extraction d'informations entraîne des distributions différents
+à la sortie des deux encodeurs. Comme on l'a dit, la loss pousse les deux encodeurs à rapprocher les images et textes
+dont les informations extraites sont identiques. Ainsi, une information si elle extraite par un encodeur doit
+être encodé de la même façon par l'encodeur image et l'encodeur texte pour pouvoir rapprocher les vecteurs.
+Comme les deux encodeurs codent identiquement les informations, mais que leurs ensembles d'informations extraites n'est 
+pas exactement le même (on a vu que pour une même paire les informations extraites par l'encodeur image et l'encodeur 
+texte peuvent 
+être différentes), on obtient dans l'espace latent des distributions proches mais avec des différences. Ces différences 
+sont plus ou moins grandes selon les features, et elles sont surtout importantes sur 9 features précises et je n'en ai
+pas l'explication pour l'instant.
