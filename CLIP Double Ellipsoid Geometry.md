@@ -1,4 +1,4 @@
-<img width="582" height="292" alt="image" src="https://github.com/user-attachments/assets/51ea1081-e3bc-4f28-9c06-38416acf96c5" />L'espace des embeddings de CLIP est de dimension 512 et contient à la fois les embeddings des phrases et les embeddings
+L'espace des embeddings de CLIP est de dimension 512 et contient à la fois les embeddings des phrases et les embeddings
 des images.
 
 # 1/ Thin shell theory :
