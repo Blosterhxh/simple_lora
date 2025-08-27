@@ -167,7 +167,7 @@ pour les vecteurs correspondant à des entrées sémantiquement proches, et une 
 Cet optimum local, en plus d'être plus facilement atteignable que l'optimum global, est favorisé par la forme des fonctions des encodeurs
 qui avec les transformers ont la capacité de comprendre le sens des entrées.
 
-Jusque là on a vu que les encodeurs sont capables d'extraire des informations de leur entrée, et qu'ils doivent utiliser ces informations pour rapprocher des vecteurs sémantiquement proches. Pour cela, il faut qu'ils encodent une information identique de manière identique,
+Jusque-là on a vu que les encodeurs sont capables d'extraire des informations de leur entrée, et qu'ils doivent utiliser ces informations pour rapprocher des vecteurs sémantiquement proches. Pour cela, il faut qu'ils encodent une information identique de manière identique,
 et qu'ils extraient exhaustivement toutes les informations contenues dans leur entrée. Or cette extraction exhaustive n'est pas possible,
 car l'entrée contient parfois trop d'informations. Par exemple dans une image, les
 informations contenues sont infinies si on va chercher tous les détails précis. Les encodeurs apprennent donc à extraire seulement les
@@ -180,7 +180,65 @@ moyenne les plus utiles pour minimiser la loss. Ainsi les informations extraites
 une même paire ne sont pas toujours identiques : le texte peut avoir été très descriptif pour une image simple, l'encodeur image
 voyant une image simple va extraire peu d'informations contrairement à l'encodeur texte.
 
+![ellipse15.PNG](ellipse15.PNG)
+
+Ici les Ci/Ct indiquent la cosine similarity moyenne de l'embedding avec les autres vecteurs de sa modalité. On voit qu'une image et un
+texte d'une même paire peuvent avoir des Ci/Ct très différents, indiquant que un encodeur extrait des informations communes par rapport
+à sa modalité tandis que l'autre extrait des informations plus précises et rares.
+
 Comme les deux encodeurs codent identiquement les informations, mais que leurs ensembles d'informations extraites n'est 
 pas exactement le même, on obtient dans l'espace latent des distributions proches mais avec des différences. Ces différences 
 sont plus ou moins grandes selon les features, et elles sont surtout importantes sur 9 features précises. Je n'ai pas trouvé l'explication
 de la concentration des différences sur ces 9 features.
+
+## d) La concentration des points sur la shell des ellipsoïdes
+
+La concentration des points sur la shell est observée avec le calcul de la norme moyenne et de sa variance, mais ce n'est
+pas expliqué pourquoi cette concentration intervient. C'est possiblement du à la dimension élevée n = 512, comme c'est le
+cas pour les distributions isotropiques log concaves.
+
+## e) Le décalage des ellipsoïdes par rapport à l'origine 
+
+### e.1) Compromis entre uniformity et alignment :
+
+Les auteurs réecrivent la loss avec un terme d'alignment et un terme d'uniformity. Le terme d'alignment rapproche les
+vecteurs d'une même paire, et le terme d'uniformity repousse les vecteurs de paires différentes. Pour diminuer la loss,
+on veut augmenter l'alignment et diminuer l'uniformity.
+Pour comprendre le décalage des ellipsoïdes, ils déplacent l'ellipsoïde des images par rapport à l'origine pour voir 
+l'évolution de la loss et précisemment de ces deux termes.
+On observe que l'alignment augmente en s'éloignant de l'origine, tandis que l'uniformity diminue en s'en rapprochant.
+La loss optimale correspond à une ellipsoïde centrée sur le vecteur moyen qui a été trouvé par l'entrainement.
+
+On peut expliquer ces évolutions différentes de l'alignment et de l'uniformity.
+La différence vient du fait que pour les embeddings de l'encodeur d'image, les directions possibles augmentent en se
+rapprochant de l'origine et diminuent en s'en éloignant.
+Si on est proche de l'origine, on peut donc plus facilement
+donner aux vecteurs de paires différentes des directions différentes ce qui diminue l'uniformity. Cependant pour les 
+paires d'embedding que le modèle n'arrive pas à réunir (ex : bruit dans les entrées, encodeurs qui n'extraient pas les 
+mêmes informations du côté image et texte), la cosine similarity de la paire sera plus faible et l'alignement diminue.
+L'inverse se passe en s'éloignant de l'origine, et au final le meilleur centre pour l'ellipsoïde est un compromis
+entre uniformity et alignment.
+
+Gestion des faux négatifs :
+
+Un faux négatif est une paire image texte sémantiquement proches mais qui ne sont pas une vraie paire du dataset.
+Sur ces faux négatifs les informations clés extraites sont similaires donc ils doivent être proches dans l'espace
+latent. 
+Le problème avec le centrage de l'ellipsoïde à l'origine, c'est que un petit déplacement des vecteurs entraîne une
+chute rapide de la cosine similarity. En effet, si on calcule le gradient d'une cosine similarity par rapport à un 
+vecteur, on voit que ce gradient est inversement proportionnel à la norme de ce vecteur.
+Cela veut dire que l'on peut difficilement avoir une cosine similarity élevée pour des faux-négatifs.
+En éloignant l'ellipsoïde de l'origine, on diminue le gradient de la cosine similarity et ainsi on augmente la cosine
+similarity des faux négatifs.
+
+Encodage différent des informations communes et rares :
+
+On prend un encodeur, par exemple l'encodeur image. Si une image a des informations extraites fréquentes, elle doit 
+avoir une cosine similarity moyenne avec les autres embeddings image plus élevée qu'une image avec des informations rares.
+Si l'ellispoïde image est centrée à l'origine, les embeddings étant sur la shell, tout embedding à la même cosine
+similarity aux autres embeddings peu importe sa position sur la shell. On ne peut donc pas différencier les images
+communes des images rares. A l'inverse en éloignant l'ellipsoïde de l'origine, un embedding avec une direction centrale
+aura une cosine similarity moyenne plus élevée avec les autres embeddings qu'un embedding avec une direction extrême.
+Ainsi, on peut placer les images communes dans des embeddings dirigés vers le centre et des images rares dans des 
+embeddings aux directions extrêmes de l'ellipsoïde.
+
