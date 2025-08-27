@@ -1,4 +1,4 @@
-L'espace des embeddings de CLIP est de dimension 512 et contient à la fois les embeddings des phrases et les embeddings
+<img width="582" height="292" alt="image" src="https://github.com/user-attachments/assets/51ea1081-e3bc-4f28-9c06-38416acf96c5" />L'espace des embeddings de CLIP est de dimension 512 et contient à la fois les embeddings des phrases et les embeddings
 des images.
 
 # 1/ Thin shell theory :
@@ -199,15 +199,25 @@ cas pour les distributions isotropiques log concaves.
 
 ## e) Le décalage des ellipsoïdes par rapport à l'origine 
 
-### e.1) Compromis entre uniformity et alignment :
+### e.1) Compromis entre uniformity et alignment
 
-Les auteurs réecrivent la loss avec un terme d'alignment et un terme d'uniformity. Le terme d'alignment rapproche les
+Les auteurs réecrivent la loss avec un terme d'alignment et un terme d'uniformity.
+
+![representation7.PNG](representation7.PNG)
+
+Le terme d'alignment rapproche les
 vecteurs d'une même paire, et le terme d'uniformity repousse les vecteurs de paires différentes. Pour diminuer la loss,
 on veut augmenter l'alignment et diminuer l'uniformity.
+
 Pour comprendre le décalage des ellipsoïdes, ils déplacent l'ellipsoïde des images par rapport à l'origine pour voir 
 l'évolution de la loss et précisemment de ces deux termes.
+
+![ellipse16.PNG](ellipse16.PNG)
+
 On observe que l'alignment augmente en s'éloignant de l'origine, tandis que l'uniformity diminue en s'en rapprochant.
 La loss optimale correspond à une ellipsoïde centrée sur le vecteur moyen qui a été trouvé par l'entrainement.
+
+![ellipse17.PNG](ellipse17.PNG)
 
 On peut expliquer ces évolutions différentes de l'alignment et de l'uniformity.
 La différence vient du fait que pour les embeddings de l'encodeur d'image, les directions possibles augmentent en se
@@ -219,7 +229,7 @@ mêmes informations du côté image et texte), la cosine similarity de la paire 
 L'inverse se passe en s'éloignant de l'origine, et au final le meilleur centre pour l'ellipsoïde est un compromis
 entre uniformity et alignment.
 
-Gestion des faux négatifs :
+## e.2) Gestion des faux négatifs
 
 Un faux négatif est une paire image texte sémantiquement proches mais qui ne sont pas une vraie paire du dataset.
 Sur ces faux négatifs les informations clés extraites sont similaires donc ils doivent être proches dans l'espace
@@ -227,11 +237,14 @@ latent.
 Le problème avec le centrage de l'ellipsoïde à l'origine, c'est que un petit déplacement des vecteurs entraîne une
 chute rapide de la cosine similarity. En effet, si on calcule le gradient d'une cosine similarity par rapport à un 
 vecteur, on voit que ce gradient est inversement proportionnel à la norme de ce vecteur.
+
+![ellipse18.PNG](ellipse18.PNG)
+
 Cela veut dire que l'on peut difficilement avoir une cosine similarity élevée pour des faux-négatifs.
 En éloignant l'ellipsoïde de l'origine, on diminue le gradient de la cosine similarity et ainsi on augmente la cosine
 similarity des faux négatifs.
 
-Encodage différent des informations communes et rares :
+## e.3) Encodage différent des informations communes et rares :
 
 On prend un encodeur, par exemple l'encodeur image. Si une image a des informations extraites fréquentes, elle doit 
 avoir une cosine similarity moyenne avec les autres embeddings image plus élevée qu'une image avec des informations rares.
@@ -239,6 +252,10 @@ Si l'ellispoïde image est centrée à l'origine, les embeddings étant sur la s
 similarity aux autres embeddings peu importe sa position sur la shell. On ne peut donc pas différencier les images
 communes des images rares. A l'inverse en éloignant l'ellipsoïde de l'origine, un embedding avec une direction centrale
 aura une cosine similarity moyenne plus élevée avec les autres embeddings qu'un embedding avec une direction extrême.
+Le schéma ci-dessous montre un exemple simplifié avec une sphère, mais c'est le même raisonnement pour un ellipsoïde.
+
+![ellipse19.PNG](ellipse19.PNG)
+
 Ainsi, on peut placer les images communes dans des embeddings dirigés vers le centre et des images rares dans des 
 embeddings aux directions extrêmes de l'ellipsoïde.
 
