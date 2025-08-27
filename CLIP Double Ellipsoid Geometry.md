@@ -229,7 +229,7 @@ mêmes informations du côté image et texte), la cosine similarity de la paire 
 L'inverse se passe en s'éloignant de l'origine, et au final le meilleur centre pour l'ellipsoïde est un compromis
 entre uniformity et alignment.
 
-## e.2) Gestion des faux négatifs
+### e.2) Gestion des faux négatifs
 
 Un faux négatif est une paire image texte sémantiquement proches mais qui ne sont pas une vraie paire du dataset.
 Sur ces faux négatifs les informations clés extraites sont similaires donc ils doivent être proches dans l'espace
@@ -244,7 +244,7 @@ Cela veut dire que l'on peut difficilement avoir une cosine similarity élevée 
 En éloignant l'ellipsoïde de l'origine, on diminue le gradient de la cosine similarity et ainsi on augmente la cosine
 similarity des faux négatifs.
 
-## e.3) Encodage différent des informations communes et rares :
+### e.3) Encodage différent des informations communes et rares :
 
 On prend un encodeur, par exemple l'encodeur image. Si une image a des informations extraites fréquentes, elle doit 
 avoir une cosine similarity moyenne avec les autres embeddings image plus élevée qu'une image avec des informations rares.
