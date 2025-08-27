@@ -156,9 +156,6 @@ dans une ellispoïde qui a pour chaque coordonée pour rayon environ la variance
 Avant d'expliquer l'origine des autres propriétés des ellipsoïdes, il faut comprendre comment fonctionne les deux encodeurs.
 Chaque encodeur fonctionne grâce à des transformers qui permettent de comprendre le sens des entrées. L'encodeur va synthétiser
 l'information qu'il a extraite de l'entrée dans un vecteur de l'espace des embeddings.
-Les encodeurs ne peuvent pas extraire exhaustivement toute l'information contenue dans l'entrée. Par exemple dans une image, les
-informations contenues sont infinies si on va chercher tous les détails précis. L'encodeur apprend donc à extraire les informations
-qui sont en moyenne les plus utiles pour diminuer la loss.
 
 La loss de CLIP correspond à la somme de la distance de la distribution des images de celles du texte et de la distance de la distribution
 du texte à celle des images. Pour minimiser cette somme, il faut que chaque paire du dataset est une cosine similarity de 1, et que les
@@ -170,28 +167,20 @@ pour les vecteurs correspondant à des entrées sémantiquement proches, et une 
 Cet optimum local, en plus d'être plus facilement atteignable que l'optimum global, est favorisé par la forme des fonctions des encodeurs
 qui avec les transformers ont la capacité de comprendre le sens des entrées.
 
+Jusque là on a vu que les encodeurs sont capables d'extraire des informations de leur entrée, et qu'ils doivent utiliser ces informations pour rapprocher des vecteurs sémantiquement proches. Pour cela, il faut qu'ils encodent une information identique de manière identique,
+et qu'ils extraient exhaustivement toutes les informations contenues dans leur entrée. Or cette extraction exhaustive n'est pas possible,
+car l'entrée contient parfois trop d'informations. Par exemple dans une image, les
+informations contenues sont infinies si on va chercher tous les détails précis. Les encodeurs apprennent donc à extraire seulement les
+informations qui en moyenne sont les plus utiles pour rapprocher les bonnes paires entre elles.
 
+## c) L'existence de deux ellipsoïdes distinctes pour l'encodeur d'image et l'encodeur de texte
 
-## b) L'existence de deux ellipsoïdes distinctes pour l'encodeur d'image et l'encodeur de texte
-
-On a vu que sur certaines coordonées (93,134) les distributions de valeur sont nettement séparées pour l'encodeur d'image et de texte.
-Pour le comprendre on va revenir à l'objectif que doivent satisfaire les deux encodeurs pour diminuer la loss.
-Les encodeurs doivent être capables de rapprocher des paires image/texte sémantiquement proches pour que la loss diminue.
-Pour cela, ils apprennent à extraire des informations depuis leurs entrées. Cela est permis grâce à la construction
-avec les transfomers qui permet d'analyser et faire le lien entre les différents composants de l'image/texte.
-Les informations possibles à extraire d'une image sont très nombreuses : il existe une infinité de descriptions plus
-ou moins précises pour la décrire. L'encodeur image doit donc faire un choix des informations en moyenne les plus utiles
-à extraire pour faire correspondre ces images avec le texte. Ainsi les informations extraites par deux encodeurs pour 
-une même paire ne sont pas identiques : le texte peut avoir été très descriptif pour une image simple, l'encodeur image
+On a vu que les encodeurs n'extraient pas exhaustivement toutes les informations de leur entrée mais uniquement celles qui sont en
+moyenne les plus utiles pour minimiser la loss. Ainsi les informations extraites par les deux encodeurs pour 
+une même paire ne sont pas toujours identiques : le texte peut avoir été très descriptif pour une image simple, l'encodeur image
 voyant une image simple va extraire peu d'informations contrairement à l'encodeur texte.
 
-Maintenant il faut comprendre en quoi cette asymétrie d'extraction d'informations entraîne des distributions différents
-à la sortie des deux encodeurs. Comme on l'a dit, la loss pousse les deux encodeurs à rapprocher les images et textes
-dont les informations extraites sont identiques. Ainsi, une information si elle extraite par un encodeur doit
-être encodé de la même façon par l'encodeur image et l'encodeur texte pour pouvoir rapprocher les vecteurs.
 Comme les deux encodeurs codent identiquement les informations, mais que leurs ensembles d'informations extraites n'est 
-pas exactement le même (on a vu que pour une même paire les informations extraites par l'encodeur image et l'encodeur 
-texte peuvent 
-être différentes), on obtient dans l'espace latent des distributions proches mais avec des différences. Ces différences 
-sont plus ou moins grandes selon les features, et elles sont surtout importantes sur 9 features précises et je n'en ai
-pas l'explication pour l'instant.
+pas exactement le même, on obtient dans l'espace latent des distributions proches mais avec des différences. Ces différences 
+sont plus ou moins grandes selon les features, et elles sont surtout importantes sur 9 features précises. Je n'ai pas trouvé l'explication
+de la concentration des différences sur ces 9 features.
