@@ -25,3 +25,26 @@ Pout tester différents éloignement,
 on teste plusieurs learning rate a nb de 
 steps constant et on a environ éloignement
 = learning rate x nb de steps.
+
+# Choix du learning rate pour le finetuning
+
+Dans le styleGAN ils disent qu'ils 
+appliquent un "léger" finetuning qui
+leur permet de gagner en reconstruction
+sans perdre en editability. Il faut donc définir qu'est-ce qu'un finetuning léger
+avant de pouvoir trouver le bon learning
+rate.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
