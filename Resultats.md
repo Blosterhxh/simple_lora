@@ -49,8 +49,13 @@ Les auteurs du pivotal tuning on rajouté un terme de regularisation a la loss
 pour s'assurer que le générateur ne modifie
 ses valeurs que localement autour du pivot.
 
-Cette regularisation a un objectid double : faire en sorte que le modèle garde ses capacités de base, et permette un apprentissage plus precis de l'apparence. En effet on a dit qu'on devait se limiter a une certaine distance d'apprentissage pour ne pas toucher aux positions. Sauf qu'avec ce terme de regularisation, on empeche le generateur de se deplacer dans des directions où il va modifier autre chose que l'apparence. On peut donc augmenter le learning rate pour parcourir une zone plus vaste de l'espace des fonctions et ameliorer l'apparence sans craindre une répercution sur les autres features qui pourraient etre apprises.
+Cette regularisation avait pour objectif initial de préserver l'apparence des visages autres que celui du pivot. En effet on avait qu'un seul modèle styleGAN donc si on modifiait tout en le finetunant on ne pouvait plus générer qu'un seul type de visage ce qui posait problème. Aujourd'hui ce n'est plus nécessaire car la méthode lora permet facilement de charger et enlever des poids pour un certain personnage, donc si on veut changer de personnage on change juste de lora.
 
+Toutefois cette régularisation peut apporter un avantage supplémentaire. En forçant le modèle à préserver ces valeurs autour du pivot, 
+on le pousse à garder son interprétation de l'espace latent et à ne pas tout déconstruire pour améliorer la loss de finetuning. Par exemple, on a dit qu'il y avait un risque que le modèle apprenne les positions de notre pesonnage en finetunant trop, mais si on l'oblige
+pour des embeddings proches à continuer de générer des positions aléatoires avec ce terme de régularisation on peut limiter ce risque.
+Pour profiter de cette nouvelle limite, on peut essayer d'augmenter le learning rate pour parcourir une zone plus vaste de l'espace des
+fonctions pour le générateur afin de trouver une meilleure apparence pour notre personnage, sans prendre le risque de dégrader d'autres features comme les positions.
 
 
 
