@@ -1,4 +1,4 @@
-# Break free from the distortion/perceptual quality + editability constraint
+# Break free from the distortion/perceptual quality + editability trade-off
 
 Article: https://arxiv.org/pdf/2106.05744
 
