@@ -36,12 +36,11 @@ If we can represent this variation factor with a subspace in Z, we can take a di
 moving G will cause the variation factor to vary continuously. We can therefore find a portion of a line in the hypersphere where G will take values for the variation factor that are impossible [1,2]. Thus, the variation factors cannot
 be represented by subspaces in Z, the space is entangled. 
 
-On résout ce problème en créant un espace latent après Z : f(Z) = W.
-L'espace latent résout le problème car il n'a pas la contrainte spaciale de Z que les vecteurs dans l'hypersphère donne des images proches
-du dataset. Il peut donc choisir librement les valeurs que G prend sur chaque zone de l'espace. Avec l'optimisation on peut alors approcher
-la représentation des facteurs de variation par des sous-espaces.
+This problem is solved by creating a latent space after Z: f(Z) = W.
+The latent space solves the problem because it does not have the spatial constraint of Z that vectors in the hypersphere give images close
+to the dataset. It can therefore freely choose the values that G takes on each area of the space. With optimization, we can then approximate the representation of the variation factors by linear subspaces.
 
-L'article utilise ce schéma pour illustrer le problème :
+The article uses this diagram to depict the problem:
 
 ![styleganW.PNG](styleganW.PNG)
 
