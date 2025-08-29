@@ -1,45 +1,46 @@
-# Modifier une image en utilisant le styleGAN
+# Modify an image using styleGAN
 
-Article : https://arxiv.org/pdf/2102.02766
+Article: https://arxiv.org/pdf/2102.02766
 
-Pour modifier une image, on peut tirer parti de la représentation des facteurs de variation en sous-espaces vectoriels dans W. On prend une image, on l'inverse dans l'espace latent W, on se déplace dans le sous-espace d'un facteur de variation, puis on applique G à notre nouveau latent et on récupère notre image modifiée. Cette méthode fonctionne, mais elle pose plusieurs problèmes.
+To modify an image, we can take advantage of the representation of variation factors in linear subspaces in W. We take an image, invert it in the latent space W, move into the linear subspace of a variation factor, then apply G to our new latent and retrieve our modified image. This method works, but it poses several problems.
 
-## Le problème de l'inversion
+## The inversion problem
 
-L'inversion d'une image dans W donne un latent w, mais la reconstruction de l'image avec G(w) ne redonne pas parfaitement l'image. Pour évaluer une reconstruction, on introduit deux mesures : la distortion et la perceptual quality. La distortion correspond à la distance entre deux images mesurée avec une norme sur l'espace des images. La perceptual quality désigne à quel point une image est réaliste.
-L'idée est qu'une image peut ressembler esthétiquement à une autre, mais n'avoir aucun sens réel. 
+Inverting an image in W gives with optimization a latent w, but reconstructing the image with G(w) does not perfectly reproduce the image. To evaluate a reconstruction, two measures are introduced: distortion and perceptual quality. Distortion corresponds to the distance between two images measured using a norm on the image space. Perceptual quality refers to how realistic an image is.
+The idea is that one image may look aesthetically similar to another, but have no real meaning. 
 
-Comme l'inversion dans W n'est pas toujours satisfaite, on propose de l'améliorer en agrandissant l'espace de départ sur lequel est réalisé l'optimisation. Cela peut être fait de différentes manières : prendre k vecteurs latents dans W (un par couche du générateur) au lieu d'un, prendre un vecteur dans 
-W* = R512 dans lequel est inclus W, prendre k vecteurs dans W*k. Un graphique de l'article illustre comme s'organisent ces différents espaces.
+Since inversion in W is not always convincing, we propose improving it by enlarging the starting space on which optimization is performed. This can be done in different ways: take k latent vectors in W (one per layer of the generator) instead of one, take a vector in 
+W* = R512 in which W is included, take k vectors in W*k. A graph in the article illustrates how these different spaces are organized.
 
 ![inversionamelioree.PNG](inversionamelioree.PNG)
 
-Note : Pourquoi prendre k vecteurs dans W au lieu d'un pourrait marcher alors qu'on a entrainé le générateur à n'utiliser
-qu'un seul vecteur ?
+Note: Why would taking k vectors in W instead of one work when we trained the generator to use
+only one vector?
 
-Le générateur à chaque couche extrait des informations différents d'un vecteur w, pour les couches plus profondes
-des informations globales, pour les couches en surface des informations plus précises. Donc pour une image donnée,
-peut être qu'un vecteur w peut donner les informations exactes pour les informations globales mais ne pourra 
-pas restituer parfaitement les informations précises, et inversement, d'où la possibilité que plusieurs vecteurs
+The generator at each layer extracts different information from a vector w: for the deeper layers,
+global information; for the surface layers, more precise information. So for a given image,
+perhaps a vector w can provide the exact information for the global information but cannot 
+perfectly reproduce the precise information, and vice versa, hence the possibility of several vectors delivering a better image
+than only one.
 
-## Le compromis distortion/perceptual quality + editability  
+## The compromise between distortion/perceptual quality and editability  
 
-On est maintenant capable de faire des reconstructions plus précises en inversant dans des espaces plus grands, mais cela n'est pas sans coût. Premièrement, il y a une perte de la perceptual quality. Si les images ont une meilleur distortion, elles ont par contre moins de sens que celles inversées dans W, comme on peut le voir dans cet exemple entre une image inversée dans W et dans W*k.
+We are now able to perform more accurate reconstructions by inverting in larger spaces, but this comes at a cost. First, there is a loss of perceptual quality. While the images have better distortion, they are less meaningful than those inverted in W, as can be seen in this example between an image inverted in W and in W*k.
 
 ![perceptualquality.PNG](perceptualquality.PNG)
 
-De plus, on constate également une perte en editability. Les modifications apportées à des images inversées dans W donnent de meilleurs résultats que celles inversées dans W*k, comme on peut le voir sur cette image.
+In addition, there is also a loss in editability. Modifications made to inverted images in W produce better results than those inverted in W*k, as can be seen in this image.
 
 ![editability.PNG](editability.PNG)
 
-En fait, il y a un compromis entre la distortion, et la perceptual quality + editability. Plus on s'écarte de l'espace W, plus on gagne en distortion mais en perdant sur les deux autres caractéristiques. Cela s'explique car c'est sur W que le générateur a été entrainé à produire des images qui ont du sens.
+In fact, there is a trade-off between distortion and perceptual quality + editability. The further we move away from the W space, the more distortion we gain, but at the expense of the other two characteristics. This is because it is on W that the generator has been trained to produce meaningful images.
 
-Pour évaluer la distance d'un vecteur de W*k à W, on utilise deux critères. Le premier est la distance de W*k à W*, qui 
-correspond à la variation entre les vecteurs de W*k : plus les vecteurs sont proches entre eux, plus on peut 
-considérer qu'on est proche de W*. Le deuxième critère est la distance de W*k à Wk, qui correspond à la distance
-individuelle des k vecteur de W* à W. En minimisant ces deux critères, un vecteur de W*k se rapproche de W.
+To evaluate the distance of a vector from W*k to W, two criteria are used. The first is the distance from W*k to W*, which 
+corresponds to the variation between the vectors of W*k: the closer the vectors are to each other, the closer 
+we can consider ourselves to be to W*. The second criterion is the distance from W*k to Wk, which corresponds to the individual distance
+of the k vectors from W* to W. By minimizing these two criteria, a vector from W*k approaches W.
 
-Ce graphique issu de l'article reprend la représentation précédente de W*k, et introduit deux couleurs de flèche pour les deux moyens de s'approcher de W : la flèche rouge pour diminuer la variation entre vecteurs, et la flèche bleue pour le rapprochement des vecteurs individuellement à ceux de W.
+This graph from the article repeats the previous representation of W*k and introduces two arrow colors for the two ways of approaching W: the red arrow to decrease the variation between vectors, and the blue arrow to bring the individual vectors closer to those of W.
 
 ![distanceaW.PNG](distanceaW.PNG)
 
