@@ -1,52 +1,50 @@
-# Se libérer de la limite distortion/perceptual quality + editability
+# Break free from the distortion/perceptual quality + editability constraint
 
-Article : https://arxiv.org/pdf/2106.05744
+Article: https://arxiv.org/pdf/2106.05744
 
-Quand on inverse une image dans W, on préserve la perceptual quality + editability, et même si la distortion
-est plus élevée que dans W*k, l'image générée reste proche de l'image d'origine. On peut donc essayer de finetuner
-le générateur pour que en ce point w, on obtienne exactement l'image d'origine, ce qui devrait pouvoir se faire
-sans modifier la sémantique de l'espace W, mais en changeant uniquement l'apparence des latents proches de w.
-Le point w est appelé le pivot.
-C'est ce qu'illustre ce graphique issu de l'article où l'on voit que l'espace où W est dense a gardé sa sémantique
-(en changeant de direction on modifie l'orientation du visage), et l'apparence que prend G sur cet espace a légèrement
-changé pour se rapprocher de l'image d'origine.
+When you invert an image in W, you preserve the perceptual quality + editability, and even if the distortion
+is higher than in W*k, the generated image remains close to the original image. We can therefore try to fine-tune
+the generator so that at this point w, we obtain exactly the original image, which should be possible
+without modifying the semantics of the W space, but only by changing the appearance of the latents close to w.
+The point w is called the pivot.
+This is illustrated in this graph from the article, where we can see that the space where W is dense has retained its semantics
+(changing direction changes the orientation of the face), and the appearance of G in this space has changed slightly
+to resemble the original image.
 
 ![pivotaltuning.PNG](pivotaltuning.PNG)
 
 ## Inversion
 
-On trouve un latent dans w et un bruit n pour générer une image proche de la cible, et ce par optimization.
+We take a latent w in W and a noise n through optimization to produce an image close to the target.
 
 ![inversionpivotal.PNG](inversionpivotal.PNG)
 
-Ici le bruit est une partie intégrante des entrées car il définie les motifs aléatoires à plusieurs étapes de synthèse,
-par exemple la forme globale des cheveux à la première couche de synthèse, et ensuite les motifs plus précis des 
-mèches à la dernière. Il faut donc aussi optimiser ce bruit pour se rapprocher au plus près de l'image voulue. 
-La loss est ainsi constituée de deux termes : un terme de différence entre l'image générée et l'image cible, et un 
-terme de régularisation du bruit qui s'assure que les paramètres du bruit sont décorélés et ne stockent que des 
-valeurs aléatoires, et pas des informations sémantiques qui sont réservées à w.
-
-
+Here, noise is an integral part of the inputs because it defines the random patterns at several stages of synthesis,
+for example, the overall shape of the hair at the first layer of synthesis, and then the more precise patterns of the 
+strands at the last layer. This noise must therefore also be optimized to get as close as possible to the desired image. 
+The loss thus consists of two terms: a term for the difference between the generated image and the target image, and a 
+term for noise regularization, which ensures that the noise parameters are decorrelated and only store 
+random values, and not semantic information, which is reserved for w.
 
 ## Tuning
 
-Pour le tuning, on a en loss un terme pour la différence entre l'image cible et l'image générée avec le latent, et un
-terme de régularisation qui a pour but de forcer le tuning à rester local autour de w.
+For tuning, we have a term for the difference between the target image and the image generated with the latent, and a
+regularization term that aims to force the tuning to remain local around w.
 
 ![tuningloss.PNG](tuningloss.PNG)
 
-Pour le terme de régularisation, on tire un vecteur dans Z, on le transforme en latent wz, et on réalise une interpolation entre
-wp et wz, dont la distance à wp est mesurée par un coefficient alpha.
+For the regularization term, we draw a vector in Z, transform it into latent wz, and perform an interpolation between
+wp (the pivot) and wz, whose distance from wp is measured by an alpha coefficient.
 
 ![interpolation.PNG](interpolation.PNG)
 
-L'idée de cette interpolation est que  si wz est trop loin de wp l'effet du finetuning sera faible sur wz donc le terme de régularisation
-aura peu d'effet, et à l'inverse s'il est trop proche de wp, le terme principal de la loss va forcer le finetuning du point et la régularisation sera faible. Il faut donc trouver un point à bonne distance. En testant plusieurs alpha, les chercheurs ont trouvé que
-que un alpha de 60 donnait une image presque identique à wz, et que un alpha 30 donnait un bon compromis entre wz et wp. 
+The idea behind this interpolation is that if wz is too far from wp, the effect of fine-tuning will be weak on wz, so the regularization term
+will have little effect, and conversely, if it is too close to wp, the main term of the loss will force fine-tuning of the point and regularization will be weak. It is therefore necessary to find a point at the right distance. By testing several alphas, the researchers found that
+an alpha of 60 gave an image almost identical to wz, and that an alpha of 30 gave a good compromise between wz and wp.
 
 ![alpha60.PNG](alpha60.PNG)
 
-Les tests de reconstruction montre que la loss entre les images générées pour wz par le nouveau et l'ancien générateur est plus faible
-dans le cas alpha 30.
+Reconstruction tests show that the loss between images generated for wz by the new and old generators is lower
+in the alpha 30 case.
 
 ![alpha30.PNG](alpha30.PNG)
