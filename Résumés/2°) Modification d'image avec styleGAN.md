@@ -1,4 +1,4 @@
-# Modify an image using styleGAN
+# Image editing with styleGAN
 
 Article: https://arxiv.org/pdf/2102.02766
 
