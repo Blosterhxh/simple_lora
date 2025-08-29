@@ -1,40 +1,40 @@
-# Le styleGAN et l'espace latent W
+# StyleGAN and the latent space W
 
-Pré-requis : savoir ce qu'est un GAN
+Prerequisite: understanding what a GAN is
 
-Article original : https://arxiv.org/pdf/1812.04948
+Original article: https://arxiv.org/pdf/1812.04948
 
-## Le styleGAN : un GAN où le générateur est modifié.
+## StyleGAN: a GAN where the generator is modified.
 
-Au lieu de mettre en entrée du générateur le vecteur z tiré de l'espace Z (par exemple R512),
-on met un vecteur constant appris avec l'entrainement, et le vecteur z est injecté après chaque convolution
-dans le générateur. Cela permet au générateur d'extraire à chaque étape les informations dont il a besoin
-au lieu de devoir se souvenir de tout depuis le début. Entre chaque convolution on ajoute également un vecteur 
-de bruit, qui permet de donner une base au générateur pour construire de l'aléatoire à chaque étape (par exemple
-pour construire des cheveux). Sans cela il devrait lui-même trouver un moyen de construire de l'aléatoire avec 
-ses poids et les autres capacités de reconstruction en seraient donc diminuées.
+Instead of feeding the generator with the vector z taken from space Z (e.g., R512),
+we feed it with a constant vector learned during training, and the vector z is injected after each convolution
+into the generator. This allows the generator to extract the information it needs at each step
+instead of having to remember everything from the beginning. Between each convolution, a noise vector is also added, 
+which provides the generator with a basis for constructing randomness at each stage (for example,
+to construct hair). Without this, it would have to find a way to construct randomness itself using 
+its weights, which would reduce the other reconstruction capabilities.
 
 ![styleGAN.PNG](styleGAN.PNG)
 
-## L'espace latent W
+## The latent space W
 
-Dans cette partie on prend comme exemple pour illustrer un styleGAN entrainé sur des visages.
+In this section, we use a styleGAN trained on faces as an example.
 
-Dans l'idéal, on aimerait que l'espace Z soit disentangled (désemmêlé) : cela signifie que pour chaque
-facteur de variation de l'image (ex : rotation du visage), on peut trouver un sous-espace vectoriel dans Z, dont les directions
-contrôle la modification de ce facteur de variation (ex : une direction pour la rotation autour de chaque axe).
-L'intuition pour comprendre que cette espace disentangled peut exister, est que des facteurs de variations différents (
-cheveux, vieillissement) modifient des attributs communs entre eux (couleur des cheveux est partagé entre vieillissement
-et cheveux), donc pour créer un sous-espace il faut trouver les directions qui modifient les attributs conformément à
-notre facteur de variation.
+Ideally, we would like the Z space to be disentangled: this means that for each
+image variation factor (e.g., face rotation), we can find a linear subspace in Z whose directions
+control the modification of this variation factor (e.g., a direction for rotation around each axis).
+The intuition for understanding that this disentangled space can exist is that different variation factors (
+hair, aging) modify attributes that are common to them (hair color is shared between aging
+and hair), so to create a subspace, we need to find the directions that modify the attributes according to
+our variation factor.
 
-Analysons Z pour voir si l'espace est disentangled. Z peut-être représenté comme une hypersphère de rayon racine de 512 de R512, dans laquelle
-la majorité des vecteurs vont être tirés d'après la loi normale. Avec l'entrainement, sur cette sphère, le générateur va prendre
-des valeurs qui sont proches de celles du dataset. Supposons maintenant qu'un facteur de variation à une zone de valeur absente du dataset,
-par exemple supposons que sur le dataset ils prennent des valeurs de [0,1] puis de [2,+oo] .
-Si on peut représenter ce facteur de variation avec un sous-espace dans Z, on peut prendre une direction de cette espace sur laquelle
-déplacer G va faire varier le facteur de variation de manière continue. On peut donc trouver une portion de droite, dans l'hypersphère, où G va prendre des valeurs pour le facteur de variation qui sont impossibles [1,2]. Ainsi les facteurs de variation ne peuvent
-pas être représentés par des sous-espaces dans Z, l'espace est entangled. 
+Let's analyze Z to see if the space is disentangled. Z can be represented as a hypersphere with a radius of sqrt(512) from R512, in which
+the majority of vectors will be drawn from the normal distribution. With training on this sphere, the generator will take
+values that are close to those in the dataset. Now suppose that a variation factor has a value range that is absent from the dataset.
+For example, suppose that in the dataset it takes values from [0,1] and then from [2,+oo].
+If we can represent this variation factor with a subspace in Z, we can take a direction in this space on which
+moving G will cause the variation factor to vary continuously. We can therefore find a portion of a line in the hypersphere where G will take values for the variation factor that are impossible [1,2]. Thus, the variation factors cannot
+be represented by subspaces in Z, the space is entangled. 
 
 On résout ce problème en créant un espace latent après Z : f(Z) = W.
 L'espace latent résout le problème car il n'a pas la contrainte spaciale de Z que les vecteurs dans l'hypersphère donne des images proches
