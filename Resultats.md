@@ -45,6 +45,8 @@ on commence a apprendre les positions, et on s'arrête juste avant.
 
 # Regularisation
 
+## a) Utilité d'une régularisation quand on finetune avec lora
+
 Les auteurs du pivotal tuning on rajouté un terme de regularisation a la loss
 pour s'assurer que le générateur ne modifie
 ses valeurs que localement autour du pivot.
@@ -57,7 +59,20 @@ pour des embeddings proches à continuer de générer des positions aléatoires 
 Pour profiter de cette nouvelle limite, on peut essayer d'augmenter le learning rate pour parcourir une zone plus vaste de l'espace des
 fonctions pour le générateur afin de trouver une meilleure apparence pour notre personnage, sans prendre le risque de dégrader d'autres features comme les positions.
 
+## b) Où et comment interpoler dans un modèle de diffusion
 
+Dans styleGAN, l'interpolation se faisait à mi-chemin entre un vecteur tiré selon la loi normale dans Z puis amené dans W, et le pivot.
+Le latent interpolé donnait une image où l'apparence correspondait à la fusion entre le latent tirent selon la loi normale et le pivot.
 
+Dans notre cas, on ne peut pas faire ça dans l'espace des embeddings juste après les tokens car il n'est pas entrainé pour que la géométrie
+ait un sens sémantique. Le seul espace où la géométrie est lié au sens est celui des embeddings après le transformer de CLIP. Cet espace
+est entrainé pour que l'embedding du token de fin d'une phrase/d'une image sémantiquement proche soit proche dans l'espace latent.
+
+Plus précisément, les embeddings de texte et d'image sont placés sur deux ellipsoïdes distinctes sur un faible nombre de feature (9) pour pouvoir différencier les distributions de texte et d'image, et environ similaire sur le reste des features ce qui permet de rapprocher les embeddings sémantiquement proches. Ces ellipsoïdes ont chacune un centre décalé de l'origine, et on peut approximer le déplacement sur
+ces ellipsoïdes en gardant une distance constante au centre et en variant l'angle, ce qui correspond à une interpolation sphérique (les ellipsoïdes sont proches d'une sphère voir l'explication dans le résumé).
+
+Dans notre cas, pour régulariser, on prend l'angle entre l'embedding de notre token et celui de la classe personnage. On fait ensuite des interpolations sphériques sur la moitié de cet angle.
+
+Toutefois ça ne peut pas marcher directement, car le générateur prend en entré les embeddings de chaque token du prompt, et la structure en ellipsoïde que l'on connaît n'est valable que pour l'embedding du token de fin qui n'est pas utilisé par le générateur. Pour vérifier qu'on peut quand même s'appuyer sur cette structure en ellipsoïde, on peut calculer les embeddings pour le dataset de phrase qui a été utilisé dans l'article, et voir pour un embedding d'indice 5 dans la phrase (comme ce sera le cas pour nous dans "an anime illustration of tok1") si la variance par rapport à la norme moyenne de l'embedding est faible, ce qui montrerait qu'on peut quand même faire l'interpolation sphérique même si on est pas sur le token de fin. 
 
 
