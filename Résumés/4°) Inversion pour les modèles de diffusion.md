@@ -78,24 +78,6 @@ not be exactly the same in our case, but they still give an idea of the starting
 - 4 batch-size
 - 5000 steps
 
-# E/ Choix des hyper-paramètres
-
-Les auteurs de l'article ont analysé l'impact des différents hyperparamètres sur la reconstruction et l'editability en utilisant les méthodes ci-dessus,
-ce qui donne une idée de quoi changer selon notre objectif.
-
-## a) Implémentation de base
-
-L'implémentation a été faite sur un ancien modèle précédent Stable Diffusion donc les paramètres ne sont peut
-être pas exactement les mêmes dans ce cas, mais ils donnent quand même une idée du point de départ :
-
-- Pour l'embedding du nouveau mot, on prend comme vecteur de départ le vecteur de la classe à laquelle est rattachée
-notre objet (ex : chat, homme, arbre ...)
-- 5 images dans le dataset
-- 0.005 LR
-- 4 batch-size
-- 5000 steps
-- 
-
 
 ## b) Déplacement sur la courbe editability/distorsion
 
