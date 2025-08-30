@@ -13,11 +13,6 @@ Before doing so, they provide definitions.
 
 ![ellipse02.PNG](ellipse02.PNG)
 
-## c) 1er résultat :
-
-Pour une distribution isotropique, la norme moyenne de x vaut racine de n le nombre de dimensions. Les évènements
-élémentaires sont donc sur une sphère de rayon racine de n.
-
 ## c) First result:
 
 For an isotropic distribution, the mean norm of x is sqrt(n), n being the number of dimensions. Elementary events
@@ -94,18 +89,6 @@ this information was useful in the article.
 
 ![ellipse10.PNG](ellipse10.PNG)
 
-## c) Shell ellipsoïdale :
-
-Au sein d'une distribution, les auteurs observent que les features ont des variances différentes. Ils en concluent donc que la shell de rayon racine de tr(C) est 
-ellipsoïdale et non sphérique. Ici je ne suis pas sûr de comprendre comment ils en arrivent à cette conclusion, mais
-voici une justification que j'ai trouvée. Premièrement on définit qu'est ce que c'est être sur une shell ellipsoïdale :
-c'est quand l'ensemble de points à une norme de malahanodis environ constante. A première vue on peut penser que ce 
-n'est pas le cas pour nous, car la distance euclidenne est environ constante a racine(tr(C)) et la transformation
-de malahanodis pour recalculer une distance euclidienne va étirer/réduire certaines coordonées, donc elle ne devrait
-pas pouvoir être constante elle aussi.
-Cependant lorsqu'on observe le graphe des variances des features, il apparaît que les variances sont en moyenne autour
-de 0.1, et que les variances plus élevées sont rares.
-
 ## c) Ellipsoidal shell:
 
 Within a distribution (image or text), the authors observe that the features have different variances. They therefore conclude that the shell with radius
@@ -121,15 +104,6 @@ However, when we look at the graph of feature variances, we see that the varianc
 
 ![ellipse11.PNG](ellipse11.PNG)
 
-Ainsi en déformant l'espace avec malahanodis, les points
-restreints à ces features vont rester sur une sphère comme toutes les coordonées auront été étirées presque de manière
-égale. Les autres coordonées étant minoritaires, leur modification ne devrait pas trop impactée la norme des vecteurs
-qui devrait rester proche de la sphère. Au final ce n'est pas contradictoire d'avoir une norme euclidienne et une norme
-de malahanodis constante, si les variances des coordonées sont en moyenne les mêmes. 
-Pour savoir si les points sont plus sur une shell ellispoïdale que sphérique, on pourrait recalculer la norme de 
-malahanodis pour ces points et voir si la variance autour de la valeur moyenne est plus faible que dans le cas euclidien,
-mais je ne l'ai pas vu dans l'article.
-
 Thus, by deforming space with Malahanodis, the points
 restricted to the features with the variance close to 0.1 will remain on a sphere, as all coordinates will have been stretched almost equally.
 As the other coordinates are a minority, their modification should not have too much impact on the norm of the vectors,
@@ -139,28 +113,28 @@ To find out whether the points are more on an ellipsoidal shell than a spherical
 for these points and see if the variance around the mean value is lower than in the Euclidean case,
 but I did not see this in the article.
 
-## d) Orientation des ellipsoïdes :
+## d) Ellipsoid orientation:
 
-Les auteurs calculent la off-diagonal dominance pour chaque ligne de la matrice de covariance pour voir si
-la diagonale est prépondérante par rapport aux restes des coefficients, autrement dit si les variables sont corrélées
-ou non. 
+The authors calculate the off-diagonal dominance for each row of the covariance matrix to see if
+the diagonal is dominant compared to the rest of the coefficients, in other words, whether the variables are correlated
+or not. 
 
 ![ellipse12.PNG](ellipse12.PNG)
 
-Ils observent des valeurs significatives, signifiant que les variables sont corrélées et que donc les ellipses
-sont penchées (comme en dimension 2 où une covariance implique que l'axe de l'ellipse est orientée selon cette
+They observe significant values, meaning that the variables are correlated and therefore the ellipses
+are tilted (as in 2 dimensions, where covariance implies that the axis of the ellipse is oriented according to this
 covariance).
 
 ![ellipse13.PNG](ellipse13.PNG)
 
-## e) Centre des ellipsoïdes :
+## e) Center of the ellipsoids:
 
-Les auteurs veulent évaluer la distance du centre des ellipsoïdes à l'origine. Pour cela, ils comparent l'écart-type
-au vecteur moyen.
+The authors want to evaluate the distance from the center of the ellipsoids to the origin. To do this, they compare the standard deviation
+to the mean vector.
 
 ![ellipse14.PNG](ellipse14.PNG)
 
-Ils trouvent le même ordre de grandeur. Cela signifie que les ellipsoïdes sont significativement éloignés de l'origine.
+They find the same order of magnitude. This means that the ellipsoids are significantly distant from the origin.
 
 # 3/ Justification de la structure en deux ellipsoïdes
 
@@ -172,6 +146,17 @@ Je n'ai pas l'explication de pourquoi un encodeur transforme la distribution de 
 centrée autour d'une valeur pour chaque coordonées.
 En tout cas une fois qu'on a une distribution centrée pour chaque coordonée, les points de la distribution sont
 dans une ellispoïde qui a pour chaque coordonée pour rayon environ la variance de la coordonnée.
+
+# 3/ Justification for the two-ellipsoid structure
+
+The authors then show that this division into two ellipsoids is optimal for CLIP loss.
+
+## a) Transformation by an encoder of an input distribution into a distribution contained within an ellipsoid
+
+I do not have an explanation for why an encoder transforms the initial distribution into a distribution that is 
+centered around a value for each coordinate.
+No matter what, once we have a centered distribution for each coordinate, the points of the distribution are
+in an ellipsoid that has a radius for each coordinate approximately equal to the variance of the coordinate.
 
 ## b) Le fonctionnement des deux encodeurs
 
