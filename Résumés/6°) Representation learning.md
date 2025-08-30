@@ -1,19 +1,5 @@
 Articles : https://arxiv.org/pdf/2005.13149 , https://arxiv.org/pdf/2411.14517
 
-# Representation learning supervisé :
-
-On veut apprendre à associer des images à une classe, sachant que les images du dataset sont labellisées et qu'on 
-connait l'ensemble des classes possibles. On modélise ce problème par une distribution de probabilité g(x). Pour
-x une image, g(x) donne les probabilités que x appartienne à chacune des classes. La bonne distribution de g(x)
-est 1 pour la classe à laquelle x appartient et 0 pour les autres. Pour approcher le modèle gtheta de la bonne
-distribution g, on utilise pour loss l'entropie qui donne une distance entre g et gtheta. 
-
-Pour construire g(x) à partir d'une image x, on créé C embeddings zi, un pour chaque classe, et on fait le softmax
-entre ces embeddings pour retrouver une distribution de probabilités. Par exemple, la probabilité que x appartienne
-à la classe i est : 
-
-![representation1.PNG](representation1.PNG)
-
 # Supervised representation learning:
 
 We want to associate images with a class, given that the images in the dataset are labeled and that we 
@@ -42,6 +28,22 @@ embeddings zi. Le numérateur ne peut pas être amélioré, mais le dénominateu
 autres zi, ce qui permet de repousser les embeddings dans l'espace latent.
 
 ![representation2.png](representation2.png)
+
+# Unsupervised representation learning: instance discrimination
+
+This time the images are not labeled, so we cannot train the model to assign images to their class.
+We choose to assign a class to each image in the dataset, and the goal will be for the model to assign each image to its own class. 
+g(x) therefore has as many elementary events as there are images in the dataset. 
+I have not yet looked into the usefulness of this type of model, which is not as obvious as the previous one.
+
+To construct g(x) from an image x, we construct a single embedding zi for each image in the dataset 
+(instead of C) and
+the entropy (which is -log p where p is the probability to belong to its own class) is : 
+
+![representation2.png](representation2.png)
+
+The numerator cannot be improved, but the denominator can be reduced by moving z away from the 
+other zi, which allows the embeddings to be pushed back into the latent space.
 
 L'entrainement doit être simplifié car en l'état, il suppose que l'on recalcule les embeddings de toutes les images
 à chaque étape, et également calcule la somme des exponentielles de tous les embeddings. Les simplifications sont
