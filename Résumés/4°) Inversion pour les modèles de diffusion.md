@@ -60,6 +60,24 @@ in environment, style, and interaction with other objects. For each prompt, we g
 average vector in the CLIP embedding space, and calculate its cosine similarity with the prompt used
 for generation, from which we have removed the new token “a photo of S\* on the moon” -> “a photo of on the moon.”
 
+
+# E/ Choice of hyper-parameters
+
+The authors of the article have analyzed the impact of different hyper-parameters on reconstruction and editability using the above methods,
+which gives an idea of what to change according to our objective.
+
+## a) Basic implementation
+
+The implementation was done on a model which preceded stable diffusion, so the parameters may
+not be exactly the same in our case, but they still give an idea of the starting point:
+
+- For the embedding of the new word, we take as starting vector the vector of the class to which our object is attached
+(e.g. cat, man, tree ...)
+- 5 images in dataset
+- 0.005 LR
+- 4 batch-size
+- 5000 steps
+
 # E/ Choix des hyper-paramètres
 
 Les auteurs de l'article ont analysé l'impact des différents hyperparamètres sur la reconstruction et l'editability en utilisant les méthodes ci-dessus,
@@ -76,6 +94,8 @@ notre objet (ex : chat, homme, arbre ...)
 - 0.005 LR
 - 4 batch-size
 - 5000 steps
+- 
+
 
 ## b) Déplacement sur la courbe editability/distorsion
 
