@@ -62,19 +62,6 @@ close neighbor of another embedding and will be moved by its loss.
 ![representation4.PNG](representation4.PNG)
 ![representation5.PNG](representation5.PNG)
 
-
-# Loss NT-Xent :
-
-C'est la loss utilisée sur CLIP, qui est bimodale contrairement aux loss précédentes car on a les embeddings d'image
-et de texte. Elle fonctionne sur le principe de l'instance discrimination : il y a une classe pour toutes les paires image/texte. Pour une paire, on veut maximiser la probabilité que l'image appartienne à la classe de son
-texte, et que le texte appartienne à la classe de son image. On se retrouve donc avec deux loss au lieu d'une
-quand on avait qu'une seule modalité. 
-
-La loss complète maximise ces deux probabilités pour l'ensemble des paires d'un batch. Maximiser différentes
-probabilités en même temps permet de ne pas éloigner les vecteurs les uns des autres au hasard comme cela se
-passerait si on maximisait la proba d'une seule paire. Là chaque vecteur s'éloigne les uns des autres en prenant
-en compte le fait qu'il ne doit pas s'approcher d'une autre paire.
-
 # Loss NT-Xent:
 
 This is the loss used in CLIP, which is bimodal unlike previous losses because we have image
