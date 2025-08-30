@@ -1,40 +1,39 @@
-# Entropie
+# Entropy
 
-On a un ensemble de n symboles qu'on observe et souhaite communiquer. Chaque symbole ni à la probabilité pi
-d'apparaître. On veut créer un code de manière à pouvoir communiquer ces n symboles, de sorte que les séquences
-utilisées pour coder les symboles les plus fréquents soient les plus petites (on diminue ainsi le coût en calcul
-avec moins de bits traités). Il y a certaines propriétés qu'un code doit vérifier pour être décodable, on ne va
-pas détailler lesquelles ici et on parlera juste de "code" en général sans entrer dans ces détails.
+We have a set of n symbols that we observe and wish to communicate. Each symbol has a probability pi
+of appearing. We want to create a code so that we can communicate these n symbols, such that the sequences
+used to encode the most frequent symbols are the smallest (thus reducing the computational cost
+with fewer bits processed). There are certain properties that a code must verify in order to be decodable, but we will not
+detail them here and will just talk about “code” in general.
 
-# Théorème 1 
+# Theorem 1
 
-Pour tout code, la longueur moyenne (somme des longueurs des séquences pour ni pondérées par pi)
-a une borne inférieure appelée entropie.
+For any code, the average length (sum of the lengths of the sequences weighted by pi)
+has a lower bound called entropy.
 ![th1.PNG](th1.PNG)
 
-# Théorème 2
+# Theorem 2
 
-Tout code peut être transformée en code préfixe (un code préfixe est un code ou aucune séquence est le préfixe
-d'une autre séquence) sans augmenter la longueur moyenne
+Any code can be transformed into a prefix code (a prefix code is a code in which no sequence is the prefix
+of another sequence) without increasing the average length
 
-# Théorème 3 : Kraft-Millman
+# Theorem 3: Kraft-Millman
 
-Si les longueurs des séquences li vérifient cette inégalité, il existe un code préfixe avec de tels longueurs
-pour coder les n symboles. 
+If the lengths of the sequences li satisfy this inequality, there exists a prefix code with such lengths
+to encode the n symbols. 
 ![th2.PNG](th2.PNG)
 
-# Théorème 4 
+# Theorem 4
 
-Pour toute distribution de probabilité sur n, prendre pour ni une séquence de longueur li = log2(qi) vérifie
-le théorème de Kraft-Millman et est donc un code valide.
+For any probability distribution on n, taking for ni a sequence of length li = log2(qi) satisfies
+the Kraft-Millman theorem and is therefore a valid code.
 ![th3.PNG](th3.PNG)
 
-# Théorème 5
+# Theorem 5
 
-En utilisant la distribution originale pour les longueurs, c'est-à-dire li = log2(pi), on obtient la longueur
-minimale pour un code qui est l'entropie.
+Using the original distribution for lengths, i.e., li = log2(pi), we obtain the minimum length for a code, which is entropy.
 
-# Exemple de code optimal pour un ensemble de 4 symboles 
+# Example of an optimal code for a set of 4 symbols
 
 ![th6.PNG](th6.PNG)
 
