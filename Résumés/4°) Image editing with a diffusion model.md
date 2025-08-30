@@ -1,4 +1,4 @@
-# A/ Modifying an image using a diffusion model
+# A/ Editing an image using a diffusion model
 
 Article: https://arxiv.org/pdf/2208.01618
 
@@ -133,15 +133,29 @@ On inverse l'image dans W pour avoir une bonne editability, et ensuite on finetu
 les valeurs prises localement près de w. Ainsi on obtient une bonne reconstruction en profitant de l'editability
 des points de W. Pour le modèle de diffusion, on peut appliquer cette même méthode en finetunant l'unet (on ne finetune pas aussi le text encoder car on ne veut pas
 modifier la sémantique dans l'espace des embeddings mais seulement modifier l'apparence de certains embeddings ce qui est géré par l'unet).
-Toutefois, les auteurs de l'article ont observé  qu'appliquer cette méthode dans le cas du modèle de diffusion n'est pas aussi efficace et fait perdre l'editability qui aura du être préservée par le finetuning. Ils proposent des idées pour modifier ce finetuning, mais qu'ils n'ont pas encore exploré.
+Toutefois, les auteurs de l'article ont observé  qu'appliquer cette méthode dans le cas du modèle de diffusion n'est pas aussi efficace et fait perdre l'editability qui aurait du être préservée par le finetuning. Ils proposent des idées pour modifier ce finetuning, mais qu'ils n'ont pas encore exploré.
 
 ![pivotaltuningdiffusion.PNG](pivotaltuningdiffusion.PNG)
 
 Ces images correspondent à la génération d'un prompt étant censé placée la sculpture dans un tableau, avec à chaque fois un guidance scale s (paramètre qui influe sur a quel point
 l'unet va prendre en compte le prompt pour générer l'image) plus élevé : 1,2 et 5. Au final le modèle est incapable de placer la statue dans un tableau donc on a perdu en editability.
 
-## d) Augmenter le nombre d'images dans le dataset
+## c) Breaking free from the editability/reconstruction trade-off : pivotal tuning
 
-Le nombre d'image affecte peu la reconstruction, un nombre optimal de 5 est trouvé pour l'editability.
+In StyleGAN, to overcome the limitation imposed by the curve, the inversion is divided into two steps.
+The image is inverted in W to achieve good editability, and then the generator is fine-tuned to modify
+the values taken locally near w. This results in good reconstruction by taking advantage of the editability
+of the points in W. For the diffusion model, we can apply this same method by fine-tuning the unet (we do not also fine-tune the text encoder because we do not want to
+modify the semantics in the embedding space, but only modify the appearance of certain embeddings, which is handled by the unet).
+However, the authors of the article observed  that applying this method in the case of the diffusion model is not as effective and results in a loss of editability that should have been preserved by fine-tuning. They propose ideas for modifying this fine-tuning, but have not yet explored them.
+
+![pivotaltuningdiffusion.PNG](pivotaltuningdiffusion.PNG)
+
+These images correspond to the generation of a prompt that is supposed to place the sculpture in a painting, each time with a higher guidance scale s (a parameter that influences the extent to which
+the model will take the prompt into account to generate the image): 1, 2, and 5. In the end, the model is unable to place the statue in a painting, so we have lost editability.
+
+## d) Increase the number of images in the dataset
+
+The number of images has little effect on reconstruction; an optimal number of 5 has been found for editability.
 
 ![datasetsize.PNG](datasetsize.PNG)
