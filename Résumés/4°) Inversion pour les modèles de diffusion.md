@@ -1,64 +1,64 @@
-# A/ Modifier une image dans un modèle de diffusion
+# A/ Modifying an image using a diffusion model
 
-Article : https://arxiv.org/pdf/2208.01618
+Article: https://arxiv.org/pdf/2208.01618
 
-Dans un modèle de diffusion, on génère l'image à partir d'un prompt là où avec un GAN on part d'un latent w. Pour modifier une image dans le modèle de diffusion, on modifie les mots
-du prompt là où dans le GAN on se déplace selon des directions spécifiques dans W.
-Cette comparaison nous permet de comprendre comment modifier une image dans un modèle de diffusion en s'inspirant de la méthode pour les GANs. 
-On créé un ou plusieurs tokens (on choisit combien de tokens on veut pour représenter notre image) et on optimise leurs embeddings pour obtenir la meilleure reconstruction.
-Ensuite on place ces tokens dans différents prompts pour modifier l'image.
+In a diffusion model, the image is generated from a prompt, whereas with a GAN, we start from a latent w. To modify an image in the diffusion model, we modify the words
+in the prompt, whereas in the GAN, we move in specific directions in W.
+This comparison allows us to understand how to modify an image in a diffusion model by drawing inspiration from the method used for GANs. 
+We create one or more tokens (we choose how many tokens we want to represent our image) and optimize their embeddings to obtain the best reconstruction.
+Then we place these tokens in different prompts to modify the image.
 
-Pour initialiser les embeddings de ces tokens, on peut choisir comme valeur de départ l'embedding de la classe à laquelle appartient notre concept (par exemple si c'est un animal
-on peut prendre l'embedding du token lion, tigre ...). On choisit un prompt comme "a photo of s\*1 s\*2 s\*3 etc." pour générer les images lors de l'entrainement.
+To initialize the embeddings of these tokens, we can choose as the starting value the embedding of the class to which our concept belongs (for example, if it is an animal,
+we can take the embedding of the token lion, tiger, etc.). We choose a prompt such as “a photo of s\*1 s\*2 s\*3 etc.” to generate the images during training.
 
-Dans l'article, les auteurs ont exploré cette méthode d'inversion sous différents angles pour voir ses capacités et ses limites dans le cas du modèle de diffusion.
+In the article, the authors explored this inversion method from different angles to see its capabilities and limitations.
 
+# B/ Capabilities:
 
-# B/ Capacités :
+## a) Semantic understanding
 
-## a) Compréhension sémantique
-
-Même si le modèle est entrainé à représenter l'image de l'objet en entier et pas son interaction avec l'environnement, il comprend sémantiquement
-sa constitution et peut le faire interagir avec d'autres objets. Par exemple si on apprend un bol spécifique il va pouvoir contenir
-des objets à l'intérieur, comme tout autre bol.
+Even though the model is trained to represent the image of the object as a whole and not its interaction with the environment, it semantically understands
+its composition and can make it interact with other objects. For example, if we teach it about a specific bowl, it will be able to contain
+objects inside it, just like any other bowl.
 
 ![capacite1.PNG](capacite1.PNG)
 
-## b) Idées abstraites
 
-Le modèle ne se limite pas à l'apprentissage d'objets concrets mais peu aussi saisir des idées abstraites comme
-un style de dessin avec ce type de prompt : “A painting in the style of s\*”
+## b) Abstract ideas
+
+The model is not limited to learning about concrete objects, but can also grasp abstract ideas such as
+a drawing style with this type of prompt: “A painting in the style of s\*”
 
 ![capacite2.PNG](capacite2.PNG)
 
-# C/ Limites :
+# C/ Limitations:
 
-## a) Interaction entre nouveaux objets
+## a) Interaction between new objects
 
-Les objets étant appris avec un set d'image où ils sont au coeur de la scène, le modèle a du mal a les faire
-interagir entre eux (il peut les faire interagir avec des concepts qu'il connaît déjà comme on l'a vu, c'est l'interaction entre nouveaux concepts qui
-pose problème). Il est possible que réaliser un entrainement où ils sont en interaction
-avec d'autres nouveaux objets et non plus au coeur de la scène débloque cette situation.
+Since objects are learned using a set of images in which they are at the center of the scene, the model has difficulty making them
+interact with each other (it can make them interact with concepts it already knows, as we have seen, but it is the interaction between new concepts that
+poses a problem). It is possible that training them to interact
+with other new objects rather than being at the center of the scene could resolve this issue.
 
-# D/ Evaluation de la méthode :
+# D/ Evaluation of the method:
 
-On peut faire varier la méthode d'inversion en changeant  certains hyperparamètres : learning rate, formule de la loss, nombre de tokens ...
-La variation de ces hyperparamètres ne modifie pas les capacités/limites qu'on a vu avant qui sont propres à la méthode.
-Néanmoins, en restant dans le cadre de ces capacités/limites, ils peuvent améliorer la reconstruction et l'editability s'ils sont bien choisis.
-Il faut donc des méthodes pour évaluer ces deux critères afin de prendre les meilleurs hyperparamètres.
+The inversion method can be varied by changing certain hyperparameters: learning rate, loss formula, number of tokens, etc.
+Changing these hyperparameters does not alter the capabilities/limitations we saw earlier, which are specific to the method.
+However, within the scope of these capabilities/limitations, they can improve reconstruction and editability if chosen wisely.
+Methods are therefore needed to evaluate these two criteria in order to select the best hyperparameters.
 
 ## a) Reconstruction
 
-On veut évaluer si le concept généré ressemble au concept du dataset.
-On génère 64 images, on les encode ainsi que les images du dataset dans l'espace d'embeddings de CLIP, on calcule
-la cosine-similarity de toutes les pairs image générée/image du dataset et on en fait la moyenne.
+We want to evaluate whether the generated concept resembles the concept in the dataset.
+We generate 64 images, encode them and the images in the dataset in the CLIP embedding space, calculate
+the cosine similarity of all generated image/dataset image pairs, and take the average.
 
 ## b) Editability
 
-On veut évaluer à quel point le concept appris est modifiable. Pour cela on créé des prompts avec des variations
-de décor, de style, et d'interaction avec d'autres objets. Pour chaque prompt, on génère 64 images, on fait une
-moyenne du vecteur dans l'espace des embeddings de CLIP, et on calcule sa cosine-similarity avec le prompt utilisé
-pour la génération à qui on a enlevé le nouveau token "a photo of S\* on the moon" -> "a photo of on the moon".
+We want to evaluate how editable the learned concept is. To do this, we create prompts with variations
+in environment, style, and interaction with other objects. For each prompt, we generate 64 images, calculate the
+average vector in the CLIP embedding space, and calculate its cosine similarity with the prompt used
+for generation, from which we have removed the new token “a photo of S\* on the moon” -> “a photo of on the moon.”
 
 # E/ Choix des hyper-paramètres
 
