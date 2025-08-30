@@ -6,7 +6,7 @@ On veut apprendre à associer des images à une classe, sachant que les images d
 connait l'ensemble des classes possibles. On modélise ce problème par une distribution de probabilité g(x). Pour
 x une image, g(x) donne les probabilités que x appartienne à chacune des classes. La bonne distribution de g(x)
 est 1 pour la classe à laquelle x appartient et 0 pour les autres. Pour approcher le modèle gtheta de la bonne
-distribution g, on utilise pour loss l'entropie qui est une distance entre g et gtheta. 
+distribution g, on utilise pour loss l'entropie qui donne une distance entre g et gtheta. 
 
 Pour construire g(x) à partir d'une image x, on créé C embeddings zi, un pour chaque classe, et on fait le softmax
 entre ces embeddings pour retrouver une distribution de probabilités. Par exemple, la probabilité que x appartienne
@@ -14,13 +14,25 @@ entre ces embeddings pour retrouver une distribution de probabilités. Par exemp
 
 ![representation1.PNG](representation1.PNG)
 
+# Supervised representation learning:
+
+We want to associate images with a class, given that the images in the dataset are labeled and that we 
+know all the possible classes. We model this problem using a probability distribution g(x). For
+x an image, g(x) gives the probabilities that x belongs to each of the classes. The correct distribution of g(x)
+is 1 for the class to which x belongs and 0 for the others. To get the model gtheta closer to g, we use entropy for loss, which gives a distance between g and gtheta. 
+
+To construct g(x) from an image x, we create C embeddings zi, one for each class, and perform softmax
+between these embeddings to find a probability distribution. For example, the probability that x belongs
+to class i is: 
+
+![representation1.PNG](representation1.PNG)
+
 # Representation learning non supervisé : instance discrimination
 
 Les images ne sont pas labellisées donc on ne peut pas entrainer le modèle a assigner les images à leur classe.
-Pour reconnaître les images, on va les placer dans un espace latent où elles seront séparées (je n'ai 
-pas lu l'utilité de cette séparation pour l'instant qui n'est pas aussi évidente que donner la classe d'une image).
-On modélise ce problème en imaginant que chaque image a sa propre classe. g(x) a donc autant
-d'évènements élémentaires qu'il y a d'images dans le dataset.
+On choisit de donner une classe par image du dataset, et l'objectif sera que le modèle donne pour chaque image sa propre classe. 
+g(x) a donc autant d'évènements élémentaires qu'il y a d'images dans le dataset. 
+Je n'ai pour l'instant pas regardé l'utilité de ce genre de modèle, qui n'est pas aussi évident que le précédent.
 
 Pour construire g(x) à partir d'une image x, on construit un seul embedding zi pour chaque image du dataset 
 (au lieu de C
