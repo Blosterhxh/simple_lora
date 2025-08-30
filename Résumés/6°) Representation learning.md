@@ -13,22 +13,6 @@ to class i is:
 
 ![representation1.PNG](representation1.PNG)
 
-# Representation learning non supervisé : instance discrimination
-
-Les images ne sont pas labellisées donc on ne peut pas entrainer le modèle a assigner les images à leur classe.
-On choisit de donner une classe par image du dataset, et l'objectif sera que le modèle donne pour chaque image sa propre classe. 
-g(x) a donc autant d'évènements élémentaires qu'il y a d'images dans le dataset. 
-Je n'ai pour l'instant pas regardé l'utilité de ce genre de modèle, qui n'est pas aussi évident que le précédent.
-
-Pour construire g(x) à partir d'une image x, on construit un seul embedding zi pour chaque image du dataset 
-(au lieu de C
-précédemment), et on fait le softmax d'un embedding sur tous les autres pour retrouver la distribution de probabilité.
-La loss qui est l'entropie correspond au softmax de la norme de z (z=g(x)) sur le produit scalaire de z avec les autres
-embeddings zi. Le numérateur ne peut pas être amélioré, mais le dénominateur peut être diminué en éloignant z des 
-autres zi, ce qui permet de repousser les embeddings dans l'espace latent.
-
-![representation2.png](representation2.png)
-
 # Unsupervised representation learning: instance discrimination
 
 This time the images are not labeled, so we cannot train the model to assign images to their class.
@@ -38,7 +22,7 @@ I have not yet looked into the usefulness of this type of model, which is not as
 
 To construct g(x) from an image x, we construct a single embedding zi for each image in the dataset 
 (instead of C) and
-the entropy (which is -log p where p is the probability to belong to its own class) is : 
+the entropy (which is -log p where p is the probability that x belongs to its own class) is : 
 
 ![representation2.png](representation2.png)
 
@@ -50,6 +34,12 @@ L'entrainement doit être simplifié car en l'état, il suppose que l'on recalcu
 décrites dans l'article et pour l'instant je n'ai pas lu les justifications. En résumé ils stockent les embeddings
 dans une banque M pour ne pas recalculer gtheta(xi) à chaque étape, et réduisent le dénominateur du softmax de N
 à K<<N tirer uniformément dans N, certainement parce que beaucoup de termes ont une contribution proche de zero.
+
+Training needs to be simplified because, as it stands, it requires recalculating the embeddings of all images
+at each stage, as well as calculating the sum of the exponentials of all embeddings. The simplifications are
+described in the article, but I haven't read the justifications yet. In summary, they store the embeddings
+in a bank M so they do not have to recalculate gtheta(xi) at each step, and reduce the denominator of the softmax from N
+to K<<N drawn uniformly from N, probably because many terms have a contribution close to zero.
 
 ![representation3.PNG](representation3.PNG)
 
