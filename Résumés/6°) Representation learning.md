@@ -37,20 +37,6 @@ to K<<N drawn uniformly from N, probably because many terms have a contribution 
 
 ![representation3.PNG](representation3.PNG)
 
-# Representation learning non-supervisé : local aggregation
-
-On aimerait maintenant regrouper les images qui font partie d'une même classe entre elles, et pas avoir une
-classe pour une image ce qui éloigne inutilement des images similaires.
-Comme on ne connaît pas à l'avance les classes, on fait un clustering sur le dataset.
-Il y a alors deux mesures de similarité sur l'espace : la distance géométrique et le clustering.
-Là où auparavant on avait juste à améliorer la distance géométrique entre les embeddings, ici il faut en plus
-prendre en compte le clustering. On améliore ces mesures conjointement en deux étapes :
-- on rapproche les vecteurs qui sont proches géométriquement et dans un même cluster
-- pour un vecteur dans le cluster et loin géométriquement, ou un vecteur hors du cluster et proche géométriquement :
-on éloigne géométriquement ce vecteur du vecteur cible. On pourrait faire l'inverse et le rapprocher dans les deux
-cas, mais cela amènerait à renforcer le cluster de départ qui est aléatoire comme la fonction n'est pas entrainée.
-Au contraire on veut déplacer au maximum les vecteurs et faire varier le cluster avec l'entrainement.
-
 # Unsupervised representation learning: local aggregation
 
 We would now like to group images that belong to the same real class together, rather than having one
@@ -80,20 +66,31 @@ close neighbor of another embedding and will be moved by its loss.
 # Loss NT-Xent :
 
 C'est la loss utilisée sur CLIP, qui est bimodale contrairement aux loss précédentes car on a les embeddings d'image
-et de texte. Elle fonctionne sur le principe de l'instance discrimination : il y a une classe pour tous les textes et
-images. Pour une paire texte-image, on veut maximiser la probabilité que l'image appartienne à la classe de son
+et de texte. Elle fonctionne sur le principe de l'instance discrimination : il y a une classe pour toutes les paires image/texte. Pour une paire, on veut maximiser la probabilité que l'image appartienne à la classe de son
 texte, et que le texte appartienne à la classe de son image. On se retrouve donc avec deux loss au lieu d'une
 quand on avait qu'une seule modalité. 
 
-La loss complète maximise ces deux probabilités pour l'ensemble des pairs d'un batch. Maximiser différentes
+La loss complète maximise ces deux probabilités pour l'ensemble des paires d'un batch. Maximiser différentes
 probabilités en même temps permet de ne pas éloigner les vecteurs les uns des autres au hasard comme cela se
 passerait si on maximisait la proba d'une seule paire. Là chaque vecteur s'éloigne les uns des autres en prenant
 en compte le fait qu'il ne doit pas s'approcher d'une autre paire.
 
+# Loss NT-Xent:
+
+This is the loss used in CLIP, which is bimodal unlike previous losses because we have image
+and text embeddings. It works on the principle of instance discrimination: there is one class for all image/text pairs. For a pair, we want to maximize the probability that the image belongs to the class of its
+text, and that the text belongs to the class of its image. We therefore end up with two terms in the loss instead of one
+when we had only one modality. 
+
+The complete loss maximizes these two probabilities for all pairs in a batch. Maximizing different
+probabilities at the same time prevents the vectors from randomly moving away from each other, as would happen
+if we maximized the probability of a single pair. Here, each vector moves away from the others, taking into account
+the fact that it must not approach another pair.
+
 ![representation6.png](representation6.png)
 
-Cette loss n'est pas écrite comme dans l'article mais elle vaut exactement la même chose, elle montre cependant plus
-explicitement la maximisation des deux probabilités pour chaque modalité. Pour s'en convaincre il suffit de faire
-le changement de varibale j=k sur la deuxème espérance de cette formule.
+This loss is not written exactly as it is in the article, but it is worth exactly the same; however, it shows more
+explicitly the maximization of the two probabilities for each modality. To be convinced of this, we can simply make
+the variable change j=k on the second expectation of this formula which comes from the article.
 
 ![representation7.PNG](representation7.PNG)
