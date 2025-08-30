@@ -78,54 +78,53 @@ not be exactly the same in our case, but they still give an idea of the starting
 - 4 batch-size
 - 5000 steps
 
+## b) Shift on the editability/distortion curve
 
-## b) Déplacement sur la courbe editability/distorsion
-
-Les auteurs ont observé l'existence d'une courbe editability/reconstruction, et plus le/les vecteurs pris dans l'espace des embeddings
-s'éloignent de l'embedding initial de la classe (ex : lion, tigre ...), plus on gagne en reconstruction tout en perdant en editability. 
+The authors observed the existence of an editability/reconstruction curve, and the further the vector(s) taken in the embedding space
+move away from the initial embedding of the class (e.g., lion, tiger, etc.), the more reconstruction is gained while losing editability. 
 
 ![tradeoff.PNG](tradeoff.PNG)
 
-Sur ce graphique, une augmentation en image similarity indique une meilleure reconstruction, et une augmentation en text similarity indique une meilleure editability (conformément
-aux deux méthodes d'évaluation qu'on a vu précédemment). Il y a donc une courbe en haut a droite sur laquelle les différentes configurations sont positionnées, chaque configuration privilégiant plus ou moins la reconstruction/editability par rapport aux autres.
+In this graph, an increase in image similarity indicates better reconstruction, and an increase in text similarity indicates better editability (in line with
+the two evaluation methods seen previously). There is therefore a curve at the top right on which the different configurations are positioned, with each configuration favoring reconstruction/editability to a greater or lesser extent than the others.
 
-Ce compromis est le même que l'on observait
-avec les styleGAN  : lorsque le/les latents s'éloignaient de l'espace W où le générateur avait été entrainé, on gagnait en reconstruction et perdait en editability.
+This tradeoff is the same as we observed
+with styleGANs: when the latent(s) moved away from the W space where the generator had been trained, we gained in reconstruction and lost in editability.
 
-Au final, la variation des hyperparamètres va éloigner plus ou moins les nouveaux tokens de l'embedding initial, il faut donc les choisir selon là où l'on veut être sur la courbe : soit on veut privilégier la reconstruction, soit l'editability.
+Ultimately, varying the hyperparameters will move the new tokens further or closer to the initial embedding, so they must be chosen according to where we want to be on the curve: either we want to favor reconstruction or editability.
 
-### b.1) Gagner en editability
+### b.1) Improving editability
 
-Pour gagner en editability il faut se rapprocher de l'embedding de départ. 
+To improve editability, we need to get closer to the initial embedding. 
 
-#### b.1.1) Diminuer le learning rate
+#### b.1.1) Decreasing the learning rate
 
-Avec un learning rate plus faible on s'éloigne moins de l'embedding de départ avec un même nombre de steps. C'est le point "Low LR" sur le graphique.
+With a lower learning rate, we stray less from the initial embedding with the same number of steps. This is the “Low LR” point on the graph.
 
-#### b.1.2) Régularisation
+#### b.1.2) Regularization
 
-On peut introduire dans la loss une norme L2 entre le nouvel embedding et l'embedding de la classe de l'objet, de manière à privilégier avec l'optimisation le changement de
-direction du nouvel embedding plutôt que son éloignement de l'embedding de départ. C'est le point "W/Regularization" sur le graphique.
+An L2 norm between the new embedding and the embedding of the object class can be introduced into the loss, so that optimization favors changing the
+direction of the new embedding rather than its distance from the initial embedding. This is the “W/Regularization” point on the graph.
 
-### b.2) Gagner en reconstruction
+### b.2) Improve reconstruction
 
-#### b.2.1) Augmenter le learning rate
+#### b.2.1) Increase the learning rate
 
-Augmenter le learning rate augmente la reconstruction pour les mêmes raisons que le diminuer augmente l'editability. C'est le point "High LR" sur le graphique.
+Increasing the learning rate improves reconstruction for the same reasons that decreasing it improves editability. This is the “High LR” point on the graph.
 
-#### b.2.2) Augmenter le nombre de tokens appris
+#### b.2.2) Increase the number of tokens learned
 
-On peut choisir d'apprendre plusieurs embeddings au lieu d'un, ou même d'apprendre un embedding
-commun pour toutes les images et un différent de manière à ce que le modèle concentre les informations communes
-dans l'embedding partagé et que les emebeddings spécifiques récupères les informations particulières à chaque image
-qui ne nous sont pas utiles. Ces méthodes se rapprochent de celles du styleGAN lorsqu'on choisissait d'inverser dans W\*k au lieu d'W\* pour avoir une meilleure reconstruction,
-et de la même manière elles éloignent plus les nouveaux tokens de l'embedding initial en multipliant les vecteurs.
+We can choose to learn several embeddings instead of one, or even learn a common embedding
+for all images and a different one so that the model concentrates the common information
+in the shared embedding and the specific embeddings retrieve the information specific to each image
+that is not useful to us. These methods are similar to those used in styleGAN when we chose to invert in W\*k instead of W\* to obtain a better reconstruction.
+In the same way, they move the new tokens further away from the initial embedding by multiplying the vectors.
 
-Toutefois ces méthodes par rapport au token unique apporte un très léger gain en
-reconstruction voir aucun, et une perte beaucoup plus importante en flexibilité. On peut le voir sur le graphe avec les configurations "3-words", "2-words" et "Per-image token"
-comparées à "Ours".
+However, compared to the single token, these methods provide a very slight gain in
+reconstruction, if any, and a much greater loss in editability. This can be seen in the graph with the “3-words,” “2-words,” and “Per-image token” configurations
+compared to “Ours”.
 
-Au final, le réglage du learning rate est la méthode la plus simple pour se déplacer sur la courbe.
+Ultimately, adjusting the learning rate is the simplest method for moving along the curve.
 
 ## c) S'affranchir de la courbe editability/reconstruction : le pivotal tuning
 
