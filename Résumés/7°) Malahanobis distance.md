@@ -38,18 +38,6 @@ symmetric, we can diagonalize it with rotation matrices.
 
 ![diagonalisation.PNG](diagonalisation.PNG)
 
-Lorsqu'on multiplie un vecteur par cette matrice,
-il va donc être exprimé dans une nouvelle base créée par rotation de la première, puis être normalisé sur les 
-axes de la nouvelle base avec les coefficients de diagonale, puis retourner en sens inverse pour revenir à la base
-de départ. On normalise donc suivant les axes qu'on voulait : axe de corrélation et axe perpendiculaire.
-
-En réalité dans le calcul, on utilise l'inverse de la racine de la  matrice de covariance car 
-la matrice de covariance augmente les distances dans les directions où la variance est grande ce qui est l'inverse 
-de ce que l'on veut. Au final,
-ce que fait l'inverse de la racine de la  matrice de covariance c'est transformé l'ellipse de l'espace de départ en 
-un cercle
-dans l'espace d'arrivé, et la distance de malahanobis est la distance euclidienne calculée sur ce cercle.
-
 When a vector is multiplied by this matrix,
 it will be expressed in a new basis created by rotating the first one, then normalized on the 
 axes of the new basis with the diagonal coefficients, then reversed to return to the original basis.
