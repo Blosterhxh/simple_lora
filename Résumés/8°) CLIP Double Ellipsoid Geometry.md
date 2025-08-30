@@ -1,16 +1,15 @@
-L'espace des embeddings de CLIP est de dimension 512 et contient à la fois les embeddings des phrases et les embeddings
-des images.
+The CLIP embedding space has a dimension of 512 and contains both text embeddings and image embeddings.
 
 # 1/ Thin shell theory :
 
-Les auteurs donnent plusieurs résultats sur la géométrie d'une distribution dans un espace à plusieurs dimensions.
-Avant cela ils donnent des définitions
+The authors present several results on the geometry of a distribution in a multidimensional space.
+Before doing so, they provide definitions.
 
-## a) Variable aléatoire isotropique : 
+## a) Isotropic random vector:
 
 ![ellipse01.PNG](ellipse01.PNG)
 
-## b) Distribution log concave :
+## b) Log-concave distribution:
 
 ![ellipse02.PNG](ellipse02.PNG)
 
@@ -19,84 +18,85 @@ Avant cela ils donnent des définitions
 Pour une distribution isotropique, la norme moyenne de x vaut racine de n le nombre de dimensions. Les évènements
 élémentaires sont donc sur une sphère de rayon racine de n.
 
+## c) First result:
+
+For an isotropic distribution, the mean norm of x is sqrt(n), n being the number of dimensions. Elementary events
+are therefore on a sphere with sqrt(n) radius.
+
 ![ellipse1.PNG](ellipse1.PNG)
 
+## d) Second result:
 
-## d) 2e résultat :
-
-Pour une distribution isotropique et log concave, on a l'épaisseur de la coquille de la sphère qui est majorée par la
-racine du logarithme de n.
+For an isotropic and log-concave distribution, the thickness of the sphere's shell is bounded according to this formula : 
 
 ![ellipse2.PNG](ellipse2.PNG)
 
-## e) 3e résultat :
+## e) Third result:
 
-Si on sait seulement que les coordonées de la variable aléatoire X sont toutes de moyenne 0, et que les fluctuations
-de la norme de x autour de sa moyenne sont faibles comparées à cette moyenne, on a que la norme moyenne de x
-vaut environ la racine de la trace de la matrice de covariance.
+If we only know that the coordinates of the random variable X all have a mean of 0, and that the fluctuations
+of the norm of x around its mean are small compared to this mean, then the mean norm of x
+is approximately equal to the root of the trace of the covariance matrix.
 
 ![ellipse3.PNG](ellipse3.PNG)
 
-On peut faire un exemple pour se le représenter en deux dimensions. On prend le cas où x et y sont de moyenne nulle,
-de variance différente et de covariance nulle (la covariance change juste l'orientation de l'ellipse qui n'intervient pas
-dans le raisonnement donc on peut prendre une covariance nulle pour simplifier). Les vecteurs ayant des fluctuations de 
-la norme faible par rapport
-à la moyenne de la norme, ces vecteurs sont placés sur un cercle de rayon la moyenne de la norme. Comme x et y ont
-une variance différente, on doit élargir/rétrécir le cercle sur les axes x et y, ce qui ne modifie pas la norme moyenne
-à condition que  la différence de variance entre x et y est faible par rapport à cette norme moyenne. Au final tous
-les points sont sur une ellipse, et environ sur un cercle
-de rayon la racine de la trace de la matrice de covariance.
+We can use an example to represent this in 2d. Let's take the case where x and y have a mean of zero,
+different variances, and zero covariance (covariance only changes the orientation of the ellipse, which is not relevant
+to the reasoning, so we can take zero covariance to simplify). 
+Since the vectors have small fluctuations of norm relative to
+the mean norm, these vectors are placed approximately on a circle with a radius equal to the mean norm. Since x and y have
+different variances, we must expand/contract the circle on the x and y axes, and to keep the fluctuations low, 
+the difference in variance between x and y have to be small relative to this mean norm. Ultimately, all
+points are on an ellipse, and approximately on a circle
+with radius equal to the root of the trace of the covariance matrix.
 
 ![ellipse4.png](ellipse4.png)
 
-Dans cet exemple, les coordonées x et y suivent une loi uniforme sur leur valeurs possibles. Par exemple pour x, il y a pour toute valeur
-possible xi 2 points correspondant (xi,+yi) et (xi,-yi). Dans CLIP, on va voir que les coordonnées suivent individuellement une loi normale
-centrée en 0. En deux dimensions, on ne voit pas comment une telle loi permettrait de garder une norme moyenne de racine(tr(C)) sans fluctuations, vu qu'on aurait beaucoup de vecteurs proches de 0. Sauf que dans CLIP, on a 512 dimensions et comme on l'a vu dans le 3e résultat même si on a pas ici exactement les mêmes
-conditions, plus il y a de dimension plus l'épaisseur de l'ellipsoide va diminuer. Cela explique qu'on puisse dans CLIP avoir une norme
-moyenne racine(tr(C)) bien que les coordonnées suivent une loi normale centrée en 0.
+In this example, the x and y coordinates follow a uniform distribution over their possible values. For example, for x, for every possible value xi, there are two corresponding points (xi,+yi) and (xi,-yi).
+In CLIP, we will see that the coordinates individually follow approximately a normal distribution
+centered at 0. In two dimensions, it is difficult to see how such a distribution would allow us to maintain an average norm of root(tr(C)) without fluctuations, since we would have many vectors close to 0. Except that in CLIP, we have 512 dimensions and, as we saw in the third result, even if we do not have exactly the same
+conditions here, the more dimensions there are, the more the thickness of the ellipsoid  shell will decrease. This explains why in CLIP we can have an average norm
+root(tr(C)) even though the coordinates follow a normal distribution centered at 0.
 
-# 2/ Analyse de l'espace des embeddings
+# 2/ Analysis of the embedding space
 
-Les auteurs commencent ensuite à analyser l'espace des embeddings pour en déduire des propriétés.
+The authors then begin to analyze the embedding space to deduce its properties.
 
-## a) Modality gap :
+## a) Modality gap:
 
-Les vecteurs des images et des textes ne suivent pas la même distribution. Par exemple pour les feature 93 et 134, 
-les chercheurs obtiennent ces distributions.
+Image and text vectors do not follow the same distribution. For example, for features 93 and 134, 
+the researchers obtain these distributions.
 
 ![ellipse5.PNG](ellipse5.PNG)
 
-Ils sont capables avec ces deux seules features de séparer linéairement l'ensemble des vecteurs d'image de celui des
-vecteurs de texte.
+With these two features alone, they are able to linearly separate all image vectors from
+text vectors.
 
 ![ellipse6.PNG](ellipse6.PNG)
 
-Par contre toutes les features ne sont pas facilement séparables, ils en trouvent 9 qui sortent du lot dont la 93 et 
-la 134.
+However, not all features are easily separable. They found nine that stand out, including 93 and 
+134.
 
 ![ellipse7.PNG](ellipse7.PNG)
 ![ellipse8.PNG](ellipse8.PNG)
 
-## b) Forme des deux distributions :
+## b) Shape of the two distributions:
 
-En prenant les 10 premières features de chaque distribution, ils constatent que les valeurs ont un pic au niveau de 0.
+Taking the first 10 features of each distribution, they find that the values peak at 0.
 
 ![ellipse9.PNG](ellipse9.PNG)
 
-A l'inverse la norme vaut en moyenne une valeur non-nulle, avec une variance beaucoup plus faible que les coordonées
-individuelles.
+Conversely, the norm has a non-zero average value, with a much lower variance than the individual coordinates.
 
-Les auteurs en concluent :
+The authors conclude:
 
-On sait qu'avec le 3e résultat, la norme moyenne vaut racine(tr(C)). Pour l'instant je n'ai pas compris à quel moment 
-cette information était utile dans l'article.
+We know that with the third result, the average norm is root(tr(C)). For now, I don't understand when 
+this information was useful in the article.
 
 ![ellipse10.PNG](ellipse10.PNG)
 
 ## c) Shell ellipsoïdale :
 
-Au sein d'une distribution, les auteurs observent que les features ont des variances différentes. Ils en concluent donc que la shell de rayon
-racine de tr(C) est 
+Au sein d'une distribution, les auteurs observent que les features ont des variances différentes. Ils en concluent donc que la shell de rayon racine de tr(C) est 
 ellipsoïdale et non sphérique. Ici je ne suis pas sûr de comprendre comment ils en arrivent à cette conclusion, mais
 voici une justification que j'ai trouvée. Premièrement on définit qu'est ce que c'est être sur une shell ellipsoïdale :
 c'est quand l'ensemble de points à une norme de malahanodis environ constante. A première vue on peut penser que ce 
@@ -105,6 +105,19 @@ de malahanodis pour recalculer une distance euclidienne va étirer/réduire cert
 pas pouvoir être constante elle aussi.
 Cependant lorsqu'on observe le graphe des variances des features, il apparaît que les variances sont en moyenne autour
 de 0.1, et que les variances plus élevées sont rares.
+
+## c) Ellipsoidal shell:
+
+Within a distribution (image or text), the authors observe that the features have different variances. They therefore conclude that the shell with radius
+root of tr(C) is 
+ellipsoidal and not spherical. Here, I am not sure how they arrive at this conclusion, but
+here is a justification that I found. First, we define what it means to be on an ellipsoidal shell:
+it is when the set of points has an approximately constant Malahanodis norm. At first glance, we might think that this 
+is not the case for us, because the Euclidean distance is approximately constant at root(tr(C)) and the Malahanodis transformation
+to recalculate a Euclidean distance will stretch/reduce certain coordinates, so it should
+not be able to be constant as well.
+However, when we look at the graph of feature variances, we see that the variances average around
+0.1, and that higher variances are rare.
 
 ![ellipse11.PNG](ellipse11.PNG)
 
@@ -116,6 +129,15 @@ de malahanodis constante, si les variances des coordonées sont en moyenne les m
 Pour savoir si les points sont plus sur une shell ellispoïdale que sphérique, on pourrait recalculer la norme de 
 malahanodis pour ces points et voir si la variance autour de la valeur moyenne est plus faible que dans le cas euclidien,
 mais je ne l'ai pas vu dans l'article.
+
+Thus, by deforming space with Malahanodis, the points
+restricted to the features with the variance close to 0.1 will remain on a sphere, as all coordinates will have been stretched almost equally.
+As the other coordinates are a minority, their modification should not have too much impact on the norm of the vectors,
+which should remain close to the sphere. Ultimately, it is not contradictory to have a Euclidean norm and a constant Malahanodis norm
+if the variances of the coordinates are on average the same. 
+To find out whether the points are more on an ellipsoidal shell than a spherical one, we could recalculate the Malahanodis norm 
+for these points and see if the variance around the mean value is lower than in the Euclidean case,
+but I did not see this in the article.
 
 ## d) Orientation des ellipsoïdes :
 
