@@ -136,17 +136,6 @@ to the mean vector.
 
 They find the same order of magnitude. This means that the ellipsoids are significantly distant from the origin.
 
-# 3/ Justification de la structure en deux ellipsoïdes
-
-Les auteurs montrent ensuite que cette répartition en deux ellipsoides est optimale pour la loss CLIP.
-
-## a) La transformation par un encodeur d'une distribution d'entrée en une distribution contenue dans une ellipsoïde
-
-Je n'ai pas l'explication de pourquoi un encodeur transforme la distribution de départ en une distribution qui est 
-centrée autour d'une valeur pour chaque coordonées.
-En tout cas une fois qu'on a une distribution centrée pour chaque coordonée, les points de la distribution sont
-dans une ellispoïde qui a pour chaque coordonée pour rayon environ la variance de la coordonnée.
-
 # 3/ Justification for the two-ellipsoid structure
 
 The authors then show that this division into two ellipsoids is optimal for CLIP loss.
@@ -157,28 +146,6 @@ I do not have an explanation for why an encoder transforms the initial distribut
 centered around a value for each coordinate.
 However, once we have a centered distribution for each coordinate, we know that the points of the distribution are
 in an ellipsoid that has a radius for each coordinate approximately equal to the variance of the coordinate.
-
-## b) Le fonctionnement des deux encodeurs
-
-Avant d'expliquer l'origine des autres propriétés des ellipsoïdes, il faut comprendre comment fonctionne les deux encodeurs.
-Chaque encodeur fonctionne grâce à des transformers qui permettent de comprendre le sens des entrées. L'encodeur va synthétiser
-l'information qu'il a extraite de l'entrée dans un vecteur de l'espace des embeddings.
-
-La loss de CLIP correspond à la somme de la distance de la distribution des images de celles du texte et de la distance de la distribution
-du texte à celle des images. Pour minimiser cette somme, il faut que chaque paire du dataset est une cosine similarity de 1, et que les
-vecteurs de cette paire aient une cosine similarity de 0 avec les vecteurs de paires différentes. Cette optimum global, si il existe
-avec les fonctions d'encodeur d'image et de texte qui ont été choisies, est difficile à trouver. Il existe cependant un optimum
-local plus facile. Pour cela, il faut que des images/textes sémantiquement proches aient des embeddings similaires. De cette manière,
-la loss diminue car au lieu d'avoir une cosine similarity moyenne entre tous les vecteurs, on aura une cosine similarity moyenne
-pour les vecteurs correspondant à des entrées sémantiquement proches, et une cosine similarity proche de 0 pour les autres.
-Cet optimum local, en plus d'être plus facilement atteignable que l'optimum global, est favorisé par la forme des fonctions des encodeurs
-qui avec les transformers ont la capacité de comprendre le sens des entrées.
-
-Jusque-là on a vu que les encodeurs sont capables d'extraire des informations de leur entrée, et qu'ils doivent utiliser ces informations pour rapprocher des vecteurs sémantiquement proches. Pour cela, il faut qu'ils encodent une information identique de manière identique,
-et qu'ils extraient exhaustivement toutes les informations contenues dans leur entrée. Or cette extraction exhaustive n'est pas possible,
-car l'entrée contient parfois trop d'informations. Par exemple dans une image, les
-informations contenues sont infinies si on va chercher tous les détails précis. Les encodeurs apprennent donc à extraire seulement les
-informations qui en moyenne sont les plus utiles pour rapprocher les bonnes paires entre elles.
 
 ## b) How the two encoders work
 
@@ -200,61 +167,61 @@ because the input sometimes contains too much information. For example, in an im
 information contained is infinite if we look for all the precise details. Encoders therefore learn to extract only the
 information that, on average, is most useful for bringing the right pairs together.
 
-## c) L'existence de deux ellipsoïdes distinctes pour l'encodeur d'image et l'encodeur de texte
+## c) The existence of two distinct ellipsoids for the image encoder and the text encoder
 
-On a vu que les encodeurs n'extraient pas exhaustivement toutes les informations de leur entrée mais uniquement celles qui sont en
-moyenne les plus utiles pour minimiser la loss. Ainsi les informations extraites par les deux encodeurs pour 
-une même paire ne sont pas toujours identiques : le texte peut avoir été très descriptif pour une image simple, l'encodeur image
-voyant une image simple va extraire peu d'informations contrairement à l'encodeur texte.
+We have seen that encoders do not exhaustively extract all the information from their input, but only that which is, on average, most useful for minimizing loss.
+Thus, the information extracted by the two encoders for 
+the same pair is not always identical: the text may have been very descriptive for a simple image, and the image encoder
+seeing a simple image will extract little information, unlike the text encoder.
 
 ![ellipse15.PNG](ellipse15.PNG)
 
-Ici les Ci/Ct indiquent la cosine similarity moyenne de l'embedding avec les autres vecteurs de sa modalité. On voit qu'une image et un
-texte d'une même paire peuvent avoir des Ci/Ct très différents, indiquant que un encodeur extrait des informations communes par rapport
-à sa modalité tandis que l'autre extrait des informations plus précises et rares.
+Here, the Ci/Ct indicate the average cosine similarity of the embedding with the other vectors of its modality. We can see that an image and
+text from the same pair can have very different Ci/Ct, indicating that one encoder extracts common information related to
+its modality, while the other extracts more precise and rare information.
 
-Comme les deux encodeurs codent identiquement les informations, mais que leurs ensembles d'informations extraites n'est 
-pas exactement le même, on obtient dans l'espace latent des distributions proches mais avec des différences. Ces différences 
-sont plus ou moins grandes selon les features, et elles sont surtout importantes sur 9 features précises. Je n'ai pas trouvé l'explication
-de la concentration des différences sur ces 9 features.
+Since both encoders encode information identically, but their sets of extracted information are not 
+exactly the same, we obtain distributions in the latent space that are close but with differences. These differences 
+vary in magnitude depending on the features, and are particularly significant for nine specific features. I have not found an explanation
+for the concentration of differences on these nine features.
 
-## d) La concentration des points sur la shell des ellipsoïdes
+## d) Concentration of points on the shell of ellipsoids
 
-La concentration des points sur la shell est observée avec le calcul de la norme moyenne et de sa variance, mais ce n'est
-pas expliqué pourquoi cette concentration intervient. C'est possiblement du à la dimension élevée n = 512, comme c'est le
-cas pour les distributions isotropiques log concaves.
+The concentration of points on the shell is observed with the calculation of the mean norm and its variance, but it is not
+explained why this concentration occurs. It is possibly due to the high dimension n = 512, as it is the
+case for isotropic log-concave distributions.
 
-## e) Le décalage des ellipsoïdes par rapport à l'origine 
+## e) The offset of the ellipsoids relative to the origin 
 
-### e.1) Compromis entre uniformity et alignment
+### e.1) Compromise between uniformity and alignment
 
-Les auteurs réecrivent la loss avec un terme d'alignment et un terme d'uniformity.
+The authors rewrite the loss with an alignment term and a uniformity term.
 
 ![representation7.PNG](representation7.PNG)
 
-Le terme d'alignment rapproche les
-vecteurs d'une même paire, et le terme d'uniformity repousse les vecteurs de paires différentes. Pour diminuer la loss,
-on veut augmenter l'alignment et diminuer l'uniformity.
+The alignment term brings the
+vectors of the same pair closer together, and the uniformity term pushes the vectors of different pairs further apart. To reduce the loss,
+we want to increase the alignment and decrease the uniformity.
 
-Pour comprendre le décalage des ellipsoïdes, ils déplacent l'ellipsoïde des images par rapport à l'origine pour voir 
-l'évolution de la loss et précisemment de ces deux termes.
+To understand the shift of the ellipsoids, they move the ellipsoid of the images relative to the origin to see 
+the evolution of the loss and specifically of these two terms.
 
 ![ellipse16.PNG](ellipse16.PNG)
 
-On observe que l'alignment augmente en s'éloignant de l'origine, tandis que l'uniformity diminue en s'en rapprochant.
-La loss optimale correspond à une ellipsoïde centrée sur le vecteur moyen qui a été trouvé par l'entrainement.
+We observe that alignment increases as we move away from the origin, while uniformity decreases as we move closer to it.
+The optimal loss corresponds to an ellipsoid centered on the mean vector that was found with training.
 
 ![ellipse17.PNG](ellipse17.PNG)
 
-On peut expliquer ces évolutions différentes de l'alignment et de l'uniformity.
-La différence vient du fait que pour les embeddings de l'encodeur d'image, les directions possibles augmentent en se
-rapprochant de l'origine et diminuent en s'en éloignant.
-Si on est proche de l'origine, on peut donc plus facilement
-donner aux vecteurs de paires différentes des directions différentes ce qui diminue l'uniformity. Cependant pour les 
-paires d'embedding que le modèle n'arrive pas à réunir (ex : bruit dans les entrées, encodeurs qui n'extraient pas les 
-mêmes informations du côté image et texte), la cosine similarity de la paire sera plus faible et l'alignement diminue.
-L'inverse se passe en s'éloignant de l'origine, et au final le meilleur centre pour l'ellipsoïde est un compromis
-entre uniformity et alignment.
+These different evolutions of alignment and uniformity can be explained.
+The difference stems from the fact that for image encoder embeddings, the possible directions increase as they
+approach the origin and decrease as they move away from it.
+If we are close to the origin, it is therefore easier to
+give vectors from different pairs different directions, which reduces uniformity. However, for 
+embedding pairs that the model cannot bring together (e.g., noise in the inputs, encoders that do not extract the 
+same information from the image and text), the cosine similarity of the pair will be weaker and the alignment will decrease.
+The opposite happens as we move away from the origin, and ultimately the best center for the ellipsoid is a compromise
+between uniformity and alignment.
 
 ### e.2) Gestion des faux négatifs
 
