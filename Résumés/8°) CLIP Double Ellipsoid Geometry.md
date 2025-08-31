@@ -155,7 +155,7 @@ The authors then show that this division into two ellipsoids is optimal for CLIP
 
 I do not have an explanation for why an encoder transforms the initial distribution into a distribution that is 
 centered around a value for each coordinate.
-No matter what, once we have a centered distribution for each coordinate, the points of the distribution are
+However, once we have a centered distribution for each coordinate, we know that the points of the distribution are
 in an ellipsoid that has a radius for each coordinate approximately equal to the variance of the coordinate.
 
 ## b) Le fonctionnement des deux encodeurs
@@ -179,6 +179,26 @@ et qu'ils extraient exhaustivement toutes les informations contenues dans leur e
 car l'entrée contient parfois trop d'informations. Par exemple dans une image, les
 informations contenues sont infinies si on va chercher tous les détails précis. Les encodeurs apprennent donc à extraire seulement les
 informations qui en moyenne sont les plus utiles pour rapprocher les bonnes paires entre elles.
+
+## b) How the two encoders work
+
+Before explaining the origin of the other properties of ellipsoids, it is necessary to understand how the two encoders work.
+Each encoder uses transformers that enable it to understand the meaning of the input. The encoder then synthesizes
+the information it has extracted from the input into a vector in the embedding space.
+
+The CLIP loss corresponds to the sum of the distance between the distribution of images and the one of texts, and the distance between the distribution
+of texts and the one of images. To minimize this sum, each pair in the dataset must have a cosine similarity of 1, and the
+vectors of this pair must have a cosine similarity of 0 with the vectors of different pairs. This global optimum, if it exists
+with the chosen image and text encoder functions, is difficult to find. However, there is an easier local optimum.
+For this, semantically similar images/texts must have similar embeddings. In this way,
+the loss decreases because instead of having an average cosine similarity between all vectors, we will have an average cosine similarity
+for vectors corresponding to semantically similar entries, and a cosine similarity close to 0 for the others.
+
+So far, we have seen that encoders are capable of extracting information from their input, and that they must use this information to bring semantically similar vectors closer together. To do this, they must encode identical information in the same way,
+and exhaustively extract all the information contained in their input. However, this exhaustive extraction is not possible,
+because the input sometimes contains too much information. For example, in an image, the
+information contained is infinite if we look for all the precise details. Encoders therefore learn to extract only the
+information that, on average, is most useful for bringing the right pairs together.
 
 ## c) L'existence de deux ellipsoïdes distinctes pour l'encodeur d'image et l'encodeur de texte
 
