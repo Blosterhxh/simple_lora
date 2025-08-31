@@ -223,20 +223,21 @@ same information from the image and text), the cosine similarity of the pair wil
 The opposite happens as we move away from the origin, and ultimately the best center for the ellipsoid is a compromise
 between uniformity and alignment.
 
-### e.2) Gestion des faux négatifs
+## e.2) Handling false negatives
 
-Un faux négatif est une paire image texte sémantiquement proches mais qui ne sont pas une vraie paire du dataset.
-Sur ces faux négatifs les informations clés extraites sont similaires donc ils doivent être proches dans l'espace
-latent. 
-Le problème avec le centrage de l'ellipsoïde à l'origine, c'est que un petit déplacement des vecteurs entraîne une
-chute rapide de la cosine similarity. En effet, si on calcule le gradient d'une cosine similarity par rapport à un 
-vecteur, on voit que ce gradient est inversement proportionnel à la norme de ce vecteur.
+A false negative is a pair of images and text that are semantically close but are not a true pair in the dataset.
+The key information extracted from these false negatives is similar, so they should be close in latent space, but not as close
+as a real pair.
+
+The problem with centering the ellipsoid at the origin is that a small shift in the vectors causes a
+rapid drop in cosine similarity. Indeed, if we calculate the gradient of a cosine similarity with respect to a 
+vector, we see that this gradient is inversely proportional to the norm of this vector.
 
 ![ellipse18.PNG](ellipse18.PNG)
 
-Cela veut dire que l'on peut difficilement avoir une cosine similarity élevée pour des faux-négatifs.
-En éloignant l'ellipsoïde de l'origine, on diminue le gradient de la cosine similarity et ainsi on augmente la cosine
-similarity des faux négatifs.
+This means that it is difficult to have a high cosine similarity for false negatives, as they cannot be as close as true pairs are.
+By moving the ellipsoid away from the origin, we decrease the gradient of the cosine similarity and thus increase the cosine
+similarity of false negatives.
 
 ### e.3) Encodage différent des informations communes et rares :
 
