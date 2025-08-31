@@ -239,21 +239,6 @@ This means that it is difficult to have a high cosine similarity for false negat
 By moving the ellipsoid away from the origin, we decrease the gradient of the cosine similarity and thus increase the cosine
 similarity of false negatives.
 
-### e.3) Encodage différent des informations communes et rares :
-
-On prend un encodeur, par exemple l'encodeur image. Si une image a des informations extraites fréquentes, elle doit 
-avoir une cosine similarity moyenne avec les autres embeddings image plus élevée qu'une image avec des informations rares.
-Si l'ellispoïde image est centrée à l'origine, les embeddings étant sur la shell, tout embedding à la même cosine
-similarity moyenne aux autres embeddings peu importe sa position sur la shell. On ne peut donc pas différencier les images
-communes des images rares. A l'inverse en éloignant l'ellipsoïde de l'origine, un embedding avec une direction centrale
-aura une cosine similarity moyenne plus élevée avec les autres embeddings qu'un embedding avec une direction extrême.
-Le schéma ci-dessous montre un exemple simplifié avec une sphère, mais c'est le même raisonnement pour une ellipsoïde.
-
-![ellipse19.PNG](ellipse19.PNG)
-
-Ainsi, on peut placer les images communes dans des embeddings dirigés vers le centre et des images rares dans des 
-embeddings aux directions extrêmes de l'ellipsoïde.
-
 ### e.3) Different encoding of common and rare information:
 
 We take an encoder, for example the image encoder. If an image has frequently extracted information, it should 
