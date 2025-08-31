@@ -244,13 +244,27 @@ similarity of false negatives.
 On prend un encodeur, par exemple l'encodeur image. Si une image a des informations extraites fréquentes, elle doit 
 avoir une cosine similarity moyenne avec les autres embeddings image plus élevée qu'une image avec des informations rares.
 Si l'ellispoïde image est centrée à l'origine, les embeddings étant sur la shell, tout embedding à la même cosine
-similarity aux autres embeddings peu importe sa position sur la shell. On ne peut donc pas différencier les images
+similarity moyenne aux autres embeddings peu importe sa position sur la shell. On ne peut donc pas différencier les images
 communes des images rares. A l'inverse en éloignant l'ellipsoïde de l'origine, un embedding avec une direction centrale
 aura une cosine similarity moyenne plus élevée avec les autres embeddings qu'un embedding avec une direction extrême.
-Le schéma ci-dessous montre un exemple simplifié avec une sphère, mais c'est le même raisonnement pour un ellipsoïde.
+Le schéma ci-dessous montre un exemple simplifié avec une sphère, mais c'est le même raisonnement pour une ellipsoïde.
 
 ![ellipse19.PNG](ellipse19.PNG)
 
 Ainsi, on peut placer les images communes dans des embeddings dirigés vers le centre et des images rares dans des 
 embeddings aux directions extrêmes de l'ellipsoïde.
 
+### e.3) Different encoding of common and rare information:
+
+We take an encoder, for example the image encoder. If an image has frequently extracted information, it should 
+have a higher average cosine similarity with other image embeddings than an image with rare information.
+If the image ellipsoid is centered at the origin, with the embeddings on the shell, any embedding will have the same average cosine
+similarity to the other embeddings regardless of its position on the shell. It is therefore impossible to differentiate between common images
+and rare images. However, by moving the ellipsoid away from the origin, an embedding with a central direction
+will have a higher average cosine similarity with the other embeddings than an embedding with an extreme direction.
+The diagram below shows a simplified example with a sphere, but the same reasoning applies to an ellipsoid.
+
+![ellipse19.PNG](ellipse19.PNG)
+
+Thus, common images can be placed in embeddings directed towards the center and rare images in 
+embeddings at the extreme directions of the ellipsoid.
