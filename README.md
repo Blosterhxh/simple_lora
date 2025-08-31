@@ -2,12 +2,17 @@
 
 Je présente les résultats importants que j'ai pu déduire de la lecture des articles et des tests effectués avec les notebooks pour parfaire le pivotal tuning d'un modèle de diffusion. 
 
-A chaque étape je résume ce que j'ai tiré des articles sans justification, pour voir les détails du raisonnement tout est dans les résumés individuels des articles.
+A chaque étape je reprends ce que j'ai écrit dans les résumés sans justification, pour voir les détails du raisonnement tout est dans les résumés individuels des articles.
 
 Pour toutes ces étapes, on prend un nombre
 de steps constant de 1000 pour ne pas
-éterniser l entrainement, et on étudiera 
+éterniser l entrainement (qui prend déjà 1h pour le finetuning), et on étudiera 
 l'influence des autres parametres.
+
+# Dataset
+
+On va entraîner le modèle à apprendre ce personnage précis en utilisant comme prompt "an anime illustration of <tok1>".
+On utilise 5 images au total, comme dans l'article.
 
 # Choix du learning rate pour l'inversion
 
@@ -18,6 +23,15 @@ départ on gagne beaucoup en reconstruction et on perd peu en editability, et un
 faible et la parte en editability plus importante. Il faudrait alors inverser à la distance limite entre ces deux périodes.
 
 Il faut donc qu'on mesure l'évolution de la reconstruction et de l'editability en fonction de l'éloignement au token, pour voir à quelle distance on doit inverser. Pour parcourir différentes distances, on utilise le fait que la distance parcouru vaut environ nb steps x learning rate, ce qu'on pourra confirmer en calculant la norme euclidienne entre le token obtenu avec l'entrainement et le token de départ. 
+
+En utilisant des learnings rates de 5e-3, 5e-4 et 5e-5, on obtient les résultats suivants :
+
+Les distances token de départ/token inversé sont les suivantes :
+
+On observe deux périodes comment on l'avait prévu, et une distance d'éloignement de 0.67 correspondant à un learning rate de 5e-4 semble
+optimal.
+
+Voici quelques images générées pour chaque learning rate pour se rendre compte de ce que produit le modèle : 
 
 # Choix du learning rate pour le finetuning
 
