@@ -44,18 +44,10 @@ Dans styleGAN, la régularisation s'applique sur des latents proches du pivot wp
 alentours soient modifiés par le finetuning. C'est important car on a qu'un seul modèle, et on ne veut pas tout
 perdre en apprenant un seul personnage.
 
-Schématiquement, cette régularisation se passe comme suit : 
 
-wp : le pivot
-wr : le latent de régularisation
-loss (wp) : le terme d entrainement
-loss(wr) : le terme de régularisation
-modifications en wp =  loss(wp) - 0.1 loss(wr)
-modifications en wr = loss(wr) -0.1 loss(wp)
-(ce n'est pas du tout exact mathématiquement c'est juste pour visualiser l'influence de chaque terme sur ces deux points)
 
 L'idée est que les modifications de G sur un latent w vont se propager aux latents proches, cette propagation diminuant
-avec la distance. En ajoutant ce terme de régularisation, on s'assure que les latents proches subissent peu de 
+avec la distance. En ajoutant le terme de régularisation, on s'assure que les latents proches subissent peu de 
 modifications. On perd alors un peu en reconstruction au niveau de wp, mais c'est faible par rapport au gain en wr.
 
 ## Appliquer la régularisation au modèle de diffusion
@@ -67,36 +59,25 @@ Il faut ensuite se demander si la régularisation appliquée telle quelle comme 
 En réalité, elle n'en a pas, car avec les loras, on peut facilement charger/décharger une config
 donc ce n'est pas un problème si l'apprentissage déborde sur les autres embeddings, contrairement au styleGAN.
 
-Cependant, on pourrait voir une autre utilité de la régularisation
-, si on était capable de la cibler à certaines features. En effet,
-durant
-l'entrainement, le modèle apprend toutes les features du dataset. Il serait utile de pouvoir diminuer l'apprentissage
-des features inutiles (position, environnement) en appliquant une régularisation ciblée sur notre token <tok1>. 
-Pour cela on peut utiliser un avantage qu'a le modèle de diffusion
-par rapport au styleGAN : il génère à partir de plusieurs tokens. 
-On peut alors trouver une méthode pour cibler la régularisation. On accompagne notre token <tok1> dans le prompt d'autres
-tokens pour faire en sorte que la feature apparence de <tok1> ne soit
-pas utilisée. Par exemple on peut écrire : "an anime illustration of <tok1> woman with long blue hair", de manière
-à ce que l'image générée construise toutes les features à partir de <tok1>, sauf l'apparence.
+## Sélectionner les features apprises grâce à la régularisation
 
-Voici une schématisation des features utilisées par le nouveau modèle et l'ancien en cas de régularisation, en utilisant
-un tel prompt :
+Cependant, on peut trouver une autre utilité à la régularisation.
+Durant le finetuning, l'embedding <tok1> va apprendre toutes les features du dataset : apparence, position, environnement ...
+Pour l'empêcher d'apprendre des features inutiles, on pourrait ajouter un terme de régularisation qui force <tok1>, sur les features
+qu'on ne souhaite pas apprendre, à rester identique à la version avant le finetuning.
 
-Modèle original :
+Pour ce faire, il faut qu'on soit capable de générer des images qui prennent en compte uniquement les features indésirées de <tok1>,
+et ainsi on pourra calculer l'erreur entre ces features modifiées par le finetuning et ces features sur le modèle de base.
+Pour cela, on peut partir du prompt de base "an anime illustration of <tok1>", et ajouter des termes qui précisent 
+l'apparence "an anime illustration of <tok1> woman with blue long hair", de manière à ce que toutes les features de <tok1>
+sauf l'apparence soit exprimée.
 
-1\*apparence_org + 1\*autre_org
+## Augmenter la zone de l'espace des fonctions parcourue par G
 
-Tuning :
-
-0.1\*apparence_tuning + 0.9\*apparence_org + 1\*autre_tuning
-
-Erreur : 
-
-0.1\*apparence_tuning + 1\*autre_tuning + ...
-
-L'erreur entre les deux modèles va donc principalement concerner les features autres que l'apparence, ce qui va forcer
-notre modèle lors du finetuning à rester proche de l'ancien modèle sur ces features. Ainsi on ne devrait apprendre 
-réellement que l'apparence.
+La régularisation nous permet donc en théorie d'apprendre une seule feature. Ainsi, on a plus à limiter la distance 
+parcourue par G avec un petit learning rate pour éviter l'apprentissage de feature parasites.
+On peut donc essayer d'augmenter le learning rate pour que G parcourt une plus grande zone de l'espace des fonctions
+et trouver une meilleure reconstruction.
 
 Pour tirer parti de cette régularisation, on peut partir de la configuration d'entrainement où on avait un overfitting
 qui correspond à un learning rate de 1e-4. On peut espérer qu'en appliquant cette régularisation, on n'ait plus 
