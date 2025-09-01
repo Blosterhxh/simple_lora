@@ -108,50 +108,23 @@ similarity entre les deux.
 
 ## Interpoler entre character et tok1
 
-Pour diminuer ce pourcentage, l'idée naturelle serait de s'éloigner de l'embedding de <tok1>.
-En s'éloignant de <tok1>, deux choses se passent.
-La fonction G est moins impacté par le finetuning, donc l'écart avec le modèle de base est plus faible, 
-et la régularisation a moins d'effet.
-D'un autre côté, le pourcentage de prise en compte des autres termes du prompt augmente.
-Il faut donc trouver un compromis : s'éloigner suffisamment pour que les termes d'apparence
-prennent le dessus sur ceux de l'embedding, mais pas trop pour G soit suffisament différente
-de la fonction de départ et que la régularisation fasse effet.
+On sait que le manifold des embeddings de texte dans CLIP est une ellispoïde
+qu'on peut approximer par une sphère comme la majorité des coordonées ont la même variance.
+Cette sphère est décalée de l'origine. 
+Cependant, ceci n'est vrai que pour les embeddings de token de fin d'une phrase/image qui sont ceux sur lesquelles
+la loss de CLIP porte. Pour les autres embeddings on ne sait rien. Or ce sont ces autres embeddings qui sont passés
+sous forme de matrice au modèle de diffusion.
 
+Comme character/tok1 sont en milieu de phrase à l'indice 5, on peut essayer de voir si les embeddings à l'indice 5
+d'une phrase suive la même répartition dans l'espace que les embeddings de fin. Pour cela, j'ai pris
+le même dataset que celui utilisé par les chercheurs pour déterminer le manifold des embeddings de fin (MS-COCO 2014),
+et j'ai calculé la norme moyenne et la variance de cette norme. Au final, j'ai obtenu le même résultat
+que sur les embeddings de fin, on va donc pouvoir faire une vSLERP pour nos embeddings à la position 5 comme 
+les chercheurs font sur les embeddings de fin.
 
+Toutefois il y a un problème dans mon code car en calculant la norme moyenne et la variance pour le token de fin (je devrai donc avoir le même résultat que l'article), j'obtiens une variance plus faible avec les embeddings de base plutôt qu'avec les embeddings centrés, ce qui n'est pas cohérent avec le décalage de l'ellipsoïde texte de l'origine que les auteurs ont montré. Je vais donc faire une SLERP et pas une vSLERP tant que ce problème n'est pas résolu.
 
-## Interpolé entre <tok1> et <character>
-
-Pour s'éloigner de <tok1> dans l'espace des embeddings, on peut utiliser le fait que l'on connaisse le manifold des embeddings de texte dans CLIP qui est une ellispoïde
-qu'on peut approximer par une sphère, décalée de l'origine. On peut commencer par faire une
-vSLERP entre <tok1> et <character>. 
-
-La méthode vSLERP est de base pensée pour l'embedding du token de fin d'une phrase/image, qui est
-le seul donc on connaît la géometrie dans l'espace latent (deux ellipsoïdes). Ceci dit, on peut vérifier que cette
-structure reste globalement vraie pour les embeddings des tokens précédant le token de fin, en calculant leur norme moyenne et sa variance. En utilisant par exemple les tokens placés à la position 5 d'une phrase, on trouve que la structure d'ellipsoïde est 
-préservée.
-
-Toutefois il y a un problème dans mon code car en calculant la norme moyenne et la variance pour le token de fin (je devrai donc avoir le même résultat que l'article), j'obtiens une variance plus faible avec les embeddings de base plutôt qu'avec les embeddings centrés, ce qui n'est pas cohérent avec le décalage de l'ellipsoïde texte de l'origine que les auteurs ont montré.
-
-Je vais donc faire une SLERP et pas une vSLERP pour la régularisation tant que ce problème n'est pas résolu.
-
-Maintenant, il reste à choisir où interpoler exactement entre les deux embeddings. L'idée est qu'en s'éloignant,
-les features comprises dans <tok1> vont s'atténuer, et il est inutile de régulariser si l'image générée ne contient
-plus aucune feature de <tok1>. Mais si on est trop proche de <tok1>, le modèle ne va utiliser que les features de <tok1> et pas 
-celles du reste du prompt. On doit donc trouver un compromis, avec un embedding où les features apparence du prompt vont prendre
-le dessus, mais les features position, environnement de <tok1> seront également exprimées.
-
-Pour trouver ce point, on peut générer pour un embedding une image avec le prompt de base, et une image avec le prompt
-avec des termes d'apparence ajoutées. Si avec le prompt de base, on obtient une image proche de ce qu'aurait donné
-<tok1>, cela veut dire que les features de <tok1> ont encore une influence à cette distance. De plus, si avec le 
-prompt apparence on arrive à changer l'apparence du personnage, on a alors réussi à diminuer le pourcentage de prise
-en compte de la feature apparence de <tok1>. Le meilleur point doit donc ressembler à <tok1> sur le prompt de base,
-et avoir une apparence complètement différente sur le prompt apparence.
-
-On génère les images pour les deux prompts, dans le cas d'une SLERP avec t = 0.5, et avec t = 1 ce qui est équivalent
-à utiliser le token character.
-
-Au final, on observe une reconstruction similaire pour le prompt de base, mais l'apparence est mieux modifiée 
-pour t = 1. On va donc laisser tomber SLERP et juste régulariser sur le token <character>.
+## Résultats
 
 
 
