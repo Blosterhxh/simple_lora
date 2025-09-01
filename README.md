@@ -73,7 +73,7 @@ Pour ce faire, il faut qu'on soit capable de générer des images qui prennent e
 et ainsi on pourra calculer l'erreur entre ces features modifiées par le finetuning et ces features sur le modèle de base.
 Pour cela, on peut partir du prompt de base "an anime illustration of \<tok1>", et ajouter des termes qui précisent 
 l'apparence "an anime illustration of <tok1> woman with blue long hair", de manière à ce que toutes les features de \<tok1>
-sauf l'apparence soit exprimée.
+sauf l'apparence soient exprimées.
 
 ## Augmenter la zone de l'espace des fonctions parcourue par G
 
