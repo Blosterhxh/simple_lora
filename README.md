@@ -40,15 +40,18 @@ on commence a apprendre les positions, et on s'arrête juste avant.
 
 ## La régularisation dans styleGAN
 
-Dans styleGAN, la régularisation s'applique sur des latents proches du pivot wp, pour empêcher que les visages aux
-alentours soient modifiés par le finetuning. C'est important car on a qu'un seul modèle, et on ne veut pas tout
-perdre en apprenant un seul personnage.
+Lorsque qu'on finetune G sur un latent wp, le finetuning va déborder sur les latents aux alentours,ce débordement
+diminuant avec la distance. Le problème, c'est qu'on a qu'un seul modèle, donc on ne peut pas se permettre
+de perdre toute la capacité de génération de visages de G juste pour apprendre une seule personne.
+Il faut donc éviter ce débordement.
 
-
-
-L'idée est que les modifications de G sur un latent w vont se propager aux latents proches, cette propagation diminuant
-avec la distance. En ajoutant le terme de régularisation, on s'assure que les latents proches subissent peu de 
-modifications. On perd alors un peu en reconstruction au niveau de wp, mais c'est faible par rapport au gain en wr.
+Pour cela, on ajoute un terme de régularisation, qui force G à coller au modèle de base sur les latents proches de wp.
+Si on prend un latent où on régularise wr, et qu'on note tr le terme de régularisation et te le terme d'entrainement,
+tout va se passer comme suit :
+grad(G(wp)) = 0.1\*grad(tr) + 0.9\*grad(te)
+grad(G(wr)) = 0.1\*grad(te) + 0.9\*grad(tr)
+Ainsi les modifications de G sur wr par te vont être négligeables devant la régularisation, et le freinage de 
+l'apprentissage de G sur wp par tr sera négligeable devant le terme d'entrainement.
 
 ## Appliquer la régularisation au modèle de diffusion
 
