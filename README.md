@@ -51,7 +51,8 @@ tout va se passer comme suit :
 grad(G(wp)) = 0.1\*grad(tr) + 0.9\*grad(te)
 grad(G(wr)) = 0.1\*grad(te) + 0.9\*grad(tr)
 Ainsi les modifications de G sur wr par te vont être négligeables devant la régularisation, et le freinage de 
-l'apprentissage de G sur wp par tr sera négligeable devant le terme d'entrainement.
+l'apprentissage de G sur wp par tr sera négligeable devant le terme d'entrainement. On peut donc
+préserver les visages situés autour du pivot sans trop freiner l'apprentissage.
 
 ## Appliquer la régularisation au modèle de diffusion
 
