@@ -104,14 +104,13 @@ de la fonction de départ et que la régularisation fasse effet.
 
 
 
-Il reste cependant un problème à traiter. J'ai écrit : 
-0.1\*apparence_tuning + 0.9\*apparence_org + 1\*autre_tuning, laissant sous entendre que le modèle prendrait en compte
-10% de la feature apparence de <tok1> et 90 % de la feature apparence du reste du prompt. En réalité ces pourcentages
-sont arbitraires, et peuvent être bien plus élevées en faveur de <tok1> ce qui pose problème.
-Par exemple, pour la configuration avec un lr de 1e-4 qu'on a prévu d'utilisé, l'apparence est prise à 100% depuis <tok1>.
+## Interpolé entre <tok1> et <character>
 
-Pour diminuer ce pourcentage, il faut s'éloigner de <tok1> dans l'espace des embeddings. Pour cela, on peut faire un
-vSLERP entre <tok1> et <character>. La méthode vSLERP est de base pensée pour l'embedding du token de fin d'une phrase/image, qui est
+Pour s'éloigner de <tok1> dans l'espace des embeddings, on peut utiliser le fait que l'on connaisse le manifold des embeddings de texte dans CLIP qui est une ellispoïde
+qu'on peut approximer par une sphère, décalée de l'origine. On peut commencer par faire une
+vSLERP entre <tok1> et <character>. 
+
+La méthode vSLERP est de base pensée pour l'embedding du token de fin d'une phrase/image, qui est
 le seul donc on connaît la géometrie dans l'espace latent (deux ellipsoïdes). Ceci dit, on peut vérifier que cette
 structure reste globalement vraie pour les embeddings des tokens précédant le token de fin, en calculant leur norme moyenne et sa variance. En utilisant par exemple les tokens placés à la position 5 d'une phrase, on trouve que la structure d'ellipsoïde est 
 préservée.
