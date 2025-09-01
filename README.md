@@ -128,5 +128,18 @@ Toutefois il y a un problème dans mon code car en calculant la norme moyenne et
 
 ## Résultats
 
+On obtient ces évolutions de l'influence du finetuning et de l'editability avec l'interpolation
+
+L'influence décroit linéairement tandis que que l'editability augmente logarithmiquement. On aurait donc intérêt à prendre l'interpolation à t = 0.5.
+Toutefois, en analysant les images générées par les interpolations, on se rend compte que que l'évolution de l'editability ne représente pas bien à quel
+point les termes d'apparence prennent le dessus sur tok1. En effet, les termes d'apparence semblent être beaucoup plus pris en compte à t = 1,
+ce qui n'ait pas mis en valeur par la courbe.
+
+Une explication est que en s'éloignant de tok1, le générateur quitte l'overfitting et génère des images plus aléatoires. Ainsi, l'editability va beaucoup baisser entre t= 0 et 
+t = 0.5, même si l'apparence est peu modifiée par le prompt apparence. Pour vérifier ça, on change la mesure de l'editability. On calcule la cosine similarity
+entre images générées avec le même prompt, et on fait la différence avec la cosine similarity d'images générées avec le prompt simple et le prompt apparence. On devrait donc
+pouvoir quantifier uniquement l'évolution de la prise en compte de l'apparence dans la génération, sans être brouillé par l'augmentation de l'aléatoire.
+
+
 
 
