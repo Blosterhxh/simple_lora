@@ -67,12 +67,13 @@ donc ce n'est pas un problème si l'apprentissage déborde sur les autres embedd
 
 Cependant, on peut trouver une autre utilité à la régularisation.
 Durant le finetuning, l'embedding \<tok1> va apprendre toutes les features du dataset : apparence, position, environnement ...
+(quand je dis "l'embedding tok1 va apprendre", c'est un raccourci pour dire que G va changer ses valeurs sur tok1).
 Pour l'empêcher d'apprendre des features inutiles, on pourrait ajouter un terme de régularisation qui force \<tok1>, sur les features
 qu'on ne souhaite pas apprendre, à rester identique à la version avant le finetuning.
 
 Pour ce faire, il faut qu'on soit capable de générer des images qui prennent en compte uniquement les features indésirées de \<tok1>,
 et ainsi on pourra calculer l'erreur entre ces features modifiées par le finetuning et ces features sur le modèle de base.
-Pour cela, on peut partir du prompt de base "an anime illustration of \<tok1>", et ajouter des termes qui précisent 
+On peut partir du prompt simple "an anime illustration of \<tok1>", et ajouter des termes qui précisent 
 l'apparence "an anime illustration of <tok1> woman with blue long hair", de manière à ce que toutes les features de \<tok1>
 sauf l'apparence soient exprimées. Pour la suite, on appelera "an anime illustration of <tok1> woman with blue long hair"
 le prompt apparence.
@@ -103,7 +104,7 @@ les deux.
 
 On va donc interpoler entre tok1 et character, mesurer l'influence du finetuning et l'editability,
 et choisir un point optimal. Pour mesurer l'influence du finetuning, on calcule la cosine similarity
-des images générées avec le dataset. Pour mesurer l'editability, on génére à partir du point
+des images générées avec le dataset. Pour mesurer l'editability, on génère à partir du point
 interpolé, le prompt simple et le prompt avec les termes d'apparence, et on calcule la cosine
 similarity entre les deux.
 
@@ -117,7 +118,7 @@ la loss de CLIP porte. Pour les autres embeddings on ne sait rien. Or ce sont ce
 sous forme de matrice au modèle de diffusion.
 
 Comme character/tok1 sont en milieu de phrase à l'indice 5, on peut essayer de voir si les embeddings à l'indice 5
-d'une phrase suive la même répartition dans l'espace que les embeddings de fin. Pour cela, j'ai pris
+d'une phrase suivent la même répartition dans l'espace que les embeddings de fin. Pour cela, j'ai pris
 le même dataset que celui utilisé par les chercheurs pour déterminer le manifold des embeddings de fin (MS-COCO 2014),
 et j'ai calculé la norme moyenne et la variance de cette norme. Au final, j'ai obtenu le même résultat
 que sur les embeddings de fin, on va donc pouvoir faire une vSLERP pour nos embeddings à la position 5 comme 
