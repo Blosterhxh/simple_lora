@@ -93,6 +93,21 @@ Malheureusement, ce n'est pas aussi simple. Le modèle construit l'apparence ave
 des termes d'apparence, et un pourcentage pris de <tok1>.
 Ainsi sur le modèle finetuné à 1e-4, on constate que 100% de l'apparence est prise depuis <tok1>.
 
+Il faut diminuer ce pourcentage pour que les termes d'apparence prennent le dessus sur <tok1>.
+Pour cela, on peut essayer d'augmenter l'editability, en interpolant entre tok1 et character.
+En effet le finetuning fait perdre en editability tok1, et cette perte décroît avec l'éloignement.
+Toutefois, si on s'éloigne trop, on gagne certes en editability mais l'effet du finetuning 
+s'estompe donc la régularisation aura moins d'impact. Il faut donc trouver un compromis entre
+les deux.
+
+On va donc interpoler entre tok1 et character, mesurer l'influence du finetuning et l'editability,
+et choisir un point optimal. Pour mesurer l'influence du finetuning, on calcule la cosine similarity
+des images générées avec le dataset. Pour mesurer l'editability, on génére à partir du point
+interpolé, le prompt simple et le prompt avec les termes d'apparence, et on calcule la cosine
+similarity entre les deux.
+
+## Interpoler entre character et tok1
+
 Pour diminuer ce pourcentage, l'idée naturelle serait de s'éloigner de l'embedding de <tok1>.
 En s'éloignant de <tok1>, deux choses se passent.
 La fonction G est moins impacté par le finetuning, donc l'écart avec le modèle de base est plus faible, 
