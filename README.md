@@ -140,6 +140,10 @@ t = 0.5, même si l'apparence est peu modifiée par le prompt apparence. Pour v�
 entre images générées avec le même prompt, et on fait la différence avec la cosine similarity d'images générées avec le prompt simple et le prompt apparence. On devrait donc
 pouvoir quantifier uniquement l'évolution de la prise en compte de l'apparence dans la génération, sans être brouillé par l'augmentation de l'aléatoire.
 
+Au final, l'évolution de l'editability n'est toujours pas représentative de la prise en compte des termes d'apparence. J'ai donc décidé de suivre mon observation
+et de régulariser à t = 1, où l'on voit que l'apparence est bien modifié avec une préservation de l'environnement et des positions apprises par tok1, même si je n'arrive
+pas à trouver une formule permettant de concrétiser cette observation.
+
 
 
 
