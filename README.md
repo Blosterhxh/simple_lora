@@ -73,7 +73,8 @@ Pour ce faire, il faut qu'on soit capable de générer des images qui prennent e
 et ainsi on pourra calculer l'erreur entre ces features modifiées par le finetuning et ces features sur le modèle de base.
 Pour cela, on peut partir du prompt de base "an anime illustration of \<tok1>", et ajouter des termes qui précisent 
 l'apparence "an anime illustration of <tok1> woman with blue long hair", de manière à ce que toutes les features de \<tok1>
-sauf l'apparence soient exprimées.
+sauf l'apparence soient exprimées. Pour la suite, on appelera "an anime illustration of <tok1> woman with blue long hair"
+le prompt apparence.
 
 ## Augmenter la zone de l'espace des fonctions parcourue par G
 
@@ -82,11 +83,26 @@ parcourue par G avec un petit learning rate pour éviter l'apprentissage de feat
 On peut donc essayer d'augmenter le learning rate pour que G parcourt une plus grande zone de l'espace des fonctions
 et trouver une meilleure reconstruction.
 
-Pour tirer parti de cette régularisation, on peut partir de la configuration d'entrainement où on avait un overfitting
-qui correspond à un learning rate de 1e-4. On peut espérer qu'en appliquant cette régularisation, on n'ait plus 
-d'overfitting comme seule l'apparence devrait être apprise, ce qui nous permettra de parcourir une zone plus vaste
-de l'espace des fonctions et donc d'avoir potentiellement une meilleure reconstruction qu'avec un learning rate de 
-1e-5.
+Pour commencer, on peut essayer d'utiliser un learning rate de 1e-4, qui précédemment était la limite de 
+l'overfitting.
+
+## La compétition entre <tok1> et les termes d'apparence
+
+J'ai précédemment dit que avec le prompt apparence, la feature apparence de <tok1> ne serait plus exprimée.
+Malheureusement, ce n'est pas aussi simple. Le modèle construit l'apparence avec un pourcentage pris
+des termes d'apparence, et un pourcentage pris de <tok1>.
+Ainsi sur le modèle finetuné à 1e-4, on constate que 100% de l'apparence est prise depuis <tok1>.
+
+Pour diminuer ce pourcentage, l'idée naturelle serait de s'éloigner de l'embedding de <tok1>.
+En s'éloignant de <tok1>, deux choses se passent.
+La fonction G est moins impacté par le finetuning, donc l'écart avec le modèle de base est plus faible, 
+et la régularisation a moins d'effet.
+D'un autre côté, le pourcentage de prise en compte des autres termes du prompt augmente.
+Il faut donc trouver un compromis : s'éloigner suffisamment pour que les termes d'apparence
+prennent le dessus sur ceux de l'embedding, mais pas trop pour G soit suffisament différente
+de la fonction de départ et que la régularisation fasse effet.
+
+
 
 Il reste cependant un problème à traiter. J'ai écrit : 
 0.1\*apparence_tuning + 0.9\*apparence_org + 1\*autre_tuning, laissant sous entendre que le modèle prendrait en compte
