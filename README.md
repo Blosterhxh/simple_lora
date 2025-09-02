@@ -71,8 +71,8 @@ Durant le finetuning, l'embedding \<tok1> va apprendre toutes les features du da
 Pour l'empêcher d'apprendre des features inutiles, on pourrait ajouter un terme de régularisation qui force \<tok1>, sur les features
 qu'on ne souhaite pas apprendre, à rester identique à la version avant le finetuning.
 
-Pour ce faire, il faut qu'on soit capable de générer des images qui prennent en compte uniquement les features indésirées de \<tok1>,
-et ainsi on pourra calculer l'erreur entre ces features modifiées par le finetuning et ces features sur le modèle de base.
+Pour ce faire, il faudrait trouver un prompt sur lequel G ne génère que les features inutiles de tok1, et ainsi
+le terme de régularisation dG calculera l'erreur entre ces features sur le nouveau et l'ancien G.
 On peut partir du prompt simple "an anime illustration of \<tok1>", et ajouter des termes qui précisent 
 l'apparence "an anime illustration of <tok1> woman with blue long hair", de manière à ce que toutes les features de \<tok1>
 sauf l'apparence soient exprimées. Pour la suite, on appelera "an anime illustration of <tok1> woman with blue long hair"
@@ -102,11 +102,13 @@ Toutefois, si on s'éloigne trop, on gagne certes en editability mais l'effet du
 s'estompe donc la régularisation aura moins d'impact. Il faut donc trouver un compromis entre
 les deux.
 
-On va donc interpoler entre tok1 et character, mesurer l'influence du finetuning et l'editability,
+On va interpoler entre tok1 et character, mesurer l'influence du finetuning et l'editability,
 et choisir un point optimal. Pour mesurer l'influence du finetuning, on calcule la cosine similarity
-des images générées avec le dataset. Pour mesurer l'editability, on génère à partir du point
-interpolé, le prompt simple et le prompt avec les termes d'apparence, et on calcule la cosine
-similarity entre les deux.
+des images générées avec celles du dataset. Pour mesurer l'editability, on génère à partir du point
+interpolé, le prompt simple et le prompt apparence, et on calcule la cosine
+similarity entre les deux. 
+Comme on compte régulariser le finetuning à 1e-4, on réalise ces mesures sur le modèle finetuné
+à 1e-4.
 
 ## Interpoler entre character et tok1
 
@@ -128,7 +130,7 @@ Toutefois il y a un problème dans mon code car en calculant la norme moyenne et
 
 ## Résultats
 
-On obtient ces évolutions de l'influence du finetuning et de l'editability avec l'interpolation
+On obtient ces évolutions de l'influence du finetuning et de l'editability avec l'interpolation.
 
 L'influence décroit linéairement tandis que que l'editability augmente logarithmiquement. On aurait donc intérêt à prendre l'interpolation à t = 0.5.
 Toutefois, en analysant les images générées par les interpolations, on se rend compte que que l'évolution de l'editability ne représente pas bien à quel
@@ -137,11 +139,13 @@ ce qui n'ait pas mis en valeur par la courbe.
 
 Une explication est que en s'éloignant de tok1, le générateur quitte l'overfitting et génère des images plus aléatoires. Ainsi, l'editability va beaucoup baisser entre t= 0 et 
 t = 0.5, même si l'apparence est peu modifiée par le prompt apparence. Pour vérifier ça, on change la mesure de l'editability. On calcule la cosine similarity
-entre images générées avec le même prompt, et on fait la différence avec la cosine similarity d'images générées avec le prompt simple et le prompt apparence. On devrait donc
+entre images générées avec le même prompt, et on fait la différence avec la cosine similarity d'images générées avec le prompt simple et le prompt apparence.
+En faisant la différence de ces deux cosine similarity, on devrait
 pouvoir quantifier uniquement l'évolution de la prise en compte de l'apparence dans la génération, sans être brouillé par l'augmentation de l'aléatoire.
 
 Au final, l'évolution de l'editability n'est toujours pas représentative de la prise en compte des termes d'apparence. J'ai donc décidé de suivre mon observation
-et de régulariser à t = 1, où l'on voit que l'apparence est bien modifié avec une préservation de l'environnement et des positions apprises par tok1, même si je n'arrive
+et de régulariser à t = 1, où l'on voit que l'apparence est bien modifié et que les autres features comme l'environnement et les positions restent influencés par le
+finetuning, même si je n'arrive
 pas à trouver une formule permettant de concrétiser cette observation.
 
 
