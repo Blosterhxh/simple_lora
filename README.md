@@ -23,6 +23,10 @@ Il faut donc qu'on mesure l'évolution de la reconstruction et de l'editability 
 
 L'intersection entre les deux périodes qu'on avait prévues se trouve à 5e-4, on va donc utiliser ce learning rate.
 
+De plus on peut confirmer que le token s'éloigne bien avec l'augmentation du learning rate : 
+
+![graphe2.png](graphe2.png)
+
 Voici quelques images générées avec les trois learning rates pour visualiser les différences :
 
 ![inversion5e-3.png](inversion5e-3.png)
@@ -47,7 +51,15 @@ Lors d'un finetuning une fonction apprend différents concepts. Par exemple en f
 Si on veut améliorer un concept précis comme l'apparence, il faut donc qu'on se déplace pas plus loin que la distance permettant de modifier ce concept et pas les autres. C'est cela que les auteurs du pivotal tuning veulent dire quand ils parlent de finetuning léger. 
 
 Pour trouver la bonne distance de finetuning, on essaie différents learning rate pour trouver la distance limite où
-on commence a apprendre les positions, et on s'arrête juste avant.
+on commence a apprendre les positions, et on s'arrête juste avant. On réalise les mesures sur 2 learnings rates : 1e-4 et 1e-5.
+
+![finetuning1e-4.png](finetuning1e-4.png)
+> LR = 1e-4
+![finetuning1e-5.png](finetuning1e-5.png)
+> LR = 1e-5
+
+On voit que à 1e-5 seule l'apparence est apprise, et qu'ensuite d'autres features comme la position et l'environnement se rajoute à l'apprentissage. On
+va donc choisir un learning rate de 1e-5.
 
 
 # Régularisation
