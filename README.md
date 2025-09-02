@@ -31,8 +31,10 @@ Voici quelques images générées avec les trois learning rates pour visualiser 
 
 ![inversion5e-3.png](inversion5e-3.png)
 > LR = 5e-3
+
 ![inversion5e-4.png](inversion5e-4.png)
 > LR = 5e-4
+
 ![inversion5e-5.png](inversion5e-5.png)
 > LR = 5e-5
 
@@ -55,6 +57,7 @@ on commence a apprendre les positions, et on s'arrête juste avant. On réalise 
 
 ![finetuning1e-4.png](finetuning1e-4.png)
 > LR = 1e-4
+
 ![finetuning1e-5.png](finetuning1e-5.png)
 > LR = 1e-5
 
@@ -76,6 +79,7 @@ Si on prend un latent où on régularise wr, et qu'on note tr le terme de régul
 tout va se passer comme suit :
 grad(G(wp)) = 0.1\*grad(tr) + 0.9\*grad(te)
 grad(G(wr)) = 0.1\*grad(te) + 0.9\*grad(tr)
+(les coefficients 0.1/0.9 ne sont pas exacts c'est juste pour montrer que selon le gradient un terme où l'autre va plus être pris en compte).
 Ainsi les modifications de G sur wr par te vont être négligeables devant la régularisation, et le freinage de 
 l'apprentissage de G sur wp par tr sera négligeable devant le terme d'entrainement. On peut donc
 préserver les visages situés autour du pivot sans trop freiner l'apprentissage.
@@ -121,6 +125,8 @@ Malheureusement, ce n'est pas aussi simple. Le modèle construit l'apparence ave
 des termes d'apparence, et un pourcentage pris de <tok1>.
 Ainsi sur le modèle finetuné à 1e-4, on constate que 100% de l'apparence est prise depuis <tok1>.
 
+![finetuning1e-5.png](finetuning1e-5.png)
+
 Il faut diminuer ce pourcentage pour que les termes d'apparence prennent le dessus sur <tok1>.
 Pour cela, on peut essayer d'augmenter l'editability, en interpolant entre tok1 et character.
 En effet le finetuning fait perdre en editability tok1, et cette perte décroît avec l'éloignement.
@@ -149,10 +155,10 @@ Comme character/tok1 sont en milieu de phrase à l'indice 5, on peut essayer de 
 d'une phrase suivent la même répartition dans l'espace que les embeddings de fin. Pour cela, j'ai pris
 le même dataset que celui utilisé par les chercheurs pour déterminer le manifold des embeddings de fin (MS-COCO 2014),
 et j'ai calculé la norme moyenne et la variance de cette norme. Au final, j'ai obtenu le même résultat
-que sur les embeddings de fin, on va donc pouvoir faire une vSLERP pour nos embeddings à la position 5 comme 
+que sur les embeddings de fin : norme de 24 et variance 1. On va donc pouvoir faire une vSLERP pour nos embeddings à la position 5 comme 
 les chercheurs font sur les embeddings de fin.
 
-Toutefois il y a un problème dans mon code car en calculant la norme moyenne et la variance pour le token de fin (je devrai donc avoir le même résultat que l'article), j'obtiens une variance plus faible avec les embeddings de base plutôt qu'avec les embeddings centrés, ce qui n'est pas cohérent avec le décalage de l'ellipsoïde texte de l'origine que les auteurs ont montré. Je vais donc faire une SLERP et pas une vSLERP tant que ce problème n'est pas résolu.
+Toutefois il y a un problème dans mon code car en calculant la norme moyenne et la variance pour le token de fin (je devrai donc avoir le même résultat que l'article), j'obtiens une variance plus faible avec les embeddings de base plutôt qu'avec les embeddings centrés, ce qui n'est pas cohérent avec le décalage de l'ellipsoïde texte de l'origine que les auteurs ont montré. J'ai exactement 27 de norme et 0.1 de variance. Je vais donc faire une SLERP et pas une vSLERP tant que ce problème n'est pas résolu.
 
 ## Résultats
 
