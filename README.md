@@ -101,26 +101,66 @@ Durant le finetuning, l'embedding \<tok1> va apprendre toutes les features du da
 Pour l'empêcher d'apprendre des features inutiles, on pourrait ajouter un terme de régularisation qui force \<tok1>, sur les features
 qu'on ne souhaite pas apprendre, à rester identique à la version avant le finetuning.
 
-Pour ce faire, il faudrait trouver un prompt sur lequel G ne génère que les features inutiles de tok1, et ainsi
-le terme de régularisation dG calculera l'erreur entre ces features sur le nouveau et l'ancien G.
-On peut partir du prompt simple "an anime illustration of \<tok1>", et ajouter des termes qui précisent 
-l'apparence "an anime illustration of <tok1> woman with blue long hair", de manière à ce que toutes les features de \<tok1>
-sauf l'apparence soient exprimées. Pour la suite, on appelera "an anime illustration of <tok1> woman with blue long hair"
-le prompt apparence.
-
-## Augmenter la zone de l'espace des fonctions parcourue par G
-
-La régularisation nous permet donc en théorie d'apprendre une seule feature. Ainsi, on a plus à limiter la distance 
+Ainsi, on aurait plus à limiter la distance 
 parcourue par G avec un petit learning rate pour éviter l'apprentissage de feature parasites.
-On peut donc essayer d'augmenter le learning rate pour que G parcourt une plus grande zone de l'espace des fonctions
+On peut augmenter le learning rate pour que G parcourt une plus grande zone de l'espace des fonctions
 et trouver une meilleure reconstruction.
 
-Pour commencer, on peut essayer d'utiliser un learning rate de 1e-4, qui précédemment était la limite de 
-l'overfitting.
+La limite de l'overfitting où les positions et l'environnement étaient appris se trouvaient à lr = 1e-4.
+Dans la suite, on va utiliser ce learning rate et voir si on arrive à annuler l'apprentissage des positions et de l'environnement.
+
+## Trouver le terme de régularisation
+
+Pour trouver un tel terme, on va exprimer mathématiquement le problème d'apprentissage de features parasites pour voir
+comment on peut modifier la loss.
+
+On modélise un prompt/une image par deux variables x : apparence, y : autres features, qui résument les informations contenues par le prompt/l'image.
+Dans la suite on considère que les autres features sont uniquement l'environnement, y : environnement, ce qui ne change rien au raisonnement et permet
+de mieux visualiser.
+
+La fonction G est l'unet qui transforme un prompt en image : G(xt,yt) = (Gx(xt),Gy(yt)) = xi,yi.
+
+Prenons le prompt d'entrainement : "an anime illustration of <tok1>".
+
+Au départ, la fonction G qu'on annotera Ga, vaut Ga(prompt) = Ga(xt = <tok1>, yt = <tok1>) = xai,yai.
+En effet, les informations d'apparence et d'environnement sont inclues dans <tok1>.
+Pour l'apparence, elle ressmble à notre personnage cible grâce à l'inversion. Pour l'environnement,
+il est généré de manière aléatoire car <tok1> ne contient pas d'information sur l'environnement.
+
+A la fin de l'entrainement, Gb(xt = <tok1>, yt = <tok1>) = xbi,ybi. Le token <tok1> a été associé à l'apparence et à l'environnement du dataset.
+Ca ne nous convient pas car on ne veut apprendre que l'apparence, on aimerait plutôt Gb(xt = <tok1>, yt = <tok1>) = xbi,yai.
+
+On va pour modifier Gb, ajouter un terme de régularisation à la loss.
+Considérons le prompt "an anime illustration of <tok1> woman with long blue hair", qu'on appelera le prompt apparence.
+On a prompt = (x = woman with long blue hair, y = <tok1>). 
+En effet on force l'apparence avec les termes "woman with long blue hair", et ces termes ne contiennent pas d'information sur l'environnement qui va donc être
+cherché dans <tok1>.
+On peut alors réecrire la loss, en annotant Ge la fonction G entrainée :
+Loss = ||Ge(xt = <tok1>, yt = <tok1>) - dataset|| + ||Ge(xt = woman, yt = <tok1>)-Ga(xt = woman, yt = woman)||
+On détaille : ||Ge(xt = woman, yt = <tok1>)-Ga(xt = woman, yt = woman)|| = ||(Gex(woman),Gey(<tok1>) - (Gax(woman),Gay(woman)||
+= ||(Gax(woman),Gey(<tok1>) - (Gax(woman),Gay(woman)|| = ||(0,Gey(<tok1>)-Gay(woman))||.
+
+Ainsi, le premier terme de la loss pousse G à ressembler au dataset sur <tok1>, et le deuxième terme oblige <tok1> à ne pas stocker d'informations d'environnement
+comme woman.
+
+Ceci dit il y a encore deux problèmes. 
+Premièrement, en apprenant l'environnement du dataset le premier terme diminue, et en gardant l'environnement original
+le second terme diminue. Ainsi on ne sait pas comment va évoluer le modèle pour faire diminuer la loss car les deux possibiltiés sont équivalentes.
+On va donc pondérer le deuxième terme par un coefficient, comme *2, pour que garder l'environnement initial
+diminue plus la loss qu'apprendre l'environnement du dataset.
+
+Le second problème, est que dans le terme ||(0,Gey(<tok1>)-Gay(woman))||, on ne sait pas si apprendre l'environnement du dataset va réellement faire augmenter le terme.
+En effet, le modèle de base génère un environnement aléatoire, donc comparer deux générations d'environnement aléatoire donne potentiellement autant d'erreur 
+que comparer un environnement fixe (celui appris du dataset) avec des environnements aléatoires.
+
+Pour l'instant, on va mettre de côté le problème 2 en se fixant un environnement dans le prompt de régularisation : "an anime illustration of character woman with long blue
+hair in a garden", et on va voir si le terme ||(0,Gey(<tok1>)-Gay(woman))|| nous permet effectivement d'apprendre l'environnement "a garden" plutôt que celui 
+du dataset.
 
 ## La compétition entre <tok1> et les termes d'apparence
 
-J'ai précédemment dit que avec le prompt apparence, la feature apparence de <tok1> ne serait plus exprimée.
+J'ai précédemment dit que avec le prompt apparence: "an anime illustration of <tok1> woman with long blue
+hair", la feature apparence de <tok1> ne serait plus exprimée : prompt = (x = woman with long blue hair, y = <tok1>).
 Malheureusement, ce n'est pas aussi simple. Le modèle construit l'apparence avec un pourcentage pris
 des termes d'apparence, et un pourcentage pris de <tok1>.
 Ainsi sur le modèle finetuné à 1e-4, on constate que 100% de l'apparence est prise depuis <tok1>.
@@ -160,7 +200,7 @@ les chercheurs font sur les embeddings de fin.
 
 Toutefois il y a un problème dans mon code car en calculant la norme moyenne et la variance pour le token de fin (je devrai donc avoir le même résultat que l'article), j'obtiens une variance plus faible avec les embeddings de base plutôt qu'avec les embeddings centrés, ce qui n'est pas cohérent avec le décalage de l'ellipsoïde texte de l'origine que les auteurs ont montré. J'ai exactement 27 de norme et 0.1 de variance. Je vais donc faire une SLERP et pas une vSLERP tant que ce problème n'est pas résolu.
 
-## Résultats
+## Résultats de l'interpolation
 
 On obtient ces évolutions de l'influence du finetuning et de l'editability avec l'interpolation.
 
@@ -192,6 +232,13 @@ Au final, l'évolution de l'editability n'est toujours pas représentative de la
 et de régulariser à t = 1, où l'on voit que l'apparence est bien modifié et que les autres features comme l'environnement et les positions restent influencés par le
 finetuning, même si je n'arrive
 pas à trouver une formule permettant de concrétiser cette observation.
+
+## Résultats de la régularisation
+
+Pour rappel, on va déjà tester si on est capable d'apprendre l'apparence du dataset et l'environnement de la régularisation.
+Pour le terme 1 ||Ge(xt = <tok1>, yt = <tok1>) - dataset||, on utilise le prompt "an anime illustration of <tok1>".
+Pour le terme 2 ||Ge(xt = woman, yt = <tok1>)-Ga(xt = woman, yt = garden)||, on utilise les prompts "an anime illustration of <tok1> woman with long blue hair"
+et "an anime illustration of character woman with long blue hair in a garden".
 
 
 
