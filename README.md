@@ -136,7 +136,8 @@ On obtient ces évolutions de l'influence du finetuning et de l'editability avec
 
 ![interpolation2.PNG](interpolation2.png)
 
-L'influence décroit linéairement tandis que que l'editability augmente logarithmiquement. On aurait donc intérêt à prendre l'interpolation à t = 0.5.
+L'influence décroit linéairement tandis que que l'editability augmente logarithmiquement. On aurait donc intérêt à prendre l'interpolation à t = 0.5,
+qui nous donne le meilleur compromis entre editability et influence du finetuning.
 Toutefois, en analysant les images générées par les interpolations, on se rend compte que que l'évolution de l'editability ne représente pas bien à quel
 point les termes d'apparence prennent le dessus sur tok1. En effet, les termes d'apparence semblent être beaucoup plus pris en compte à t = 1,
 ce qui n'ait pas mis en valeur par la courbe.
