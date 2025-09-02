@@ -125,7 +125,7 @@ Malheureusement, ce n'est pas aussi simple. Le modèle construit l'apparence ave
 des termes d'apparence, et un pourcentage pris de <tok1>.
 Ainsi sur le modèle finetuné à 1e-4, on constate que 100% de l'apparence est prise depuis <tok1>.
 
-![finetuning1e-5.png](finetuning1e-5.png)
+![apparence1.png](apparence1.png)
 
 Il faut diminuer ce pourcentage pour que les termes d'apparence prennent le dessus sur <tok1>.
 Pour cela, on peut essayer d'augmenter l'editability, en interpolant entre tok1 et character.
