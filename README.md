@@ -17,7 +17,14 @@ l'inversion n'est pas gratuite. En effet en s'éloignant du token de départ, on
 départ on gagne beaucoup en reconstruction et on perd peu en editability, et une seconde période où le gain en reconstruction est plus
 faible et la parte en editability plus importante. Il faudrait alors inverser à la distance limite entre ces deux périodes.
 
-Il faut donc qu'on mesure l'évolution de la reconstruction et de l'editability en fonction de l'éloignement au token, pour voir à quelle distance on doit inverser. Pour parcourir différentes distances, on utilise le fait que la distance parcouru vaut environ nb steps x learning rate, ce qu'on pourra confirmer en calculant la norme euclidienne entre le token obtenu avec l'entrainement et le token de départ. 
+Il faut donc qu'on mesure l'évolution de la reconstruction et de l'editability en fonction de l'éloignement au token, pour voir à quelle distance on doit inverser. Pour parcourir différentes distances, on utilise le fait que la distance parcouru vaut environ nb steps x learning rate, ce qu'on pourra confirmer en calculant la norme euclidienne entre le token obtenu avec l'entrainement et le token de départ. On réalise les mesures sur 3 learnings rates : 5e-3, 5e-4 et 5e-5.
+
+![inversionconfigs.png](inversionconfigs.png)
+
+L'intersection entre les deux périodes qu'on avait prévues se trouve à 5e-4, on va donc utiliser ce learning rate.
+
+Voici quelques images générées avec les trois learning rates pour visualiser les différences :
+
 
 # Choix du learning rate pour le finetuning
 
