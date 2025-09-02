@@ -25,6 +25,13 @@ L'intersection entre les deux périodes qu'on avait prévues se trouve à 5e-4, 
 
 Voici quelques images générées avec les trois learning rates pour visualiser les différences :
 
+![inversion5e-3.png](inversion5e-3.png)
+> LR = 5e-3
+![inversion5e-4.png](inversion5e-4.png)
+> LR = 5e-4
+![inversion5e-5.png](inversion5e-5.png)
+> LR = 5e-5
+
 
 # Choix du learning rate pour le finetuning
 
