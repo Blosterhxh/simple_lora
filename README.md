@@ -132,16 +132,30 @@ Toutefois il y a un problème dans mon code car en calculant la norme moyenne et
 
 On obtient ces évolutions de l'influence du finetuning et de l'editability avec l'interpolation.
 
+![interpolation3.PNG](interpolation3.PNG)
+
+![interpolation2.PNG](interpolation2.PNG)
+
+> SD 1.5 PTI on Kiriko, the game character, Various Prompts.
+
 L'influence décroit linéairement tandis que que l'editability augmente logarithmiquement. On aurait donc intérêt à prendre l'interpolation à t = 0.5.
 Toutefois, en analysant les images générées par les interpolations, on se rend compte que que l'évolution de l'editability ne représente pas bien à quel
 point les termes d'apparence prennent le dessus sur tok1. En effet, les termes d'apparence semblent être beaucoup plus pris en compte à t = 1,
 ce qui n'ait pas mis en valeur par la courbe.
 
-Une explication est que en s'éloignant de tok1, le générateur quitte l'overfitting et génère des images plus aléatoires. Ainsi, l'editability va beaucoup baisser entre t= 0 et 
+![interpolation4.PNG](interpolation4.PNG)
+
+Une explication est que en s'éloignant de tok1, le générateur quitte l'overfitting et génère des images plus aléatoires. 
+
+![interpolation5.PNG](interpolation5.PNG)
+
+Ainsi, l'editability va beaucoup baisser entre t= 0 et 
 t = 0.5, même si l'apparence est peu modifiée par le prompt apparence. Pour vérifier ça, on change la mesure de l'editability. On calcule la cosine similarity
 entre images générées avec le même prompt, et on fait la différence avec la cosine similarity d'images générées avec le prompt simple et le prompt apparence.
 En faisant la différence de ces deux cosine similarity, on devrait
 pouvoir quantifier uniquement l'évolution de la prise en compte de l'apparence dans la génération, sans être brouillé par l'augmentation de l'aléatoire.
+
+![interpolation1.PNG](interpolation1.PNG)
 
 Au final, l'évolution de l'editability n'est toujours pas représentative de la prise en compte des termes d'apparence. J'ai donc décidé de suivre mon observation
 et de régulariser à t = 1, où l'on voit que l'apparence est bien modifié et que les autres features comme l'environnement et les positions restent influencés par le
