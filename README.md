@@ -144,25 +144,28 @@ On modélise un prompt/une image par deux variables x : apparence, y : autres fe
 Dans la suite on considère que les autres features sont uniquement l'environnement, y : environnement, ce qui ne change rien au raisonnement et permet
 de mieux visualiser.
 
-La fonction G est l'unet qui transforme un prompt en image : G(xt,yt) = (Gx(xt),Gy(yt)) = xi,yi.
+La fonction G est l'unet qui transforme un prompt en image : G(xt,yt) = G1(xt) + G2(yt), où G1 transforme l'apparence texte
+en apparence d'image et G2 transforme l'environnement texte en environnement d'image.
 
 Prenons le prompt d'entrainement : "an anime illustration of \<tok1>".
 
-Au départ, la fonction G qu'on annotera Ga, vaut Ga(prompt) = Ga(xt = <tok1>, yt = <tok1>) = xai,yai.
+Au départ, la fonction G qu'on annotera Ga, vaut Ga(prompt) = Ga(xt = \<tok1>, yt = <tok1>) = Ga1(\<tok1>)+Ga2(\<tok1>) =  Ga1(\<tok1>)+ random .
 En effet, les informations d'apparence et d'environnement sont inclues dans <tok1>.
-Pour l'apparence, elle ressmble à notre personnage cible grâce à l'inversion. Pour l'environnement,
+Pour l'apparence, elle ressemble à notre personnage cible grâce à l'inversion. Pour l'environnement,
 il est généré de manière aléatoire car <tok1> ne contient pas d'information sur l'environnement.
 
-A la fin de l'entrainement, Gb(xt = <tok1>, yt = <tok1>) = xbi,ybi. Le token <tok1> a été associé à l'apparence et à l'environnement du dataset.
-Ca ne nous convient pas car on ne veut apprendre que l'apparence, on aimerait plutôt Gb(xt = <tok1>, yt = <tok1>) = xbi,yai.
+A la fin de l'entrainement, Gb(xt = <tok1>, yt = <tok1>) = Gb1(\<tok1>)+Gb2(\<tok1>).
+On aimerait que Gb2(\<tok1>) = random, mais ce n'est pas le cas car le token <tok1> a été associé à l'apparence et à l'environnement du dataset.
 
 ### c.2) Existence du prompt apparence
 
-On aimerait démontrer qu'il existe un prompt = (xt,yt), tel que Gb(xt,yt) = xai',ybi, où xai' est une apparence 
-de personnage générée par Ga telle que <xai'|xai> = 0. Autrement dit, les deux apparences n'ont rien en commun.
+On aimerait démontrer qu'il existe un prompt = (xt,yt), tel que Gb(xt,yt) = Ga1(\char1)+Gb2(\<tok1>), où Ga1(\char1) est une apparence 
+de personnage générée par Ga telle que <Ga1(char1)|Gb1(\<tok1>)> = 0. Autrement dit, les deux apparences n'ont rien en commun.
 
 Prenons le prompt, qu'on appelera prompt apparence, "an anime illustration of \<tok1> woman with long blue hair".
-On a Gb(xt,yt) = (p*Gb(\<tok1>)x+(1-p)Gbx(woman with long blue hair),Gby(\<tok1>)) = (p\*xbi+(1-p)\*xai',ybi).
+On prend char1 = "woman with long blue hair".
+On a déjà <Ga1(char1)|Gb1(\<tok1>)> = 0.
+De plus, Gb(xt,yt) = (p\*Gb1(\<tok1>)+(1-p)Gb1(char1),Gb2(\<tok1>)) = (p\*Gb1(\<tok1>)+(1-p)Ga1(char1),Gb2(\<tok1>)).
 Le modèle construit l'apparence avec un pourcentage pris de <tok1> et un pourcentage pris des termes d'apparence.
 Si on arrivait à avoir p = 0, le prompt satisferait la propriété.
 En testant ce prompt sur le modèle entrainé à 1e-4, on voit qu'au contraire on a p = 1.
@@ -171,7 +174,7 @@ En testant ce prompt sur le modèle entrainé à 1e-4, on voit qu'au contraire o
 
 Pour diminuer ce pourcentage, on peut essayer d'augmenter l'editability, en interpolant entre tok1 et character.
 En effet le finetuning fait perdre en editability tok1, et cette perte décroît avec l'éloignement. Toutefois l'effet
-du finetuning décroit avec l'éloignement, il faut s'assurer que même en s'éloignant on a toujours Gby(<embed>) = ybi.
+du finetuning décroit avec l'éloignement, il faut s'assurer que même en s'éloignant on a toujours Gb2(\<embed>) = Gb2(\<tok1>).
 
 On va donc interpoler entre tok1 et character, mesurer l'influence du finetuning et l'editability,
 et choisir un point optimal. Pour mesurer l'influence du finetuning, on calcule la cosine similarity
@@ -219,11 +222,11 @@ pas à trouver une formule permettant de concrétiser cette observation.
 
 ### d.1) Trouver le terme de régularisation
 
-Les deux points précédents nous ont permis de trouver un prompt où Gbx(xt) = xai' et Gby(yt) = ybi.
+Les deux points précédents nous ont permis de trouver un prompt où Gb1(xt) = Ga1(char1) et Gb2(yt) = Gb2(\<tok1>), avec <Ga1(char1)|Gb1(\<tok1>)>.
 
-On Ge la fonction G entrainé entre Ga et Gb.
-Sur le prompt apparence, Gex(xt) = xai' car l'editability de Ge est plus grande que Gb.
-Gey(yt) = yei, car seul \<tok1> contient des informations d'environnement.
+On note Ge la fonction G entrainée de Ga à Gb.
+Sur le prompt apparence, Ge1(xt) = Ge1(char1) car l'editability de Ge est plus grande que Gb, puis Ge1(char1) = Ga1(char1).
+Ge2(yt) = Ge2(\<tok1>), car seul \<tok1> contient des informations d'environnement.
 
 On va modifier la loss en ajoutant un deuxième terme portant sur le prompt apparence.
 Loss = ||Ge("an anime illustration of \<tok1>") - dataset||
@@ -232,12 +235,11 @@ Loss = ||Ge("an anime illustration of \<tok1>") - dataset||
 On détaille :
 ||Ge("an anime illustration of character woman with long blue hair)-Ga("an anime illustration of character woman with long blue hair)||.
 =
-||xai',yei - xai',yai'||
+||Ga1(char1)+Gb2(\<tok1>) - Ga1(char1)+random ||
 =
-||0,yei-yai'||.
+||0,Gb2(\<tok1>)-random||.
 
-Ainsi, le premier terme de la loss pousse G à ressembler au dataset sur <tok1>, et le deuxième terme oblige <tok1> à ne pas stocker d'informations d'environnement
-comme woman.
+Ainsi, le premier terme de la loss pousse G à ressembler au dataset sur \<tok1>, et le deuxième terme oblige \<tok1> à ne pas stocker d'informations d'environnement.
 
 Ceci dit il y a encore deux problèmes. 
 Premièrement, en apprenant l'environnement du dataset le premier terme diminue, et en gardant l'environnement original
@@ -245,12 +247,12 @@ le second terme diminue. Ainsi on ne sait pas comment va évoluer le modèle pou
 On va donc pondérer le deuxième terme par un coefficient, comme *2, pour que garder l'environnement initial
 diminue plus la loss qu'apprendre l'environnement du dataset.
 
-Le second problème, est que dans le terme ||0,yei-yai'||, on ne sait pas si apprendre l'environnement du dataset va réellement faire augmenter le terme.
+Le second problème, est que dans le terme ||0,Gb2(\<tok1>)-random||, on ne sait pas si apprendre l'environnement du dataset va réellement faire augmenter le terme.
 En effet, le modèle de base génère un environnement aléatoire, donc comparer deux générations d'environnement aléatoire donne potentiellement autant d'erreur 
 que comparer un environnement fixe (celui appris du dataset) avec des environnements aléatoires.
 
 Pour l'instant, on va mettre de côté le problème 2 en se fixant un environnement dans le prompt de régularisation : "an anime illustration of character woman with long blue
-hair in a garden", et on va voir si le terme ||0,yei-yai'|| nous permet effectivement d'apprendre l'environnement "a garden" plutôt que celui 
+hair in a garden", et on va voir si le terme ||0,Gb2(\<tok1>)-Ga2(garden)|| nous permet effectivement d'apprendre l'environnement "a garden" plutôt que celui 
 du dataset.
 
 ### d.2) Résultats de la régularisation
