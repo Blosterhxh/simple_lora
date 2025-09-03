@@ -160,57 +160,57 @@ On aimerait que Gb2(\<tok1>) = random, mais ce n'est pas le cas car le token <to
 On commence par modéliser notre situation mathématiquement.
 
 On modélise un prompt/une image par deux variables  
-\( x \) : apparence,  
-\( y \) : autres features,  
+$x$ : apparence,  
+$y$ : autres features,  
 qui résument les informations contenues par le prompt/l'image.  
 Dans la suite on considère que les autres features sont uniquement l'environnement,  
-\( y = \text{environnement} \),  
+$y = \text{environnement}$,  
 ce qui ne change rien au raisonnement et permet de mieux visualiser.
 
-La fonction \( G \) est l'Unet qui transforme un prompt en image :  
+La fonction $G$ est l'Unet qui transforme un prompt en image :
 
-\[
+$$
 G(x_t, y_t) = G_1(x_t) + G_2(y_t)
-\]
+$$
 
-où \( G_1 \) transforme l'apparence texte en apparence d'image et  
-\( G_2 \) transforme l'environnement texte en environnement d'image.
+où $G_1$ transforme l'apparence texte en apparence d'image et  
+$G_2$ transforme l'environnement texte en environnement d'image.
 
 Prenons le prompt d'entraînement : `"an anime illustration of <tok1>"`.
 
 ---
 
-Au départ, la fonction \( G \), qu'on annotera \( G_a \), vaut :  
+Au départ, la fonction $G$, qu'on annotera $G_a$, vaut :  
 
-\[
+$$
 G_a(\text{prompt}) = G_a(x_t = \langle tok1 \rangle,\, y_t = \langle tok1 \rangle) 
 = G_{a1}(\langle tok1 \rangle) + G_{a2}(\langle tok1 \rangle) 
 = G_{a1}(\langle tok1 \rangle) + \text{random}
-\]
+$$
 
 En effet, les informations d'apparence et d'environnement sont incluses dans  
-\( \langle tok1 \rangle \).  
+$\langle tok1 \rangle$.  
 Pour l'apparence, elle ressemble à notre personnage cible grâce à l'inversion.  
 Pour l'environnement, il est généré de manière aléatoire car  
-\( \langle tok1 \rangle \) ne contient pas d'information sur l'environnement.
+$\langle tok1 \rangle$ ne contient pas d'information sur l'environnement.
 
 ---
 
 À la fin de l'entraînement :  
 
-\[
+$$
 G_b(x_t = \langle tok1 \rangle,\, y_t = \langle tok1 \rangle) 
 = G_{b1}(\langle tok1 \rangle) + G_{b2}(\langle tok1 \rangle)
-\]
+$$
 
 On aimerait que :  
 
-\[
+$$
 G_{b2}(\langle tok1 \rangle) = \text{random}
-\]
+$$
 
 mais ce n'est pas le cas car le token  
-\( \langle tok1 \rangle \)  
+$\langle tok1 \rangle$  
 a été associé à l'apparence **et** à l'environnement du dataset.
 
 
