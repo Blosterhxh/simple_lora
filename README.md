@@ -65,11 +65,11 @@ On voit que à 1e-5 seule l'apparence est apprise, et qu'ensuite d'autres featur
 va donc choisir un learning rate de 1e-5.
 
 
-# Régularisation
+# 3/ Régularisation
 
-## Utilité de la régularisation pour le modèle de diffusion
+## A) Utilité de la régularisation pour le modèle de diffusion
 
-### La régularisation dans styleGAN
+### a.1) La régularisation dans styleGAN
 
 Lorsque qu'on finetune G sur un latent wp, le finetuning va déborder sur les latents aux alentours,ce débordement
 diminuant avec la distance. Le problème, c'est qu'on a qu'un seul modèle, donc on ne peut pas se permettre
@@ -86,7 +86,7 @@ Ainsi les modifications de G sur wr par te vont être négligeables devant la r�
 l'apprentissage de G sur wp par tr sera négligeable devant le terme d'entrainement. On peut donc
 préserver les visages situés autour du pivot sans trop freiner l'apprentissage.
 
-### Régularisation sur styleGAN = régularisation sur modèle de diffusion ?
+### a.2) Régularisation sur styleGAN = régularisation sur modèle de diffusion ?
 
 Pour appliquer la régularisation au modèle de diffusion, on se place dans l'espace des embeddings après le transformer
 de CLIP qui est entrainé pour avoir une relation entre la géométrie et la sémantique, contrairement à l'espace 
@@ -95,7 +95,7 @@ Il faut ensuite se demander si la régularisation appliquée telle quelle comme 
 En réalité, elle n'en a pas, car avec les loras, on peut facilement charger/décharger une config
 donc ce n'est pas un problème si l'apprentissage déborde sur les autres embeddings, contrairement au styleGAN.
 
-### Sélectionner les features apprises grâce à la régularisation
+### a.3) Sélectionner les features apprises grâce à la régularisation
 
 Cependant, on peut trouver une autre utilité à la régularisation.
 Durant le finetuning, l'embedding \<tok1> va apprendre toutes les features du dataset : apparence, position, environnement ...
@@ -111,7 +111,7 @@ et trouver une meilleure reconstruction.
 La limite de l'overfitting où les positions et l'environnement étaient appris se trouvaient à lr = 1e-4.
 Dans la suite, on va utiliser ce learning rate et voir si on arrive à annuler l'apprentissage des positions et de l'environnement.
 
-## Interpoler entre deux embeddings
+## B) Interpoler entre deux embeddings
 
 Pour trouver le terme de régularisation, on va avoir besoin d'interpoler entre \<tok1> et character.
 Voyons comme cela est possible.
@@ -132,11 +132,11 @@ les chercheurs font sur les embeddings de fin.
 
 Toutefois il y a un problème dans mon code car en calculant la norme moyenne et la variance pour le token de fin (je devrai donc avoir le même résultat que l'article), j'obtiens une variance plus faible avec les embeddings de base plutôt qu'avec les embeddings centrés, ce qui n'est pas cohérent avec le décalage de l'ellipsoïde texte de l'origine que les auteurs ont montré. J'ai exactement 27 de norme et 0.1 de variance. Je vais donc faire une SLERP et pas une vSLERP tant que ce problème n'est pas résolu.
 
-## Le prompt apparence
+## C) Le prompt apparence
 
 Avant de pouvoir trouver le terme de régularisation, on va démontrer une propriété.
 
-### Modélisation du problème
+### c.1) Modélisation du problème
 
 On commence par modéliser notre situation mathématiquement.
 
@@ -156,7 +156,7 @@ il est généré de manière aléatoire car <tok1> ne contient pas d'information
 A la fin de l'entrainement, Gb(xt = <tok1>, yt = <tok1>) = xbi,ybi. Le token <tok1> a été associé à l'apparence et à l'environnement du dataset.
 Ca ne nous convient pas car on ne veut apprendre que l'apparence, on aimerait plutôt Gb(xt = <tok1>, yt = <tok1>) = xbi,yai.
 
-### Propriété 1
+### c.2) Existence du prompt apparence
 
 On aimerait démontrer qu'il existe un prompt = (xt,yt), tel que Gb(xt,yt) = xai',ybi, où xai' est une apparence 
 de personnage générée par Ga telle que <xai'|xai> = 0. Autrement dit, les deux apparences n'ont rien en commun.
@@ -166,6 +166,8 @@ On a Gb(xt,yt) = (p*Gb(\<tok1>)x+(1-p)Gbx(woman with long blue hair),Gby(\<tok1>
 Le modèle construit l'apparence avec un pourcentage pris de <tok1> et un pourcentage pris des termes d'apparence.
 Si on arrivait à avoir p = 0, le prompt satisferait la propriété.
 En testant ce prompt sur le modèle entrainé à 1e-4, on voit qu'au contraire on a p = 1.
+
+![apparence1.png](apparence1.png)
 
 Pour diminuer ce pourcentage, on peut essayer d'augmenter l'editability, en interpolant entre tok1 et character.
 En effet le finetuning fait perdre en editability tok1, et cette perte décroît avec l'éloignement. Toutefois l'effet
@@ -180,7 +182,7 @@ des termes d'apparence du prompt apparence.
 Comme on compte régulariser le finetuning à 1e-4, on réalise ces mesures sur le modèle finetuné
 à 1e-4.
 
-### Résultats de l'interpolation
+### c.3) Résultats de l'interpolation
 
 On obtient ces évolutions de l'influence du finetuning et de l'editability avec l'interpolation.
 
@@ -213,7 +215,9 @@ et de régulariser à t = 1, où l'on voit que l'apparence est bien modifié et 
 finetuning, même si je n'arrive
 pas à trouver une formule permettant de concrétiser cette observation.
 
-## Le terme de régularisation
+## D) Le terme de régularisation
+
+### d.1) Trouver le terme de régularisation
 
 Les deux points précédents nous ont permis de trouver un prompt où Gbx(xt) = xai' et Gby(yt) = ybi.
 
@@ -241,52 +245,17 @@ le second terme diminue. Ainsi on ne sait pas comment va évoluer le modèle pou
 On va donc pondérer le deuxième terme par un coefficient, comme *2, pour que garder l'environnement initial
 diminue plus la loss qu'apprendre l'environnement du dataset.
 
-Le second problème, est que dans le terme ||(0,Gey(<tok1>)-Gay(woman))||, on ne sait pas si apprendre l'environnement du dataset va réellement faire augmenter le terme.
+Le second problème, est que dans le terme ||0,yei-yai'||, on ne sait pas si apprendre l'environnement du dataset va réellement faire augmenter le terme.
 En effet, le modèle de base génère un environnement aléatoire, donc comparer deux générations d'environnement aléatoire donne potentiellement autant d'erreur 
 que comparer un environnement fixe (celui appris du dataset) avec des environnements aléatoires.
 
 Pour l'instant, on va mettre de côté le problème 2 en se fixant un environnement dans le prompt de régularisation : "an anime illustration of character woman with long blue
-hair in a garden", et on va voir si le terme ||(0,Gey(<tok1>)-Gay(woman))|| nous permet effectivement d'apprendre l'environnement "a garden" plutôt que celui 
+hair in a garden", et on va voir si le terme ||0,yei-yai'|| nous permet effectivement d'apprendre l'environnement "a garden" plutôt que celui 
 du dataset.
 
-## La compétition entre <tok1> et les termes d'apparence
-
-J'ai précédemment dit que avec le prompt apparence: "an anime illustration of <tok1> woman with long blue
-hair", la feature apparence de <tok1> ne serait plus exprimée : prompt = (x = woman with long blue hair, y = <tok1>).
-Malheureusement, ce n'est pas aussi simple. Le modèle construit l'apparence avec un pourcentage pris
-des termes d'apparence, et un pourcentage pris de <tok1>.
-Ainsi sur le modèle finetuné à 1e-4, on constate que 100% de l'apparence est prise depuis <tok1>.
-
-![apparence1.png](apparence1.png)
-
-Il faut diminuer ce pourcentage pour que les termes d'apparence prennent le dessus sur <tok1>.
-Pour cela, on peut essayer d'augmenter l'editability, en interpolant entre tok1 et character.
-En effet le finetuning fait perdre en editability tok1, et cette perte décroît avec l'éloignement.
-Toutefois, si on s'éloigne trop, on gagne certes en editability mais l'effet du finetuning 
-s'estompe donc la régularisation aura moins d'impact. Il faut donc trouver un compromis entre
-les deux.
-
-On va interpoler entre tok1 et character, mesurer l'influence du finetuning et l'editability,
-et choisir un point optimal. Pour mesurer l'influence du finetuning, on calcule la cosine similarity
-des images générées avec celles du dataset. Pour mesurer l'editability, on génère à partir du point
-interpolé, le prompt simple et le prompt apparence, et on calcule la cosine
-similarity entre les deux. La baisse de similarité dans ce cas sera dû à la prise en compte
-des termes d'apparence du prompt apparence.
-Comme on compte régulariser le finetuning à 1e-4, on réalise ces mesures sur le modèle finetuné
-à 1e-4.
-
-## Interpoler entre character et tok1
+### d.2) Résultats de la régularisation
 
 
-
-
-
-## Résultats de la régularisation
-
-Pour rappel, on va déjà tester si on est capable d'apprendre l'apparence du dataset et l'environnement de la régularisation.
-Pour le terme 1 ||Ge(xt = <tok1>, yt = <tok1>) - dataset||, on utilise le prompt "an anime illustration of <tok1>".
-Pour le terme 2 ||Ge(xt = woman, yt = <tok1>)-Ga(xt = woman, yt = garden)||, on utilise les prompts "an anime illustration of <tok1> woman with long blue hair"
-et "an anime illustration of character woman with long blue hair in a garden".
 
 
 
