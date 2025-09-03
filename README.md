@@ -289,24 +289,47 @@ pas à trouver une formule permettant de concrétiser cette observation.
 
 ### d.1) Trouver le terme de régularisation
 
-Les deux points précédents nous ont permis de trouver un prompt où Gb1(xt) = Ga1(char1) et Gb2(yt) = Gb2(\<tok1>), avec <Ga1(char1)|Gb1(\<tok1>)>.
+Les deux points précédents nous ont permis de trouver un prompt $(x_t,y_t)$ où 
 
-On note Ge la fonction G entrainée de Ga à Gb.
-Sur le prompt apparence, Ge1(xt) = Ge1(char1) car l'editability de Ge est plus grande que Gb, puis Ge1(char1) = Ga1(char1).
-Ge2(yt) = Ge2(\<tok1>), car seul \<tok1> contient des informations d'environnement.
+$G_{b1}(x_t) = G_{a1}(\texttt{char1})$ et $G_{b2}(y_t) = G_{b2}(\langle tok1 \rangle)$
 
-On va modifier la loss en ajoutant un deuxième terme portant sur le prompt apparence.
-Loss = ||Ge("an anime illustration of \<tok1>") - dataset||
+avec $\langle G_{a1}(\texttt{char1}) \mid G_{b1}(\langle tok1 \rangle) \rangle = 0$.
+
+On note $G_e$ la fonction $G$ entraînée de $G_a$ à $G_b$.  
+
+Sur le prompt apparence :  
+
+- $G_{e1}(x_t) = G_{e1}(\texttt{char1})$ car l’editability de $G_e$ est plus grande que celle de $G_b$,  puis $G_{e1}(\texttt{char1}) = G_{a1}(\texttt{char1})$.
+
+- $G_{e2}(y_t) = G_{e2}(\langle tok1 \rangle)$, car seul $\langle tok1 \rangle$ contient des informations d’environnement.  
+
+
+On va modifier la loss en ajoutant un deuxième terme portant sur le prompt apparence :  
+
+$$
+\text{Loss} = \| G_e(\text{"an anime illustration of tok1"}) - \text{dataset} \|
 +
-||Ge("an anime illustration of character woman with long blue hair)-Ga("an anime illustration of character woman with long blue hair)||.
-On détaille :
-||Ge("an anime illustration of character woman with long blue hair)-Ga("an anime illustration of character woman with long blue hair)||.
-=
-||Ga1(char1)+Gb2(\<tok1>) - Ga1(char1)+random ||
-=
-||0,Gb2(\<tok1>)-random||.
+ \| G_e(\text{"an anime illustration of character woman with long blue hair"}) - G_a(\text{"an anime illustration of character woman with long blue hair"}) \|
+$$
 
-Ainsi, le premier terme de la loss pousse G à ressembler au dataset sur \<tok1>, et le deuxième terme oblige \<tok1> à ne pas stocker d'informations d'environnement.
+On détaille le deuxième terme :  
+
+$$
+\| G_e(\text{"an anime illustration of character woman with long blue hair"}) - G_a(\text{"an anime illustration of character woman with long blue hair"}) \|
+$$
+
+En développant :  
+
+$$
+= \| G_{a1}(\texttt{char1}) + G_{b2}(\langle tok1 \rangle) - (G_{a1}(\texttt{char1}) + \text{random}) \|
+$$
+
+$$
+= \| 0,\, G_{b2}(\langle tok1 \rangle) - \text{random} \|
+$$
+
+
+Ainsi, le premier terme de la loss pousse G à ressembler au dataset sur $\langle tok1 \rangle$, et le deuxième terme oblige $\langle tok1 \rangle$ à ne pas stocker d'informations d'environnement.
 
 Ceci dit il y a encore deux problèmes. 
 Premièrement, en apprenant l'environnement du dataset le premier terme diminue, et en gardant l'environnement original
@@ -314,12 +337,12 @@ le second terme diminue. Ainsi on ne sait pas comment va évoluer le modèle pou
 On va donc pondérer le deuxième terme par un coefficient, comme *2, pour que garder l'environnement initial
 diminue plus la loss qu'apprendre l'environnement du dataset.
 
-Le second problème, est que dans le terme ||0,Gb2(\<tok1>)-random||, on ne sait pas si apprendre l'environnement du dataset va réellement faire augmenter le terme.
+Le second problème, est que dans le terme $\| 0,\, G_{b2}(\langle tok1 \rangle) - \text{random} \|$, on ne sait pas si apprendre l'environnement du dataset va réellement faire augmenter le terme.
 En effet, le modèle de base génère un environnement aléatoire, donc comparer deux générations d'environnement aléatoire donne potentiellement autant d'erreur 
 que comparer un environnement fixe (celui appris du dataset) avec des environnements aléatoires.
 
 Pour l'instant, on va mettre de côté le problème 2 en se fixant un environnement dans le prompt de régularisation : "an anime illustration of character woman with long blue
-hair in a garden", et on va voir si le terme ||0,Gb2(\<tok1>)-Ga2(garden)|| nous permet effectivement d'apprendre l'environnement "a garden" plutôt que celui 
+hair in a garden", et on va voir si le terme $\| 0,\, G_{b2}(\langle tok1 \rangle) - G_{a2}(\langle garden \rangle) \|$ nous permet effectivement d'apprendre l'environnement "a garden" plutôt que celui 
 du dataset.
 
 ### d.2) Résultats de la régularisation
