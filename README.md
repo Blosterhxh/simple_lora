@@ -183,22 +183,65 @@ mais ce n'est pas le cas car le token  $\langle tok1 \rangle$  a été associé 
 
 ### c.2) Existence du prompt apparence
 
-On aimerait démontrer qu'il existe un prompt = (xt,yt), tel que Gb(xt,yt) = Ga1(\char1)+Gb2(\<tok1>), où Ga1(\char1) est une apparence 
-de personnage générée par Ga telle que <Ga1(char1)|Gb1(\<tok1>)> = 0. Autrement dit, les deux apparences n'ont rien en commun.
+On aimerait démontrer qu'il existe un prompt $(x_t, y_t)$, tel que :  
 
-Prenons le prompt, qu'on appelera prompt apparence, "an anime illustration of \<tok1> woman with long blue hair".
-On prend char1 = "woman with long blue hair".
-On a déjà <Ga1(char1)|Gb1(\<tok1>)> = 0.
-De plus, Gb(xt,yt) = (p\*Gb1(\<tok1>)+(1-p)Gb1(char1),Gb2(\<tok1>)) = (p\*Gb1(\<tok1>)+(1-p)Ga1(char1),Gb2(\<tok1>)).
-Le modèle construit l'apparence avec un pourcentage pris de <tok1> et un pourcentage pris des termes d'apparence.
-Si on arrivait à avoir p = 0, le prompt satisferait la propriété.
-En testant ce prompt sur le modèle entrainé à 1e-4, on voit qu'au contraire on a p = 1.
+$$
+G_b(x_t, y_t) = G_{a1}(\texttt{char1}) + G_{b2}(\langle tok1 \rangle)
+$$
+
+où $G_{a1}(\texttt{char1})$ est une apparence de personnage telle que :  
+
+$$
+\langle G_{a1}(\texttt{char1}) \mid G_{b1}(\langle tok1 \rangle) \rangle = 0
+$$  
+
+Autrement dit, les deux apparences n'ont rien en commun.
+
+
+Prenons le prompt, qu'on appellera **prompt apparence** :  "an anime illustration of <tok1> woman with long blue hair"
+
+
+On prend :  
+
+$$
+\texttt{char1} = \text{"woman with long blue hair"}
+$$  
+
+On a déjà :  
+
+$$
+\langle G_{a1}(\texttt{char1}) \mid G_{b1}(\langle tok1 \rangle) \rangle = 0
+$$  
+
+De plus :  
+
+$$
+G_b(x_t, y_t) = 
+\big( p \cdot G_{b1}(\langle tok1 \rangle) + (1-p) G_{b1}(\texttt{char1}), G_{b2}(\langle tok1 \rangle) \big)
+$$  
+
+ce qui peut aussi s’écrire :  
+
+$$
+G_b(x_t, y_t) = 
+\big( p \cdot G_{b1}(\langle tok1 \rangle) + (1-p) G_{a1}(\texttt{char1}),\; G_{b2}(\langle tok1 \rangle) \big)
+$$  
+
+comme $G$ ne change pas ses valeurs sur $char1$ avec l'entrainement.
+
+Le modèle construit l'apparence avec un pourcentage pris de  $\langle tok1 \rangle\$ et un pourcentage pris de   $char1$
+
+Si on arrivait à avoir $p = 0$, le prompt satisferait la propriété.  En testant ce prompt sur le modèle entraîné à $10^{-4}$,  on voit qu'au contraire on a $p = 1$ .
 
 ![apparence1.png](apparence1.png)
 
-Pour diminuer ce pourcentage, on peut essayer d'augmenter l'editability, en interpolant entre tok1 et character.
-En effet le finetuning fait perdre en editability tok1, et cette perte décroît avec l'éloignement. Toutefois l'effet
-du finetuning décroit avec l'éloignement, il faut s'assurer que même en s'éloignant on a toujours Gb2(\<embed>) = Gb2(\<tok1>).
+Pour diminuer ce pourcentage, on peut essayer d'augmenter l'editability, en interpolant entre $\langle tok1 \rangle\$ et character.
+En effet le finetuning fait perdre en editability $\langle tok1 \rangle\$, et cette perte décroît avec l'éloignement. Toutefois l'effet
+du finetuning décroit avec l'éloignement, il faut s'assurer que même en s'éloignant on a toujours :
+
+$$
+G_{b2}(embed) = G_{b2}(\langle tok1 \rangle\)
+$$
 
 On va donc interpoler entre tok1 et character, mesurer l'influence du finetuning et l'editability,
 et choisir un point optimal. Pour mesurer l'influence du finetuning, on calcule la cosine similarity
