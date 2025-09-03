@@ -325,7 +325,7 @@ $$
 $$
 
 $$
-= \| 0,\, G_{b2}(\langle tok1 \rangle) - \text{random} \|
+= \| G_{b2}(\langle tok1 \rangle) - \text{random} \|
 $$
 
 
@@ -337,12 +337,12 @@ le second terme diminue. Ainsi on ne sait pas comment va évoluer le modèle pou
 On va donc pondérer le deuxième terme par un coefficient, comme *2, pour que garder l'environnement initial
 diminue plus la loss qu'apprendre l'environnement du dataset.
 
-Le second problème, est que dans le terme $\| 0,\, G_{b2}(\langle tok1 \rangle) - \text{random} \|$, on ne sait pas si apprendre l'environnement du dataset va réellement faire augmenter le terme.
+Le second problème, est que dans le terme $\| G_{b2}(\langle tok1 \rangle) - \text{random} \|$, on ne sait pas si apprendre l'environnement du dataset va réellement faire augmenter le terme.
 En effet, le modèle de base génère un environnement aléatoire, donc comparer deux générations d'environnement aléatoire donne potentiellement autant d'erreur 
 que comparer un environnement fixe (celui appris du dataset) avec des environnements aléatoires.
 
 Pour l'instant, on va mettre de côté le problème 2 en se fixant un environnement dans le prompt de régularisation : "an anime illustration of character woman with long blue
-hair in a garden", et on va voir si le terme $\| 0,\, G_{b2}(\langle tok1 \rangle) - G_{a2}(\langle garden \rangle) \|$ nous permet effectivement d'apprendre l'environnement "a garden" plutôt que celui 
+hair in a garden", et on va voir si le terme $\| G_{b2}(\langle tok1 \rangle) - G_{a2}(garden) \|$ nous permet effectivement d'apprendre l'environnement "a garden" plutôt que celui 
 du dataset.
 
 ### d.2) Résultats de la régularisation
