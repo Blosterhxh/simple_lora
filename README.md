@@ -109,10 +109,11 @@ et trouver une meilleure reconstruction.
 La limite de l'overfitting où les positions et l'environnement étaient appris se trouvaient à lr = 1e-4.
 Dans la suite, on va utiliser ce learning rate et voir si on arrive à annuler l'apprentissage des positions et de l'environnement.
 
-## Trouver le terme de régularisation
+### Modélisation du problème
 
-Pour trouver un tel terme, on va exprimer mathématiquement le problème d'apprentissage de features parasites pour voir
-comment on peut modifier la loss.
+Avant de trouver ce terme de régularisation, on va démontrer une propriété.
+
+On commence par modéliser notre situation mathématiquement.
 
 On modélise un prompt/une image par deux variables x : apparence, y : autres features, qui résument les informations contenues par le prompt/l'image.
 Dans la suite on considère que les autres features sont uniquement l'environnement, y : environnement, ce qui ne change rien au raisonnement et permet
@@ -120,7 +121,7 @@ de mieux visualiser.
 
 La fonction G est l'unet qui transforme un prompt en image : G(xt,yt) = (Gx(xt),Gy(yt)) = xi,yi.
 
-Prenons le prompt d'entrainement : "an anime illustration of <tok1>".
+Prenons le prompt d'entrainement : "an anime illustration of \<tok1>".
 
 Au départ, la fonction G qu'on annotera Ga, vaut Ga(prompt) = Ga(xt = <tok1>, yt = <tok1>) = xai,yai.
 En effet, les informations d'apparence et d'environnement sont inclues dans <tok1>.
@@ -129,6 +130,38 @@ il est généré de manière aléatoire car <tok1> ne contient pas d'information
 
 A la fin de l'entrainement, Gb(xt = <tok1>, yt = <tok1>) = xbi,ybi. Le token <tok1> a été associé à l'apparence et à l'environnement du dataset.
 Ca ne nous convient pas car on ne veut apprendre que l'apparence, on aimerait plutôt Gb(xt = <tok1>, yt = <tok1>) = xbi,yai.
+
+### Propriété 1
+
+On aimerait démontrer qu'il existe un prompt = (xt,yt), tel que Gb(xt,yt) = xai',ybi, où xai' est une apparence 
+de personnage générée par Ga telle que <xai'|xai> = 0. Autrement dit, les deux apparences n'ont rien en commun.
+
+Prenons le prompt, qu'on appelera prompt apparence, "an anime illustration of \<tok1> woman with long blue hair".
+On a Gb(xt,yt) = (p*Gb(\<tok1>)x+(1-p)Gbx(woman with long blue hair),Gby(\<tok1>)) = (p\*xbi+(1-p)\*xai',ybi).
+Le modèle construit l'apparence avec un pourcentage pris de <tok1> et un pourcentage pris des termes d'apparence.
+Si on arrivait à avoir p = 0, le prompt satisferait la propriété.
+En testant ce prompt sur le modèle entrainé à 1e-4, on voit qu'au contraire on a p = 1.
+
+Pour diminuer ce pourcentage, on peut essayer d'augmenter l'editability, en interpolant entre tok1 et character.
+En effet le finetuning fait perdre en editability tok1, et cette perte décroît avec l'éloignement. Toutefois l'effet
+du finetuning décroit avec l'éloignement, il faut s'assurer que même en s'éloignant on a toujours Gby(<embed>) = ybi.
+
+On va donc interpoler entre tok1 et character, mesurer l'influence du finetuning et l'editability,
+et choisir un point optimal. Pour mesurer l'influence du finetuning, on calcule la cosine similarity
+des images générées avec celles du dataset. Pour mesurer l'editability, on génère à partir du point
+interpolé, le prompt simple et le prompt apparence, et on calcule la cosine
+similarity entre les deux. La baisse de similarité dans ce cas sera dû à la prise en compte
+des termes d'apparence du prompt apparence.
+Comme on compte régulariser le finetuning à 1e-4, on réalise ces mesures sur le modèle finetuné
+à 1e-4.
+
+
+## Trouver le terme de régularisation
+
+Pour trouver un tel terme, on va exprimer mathématiquement le problème d'apprentissage de features parasites pour voir
+comment on peut modifier la loss.
+
+
 
 On va pour modifier Gb, ajouter un terme de régularisation à la loss.
 Considérons le prompt "an anime illustration of <tok1> woman with long blue hair", qu'on appelera le prompt apparence.
@@ -178,7 +211,8 @@ On va interpoler entre tok1 et character, mesurer l'influence du finetuning et l
 et choisir un point optimal. Pour mesurer l'influence du finetuning, on calcule la cosine similarity
 des images générées avec celles du dataset. Pour mesurer l'editability, on génère à partir du point
 interpolé, le prompt simple et le prompt apparence, et on calcule la cosine
-similarity entre les deux. 
+similarity entre les deux. La baisse de similarité dans ce cas sera dû à la prise en compte
+des termes d'apparence du prompt apparence.
 Comme on compte régulariser le finetuning à 1e-4, on réalise ces mesures sur le modèle finetuné
 à 1e-4.
 
