@@ -140,32 +140,8 @@ Avant de pouvoir trouver le terme de régularisation, on va démontrer une propr
 
 On commence par modéliser notre situation mathématiquement.
 
-On modélise un prompt/une image par deux variables x : apparence, y : autres features, qui résument les informations contenues par le prompt/l'image.
-Dans la suite on considère que les autres features sont uniquement l'environnement, y : environnement, ce qui ne change rien au raisonnement et permet
-de mieux visualiser.
-
-La fonction G est l'unet qui transforme un prompt en image : G(xt,yt) = G1(xt) + G2(yt), où G1 transforme l'apparence texte
-en apparence d'image et G2 transforme l'environnement texte en environnement d'image.
-
-Prenons le prompt d'entrainement : "an anime illustration of \<tok1>".
-
-Au départ, la fonction G qu'on annotera Ga, vaut Ga(prompt) = Ga(xt = \<tok1>, yt = <tok1>) = Ga1(\<tok1>)+Ga2(\<tok1>) =  Ga1(\<tok1>)+ random .
-En effet, les informations d'apparence et d'environnement sont inclues dans <tok1>.
-Pour l'apparence, elle ressemble à notre personnage cible grâce à l'inversion. Pour l'environnement,
-il est généré de manière aléatoire car <tok1> ne contient pas d'information sur l'environnement.
-
-A la fin de l'entrainement, Gb(xt = <tok1>, yt = <tok1>) = Gb1(\<tok1>)+Gb2(\<tok1>).
-On aimerait que Gb2(\<tok1>) = random, mais ce n'est pas le cas car le token <tok1> a été associé à l'apparence et à l'environnement du dataset.
-
-On commence par modéliser notre situation mathématiquement.
-
-On modélise un prompt/une image par deux variables  
-$x$ : apparence,  
-$y$ : autres features,  
-qui résument les informations contenues par le prompt/l'image.  
-Dans la suite on considère que les autres features sont uniquement l'environnement,  
-$y = \text{environnement}$,  
-ce qui ne change rien au raisonnement et permet de mieux visualiser.
+On modélise un prompt/une image par deux variables, $x$ : apparence,  $y$ : autres features,  qui résument les informations contenues par le prompt/l'image.  
+Dans la suite on considère que les autres features sont uniquement l'environnement,  $y$ : environnement,  ce qui ne change rien au raisonnement et permet de mieux visualiser.
 
 La fonction $G$ est l'Unet qui transforme un prompt en image :
 
@@ -173,12 +149,9 @@ $$
 G(x_t, y_t) = G_1(x_t) + G_2(y_t)
 $$
 
-où $G_1$ transforme l'apparence texte en apparence d'image et  
-$G_2$ transforme l'environnement texte en environnement d'image.
+où $G_1$ transforme l'apparence texte en apparence d'image et  $G_2$ transforme l'environnement texte en environnement d'image.
 
-Prenons le prompt d'entraînement : `"an anime illustration of <tok1>"`.
-
----
+Prenons le prompt d'entraînement : "an anime illustration of \<tok1>".
 
 Au départ, la fonction $G$, qu'on annotera $G_a$, vaut :  
 
@@ -188,13 +161,9 @@ G_a(\text{prompt}) = G_a(x_t = \langle tok1 \rangle,\, y_t = \langle tok1 \rangl
 = G_{a1}(\langle tok1 \rangle) + \text{random}
 $$
 
-En effet, les informations d'apparence et d'environnement sont incluses dans  
-$\langle tok1 \rangle$.  
+En effet, les informations d'apparence et d'environnement sont incluses dans  $\langle tok1 \rangle$.  
 Pour l'apparence, elle ressemble à notre personnage cible grâce à l'inversion.  
-Pour l'environnement, il est généré de manière aléatoire car  
-$\langle tok1 \rangle$ ne contient pas d'information sur l'environnement.
-
----
+Pour l'environnement, il est généré de manière aléatoire car  $\langle tok1 \rangle$ ne contient pas d'information sur l'environnement.
 
 À la fin de l'entraînement :  
 
@@ -209,9 +178,7 @@ $$
 G_{b2}(\langle tok1 \rangle) = \text{random}
 $$
 
-mais ce n'est pas le cas car le token  
-$\langle tok1 \rangle$  
-a été associé à l'apparence **et** à l'environnement du dataset.
+mais ce n'est pas le cas car le token  $\langle tok1 \rangle$  a été associé à l'apparence **et** à l'environnement du dataset.
 
 
 ### c.2) Existence du prompt apparence
