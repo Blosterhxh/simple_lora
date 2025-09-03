@@ -67,7 +67,9 @@ va donc choisir un learning rate de 1e-5.
 
 # Régularisation
 
-## La régularisation dans styleGAN
+## Utilité de la régularisation pour le modèle de diffusion
+
+### La régularisation dans styleGAN
 
 Lorsque qu'on finetune G sur un latent wp, le finetuning va déborder sur les latents aux alentours,ce débordement
 diminuant avec la distance. Le problème, c'est qu'on a qu'un seul modèle, donc on ne peut pas se permettre
@@ -84,7 +86,7 @@ Ainsi les modifications de G sur wr par te vont être négligeables devant la r�
 l'apprentissage de G sur wp par tr sera négligeable devant le terme d'entrainement. On peut donc
 préserver les visages situés autour du pivot sans trop freiner l'apprentissage.
 
-## Appliquer la régularisation au modèle de diffusion
+### Régularisation sur styleGAN = régularisation sur modèle de diffusion ?
 
 Pour appliquer la régularisation au modèle de diffusion, on se place dans l'espace des embeddings après le transformer
 de CLIP qui est entrainé pour avoir une relation entre la géométrie et la sémantique, contrairement à l'espace 
@@ -93,7 +95,7 @@ Il faut ensuite se demander si la régularisation appliquée telle quelle comme 
 En réalité, elle n'en a pas, car avec les loras, on peut facilement charger/décharger une config
 donc ce n'est pas un problème si l'apprentissage déborde sur les autres embeddings, contrairement au styleGAN.
 
-## Sélectionner les features apprises grâce à la régularisation
+### Sélectionner les features apprises grâce à la régularisation
 
 Cependant, on peut trouver une autre utilité à la régularisation.
 Durant le finetuning, l'embedding \<tok1> va apprendre toutes les features du dataset : apparence, position, environnement ...
@@ -109,9 +111,32 @@ et trouver une meilleure reconstruction.
 La limite de l'overfitting où les positions et l'environnement étaient appris se trouvaient à lr = 1e-4.
 Dans la suite, on va utiliser ce learning rate et voir si on arrive à annuler l'apprentissage des positions et de l'environnement.
 
-### Modélisation du problème
+## Interpoler entre deux embeddings
 
-Avant de trouver ce terme de régularisation, on va démontrer une propriété.
+Pour trouver le terme de régularisation, on va avoir besoin d'interpoler entre \<tok1> et character.
+Voyons comme cela est possible.
+
+On sait que le manifold des embeddings de texte dans CLIP est une ellispoïde
+qu'on peut approximer par une sphère comme la majorité des coordonées ont la même variance.
+Cette sphère est décalée de l'origine. 
+Cependant, ceci n'est vrai que pour les embeddings de token de fin d'une phrase/image qui sont ceux sur lesquelles
+la loss de CLIP porte. Pour les autres embeddings on ne sait rien. Or ce sont ces autres embeddings qui sont passés
+sous forme de matrice au modèle de diffusion.
+
+Comme character/tok1 sont en milieu de phrase à l'indice 5, on peut essayer de voir si les embeddings à l'indice 5
+d'une phrase suivent la même répartition dans l'espace que les embeddings de fin. Pour cela, j'ai pris
+le même dataset que celui utilisé par les chercheurs pour déterminer le manifold des embeddings de fin (MS-COCO 2014),
+et j'ai calculé la norme moyenne et la variance de cette norme. Au final, j'ai obtenu le même résultat
+que sur les embeddings de fin : norme de 24 et variance 1. On va donc pouvoir faire une vSLERP pour nos embeddings à la position 5 comme 
+les chercheurs font sur les embeddings de fin.
+
+Toutefois il y a un problème dans mon code car en calculant la norme moyenne et la variance pour le token de fin (je devrai donc avoir le même résultat que l'article), j'obtiens une variance plus faible avec les embeddings de base plutôt qu'avec les embeddings centrés, ce qui n'est pas cohérent avec le décalage de l'ellipsoïde texte de l'origine que les auteurs ont montré. J'ai exactement 27 de norme et 0.1 de variance. Je vais donc faire une SLERP et pas une vSLERP tant que ce problème n'est pas résolu.
+
+## Le prompt apparence
+
+Avant de pouvoir trouver le terme de régularisation, on va démontrer une propriété.
+
+### Modélisation du problème
 
 On commence par modéliser notre situation mathématiquement.
 
@@ -155,23 +180,57 @@ des termes d'apparence du prompt apparence.
 Comme on compte régulariser le finetuning à 1e-4, on réalise ces mesures sur le modèle finetuné
 à 1e-4.
 
+### Résultats de l'interpolation
 
-## Trouver le terme de régularisation
+On obtient ces évolutions de l'influence du finetuning et de l'editability avec l'interpolation.
 
-Pour trouver un tel terme, on va exprimer mathématiquement le problème d'apprentissage de features parasites pour voir
-comment on peut modifier la loss.
+![interpolation3.PNG](interpolation3.png)
 
+![interpolation2.PNG](interpolation2.png)
 
+L'influence décroit linéairement tandis que que l'editability augmente logarithmiquement. On aurait donc intérêt à prendre l'interpolation à t = 0.5,
+qui nous donne le meilleur compromis entre editability et influence du finetuning.
+Toutefois, en analysant les images générées par les interpolations, on se rend compte que que l'évolution de l'editability ne représente pas bien à quel
+point les termes d'apparence prennent le dessus sur tok1. En effet, les termes d'apparence semblent être beaucoup plus pris en compte à t = 1,
+ce qui n'est pas mis en valeur par la courbe.
 
-On va pour modifier Gb, ajouter un terme de régularisation à la loss.
-Considérons le prompt "an anime illustration of <tok1> woman with long blue hair", qu'on appelera le prompt apparence.
-On a prompt = (x = woman with long blue hair, y = <tok1>). 
-En effet on force l'apparence avec les termes "woman with long blue hair", et ces termes ne contiennent pas d'information sur l'environnement qui va donc être
-cherché dans <tok1>.
-On peut alors réecrire la loss, en annotant Ge la fonction G entrainée :
-Loss = ||Ge(xt = <tok1>, yt = <tok1>) - dataset|| + ||Ge(xt = woman, yt = <tok1>)-Ga(xt = woman, yt = woman)||
-On détaille : ||Ge(xt = woman, yt = <tok1>)-Ga(xt = woman, yt = woman)|| = ||(Gex(woman),Gey(<tok1>) - (Gax(woman),Gay(woman)||
-= ||(Gax(woman),Gey(<tok1>) - (Gax(woman),Gay(woman)|| = ||(0,Gey(<tok1>)-Gay(woman))||.
+![interpolation4.PNG](interpolation4.png)
+
+Une explication est que en s'éloignant de tok1, le générateur quitte l'overfitting et génère des images plus aléatoires. 
+
+![interpolation5.PNG](interpolation5.png)
+
+Ainsi, l'editability va beaucoup baisser entre t= 0 et 
+t = 0.5, même si l'apparence est peu modifiée par le prompt apparence. Pour vérifier ça, on change la mesure de l'editability. On calcule la cosine similarity
+entre images générées avec le même prompt, et on fait la différence avec la cosine similarity d'images générées avec le prompt simple et le prompt apparence.
+En faisant la différence de ces deux cosine similarity, on devrait
+pouvoir quantifier uniquement l'évolution de la prise en compte de l'apparence dans la génération, sans être brouillé par l'augmentation de l'aléatoire.
+
+![interpolation1.PNG](interpolation1.png)
+
+Au final, l'évolution de l'editability n'est toujours pas représentative de la prise en compte des termes d'apparence. J'ai donc décidé de suivre mon observation
+et de régulariser à t = 1, où l'on voit que l'apparence est bien modifié et que les autres features comme l'environnement et les positions restent influencés par le
+finetuning, même si je n'arrive
+pas à trouver une formule permettant de concrétiser cette observation.
+
+## Le terme de régularisation
+
+Les deux points précédents nous ont permis de trouver un prompt où Gbx(xt) = xai' et Gby(yt) = ybi.
+
+On Ge la fonction G entrainé entre Ga et Gb.
+Sur le prompt apparence, Gex(xt) = xai' car l'editability de Ge est plus grande que Gb.
+Gey(yt) = yei, car seul \<tok1> contient des informations d'environnement.
+
+On va modifier la loss en ajoutant un deuxième terme portant sur le prompt apparence.
+Loss = ||Ge("an anime illustration of \<tok1>") - dataset||
++
+||Ge("an anime illustration of character woman with long blue hair)-Ga("an anime illustration of character woman with long blue hair)||.
+On détaille :
+||Ge("an anime illustration of character woman with long blue hair)-Ga("an anime illustration of character woman with long blue hair)||.
+=
+||xai',yei - xai',yai'||
+=
+||0,yei-yai'||.
 
 Ainsi, le premier terme de la loss pousse G à ressembler au dataset sur <tok1>, et le deuxième terme oblige <tok1> à ne pas stocker d'informations d'environnement
 comme woman.
@@ -218,54 +277,9 @@ Comme on compte régulariser le finetuning à 1e-4, on réalise ces mesures sur 
 
 ## Interpoler entre character et tok1
 
-On sait que le manifold des embeddings de texte dans CLIP est une ellispoïde
-qu'on peut approximer par une sphère comme la majorité des coordonées ont la même variance.
-Cette sphère est décalée de l'origine. 
-Cependant, ceci n'est vrai que pour les embeddings de token de fin d'une phrase/image qui sont ceux sur lesquelles
-la loss de CLIP porte. Pour les autres embeddings on ne sait rien. Or ce sont ces autres embeddings qui sont passés
-sous forme de matrice au modèle de diffusion.
 
-Comme character/tok1 sont en milieu de phrase à l'indice 5, on peut essayer de voir si les embeddings à l'indice 5
-d'une phrase suivent la même répartition dans l'espace que les embeddings de fin. Pour cela, j'ai pris
-le même dataset que celui utilisé par les chercheurs pour déterminer le manifold des embeddings de fin (MS-COCO 2014),
-et j'ai calculé la norme moyenne et la variance de cette norme. Au final, j'ai obtenu le même résultat
-que sur les embeddings de fin : norme de 24 et variance 1. On va donc pouvoir faire une vSLERP pour nos embeddings à la position 5 comme 
-les chercheurs font sur les embeddings de fin.
 
-Toutefois il y a un problème dans mon code car en calculant la norme moyenne et la variance pour le token de fin (je devrai donc avoir le même résultat que l'article), j'obtiens une variance plus faible avec les embeddings de base plutôt qu'avec les embeddings centrés, ce qui n'est pas cohérent avec le décalage de l'ellipsoïde texte de l'origine que les auteurs ont montré. J'ai exactement 27 de norme et 0.1 de variance. Je vais donc faire une SLERP et pas une vSLERP tant que ce problème n'est pas résolu.
 
-## Résultats de l'interpolation
-
-On obtient ces évolutions de l'influence du finetuning et de l'editability avec l'interpolation.
-
-![interpolation3.PNG](interpolation3.png)
-
-![interpolation2.PNG](interpolation2.png)
-
-L'influence décroit linéairement tandis que que l'editability augmente logarithmiquement. On aurait donc intérêt à prendre l'interpolation à t = 0.5,
-qui nous donne le meilleur compromis entre editability et influence du finetuning.
-Toutefois, en analysant les images générées par les interpolations, on se rend compte que que l'évolution de l'editability ne représente pas bien à quel
-point les termes d'apparence prennent le dessus sur tok1. En effet, les termes d'apparence semblent être beaucoup plus pris en compte à t = 1,
-ce qui n'ait pas mis en valeur par la courbe.
-
-![interpolation4.PNG](interpolation4.png)
-
-Une explication est que en s'éloignant de tok1, le générateur quitte l'overfitting et génère des images plus aléatoires. 
-
-![interpolation5.PNG](interpolation5.png)
-
-Ainsi, l'editability va beaucoup baisser entre t= 0 et 
-t = 0.5, même si l'apparence est peu modifiée par le prompt apparence. Pour vérifier ça, on change la mesure de l'editability. On calcule la cosine similarity
-entre images générées avec le même prompt, et on fait la différence avec la cosine similarity d'images générées avec le prompt simple et le prompt apparence.
-En faisant la différence de ces deux cosine similarity, on devrait
-pouvoir quantifier uniquement l'évolution de la prise en compte de l'apparence dans la génération, sans être brouillé par l'augmentation de l'aléatoire.
-
-![interpolation1.PNG](interpolation1.png)
-
-Au final, l'évolution de l'editability n'est toujours pas représentative de la prise en compte des termes d'apparence. J'ai donc décidé de suivre mon observation
-et de régulariser à t = 1, où l'on voit que l'apparence est bien modifié et que les autres features comme l'environnement et les positions restent influencés par le
-finetuning, même si je n'arrive
-pas à trouver une formule permettant de concrétiser cette observation.
 
 ## Résultats de la régularisation
 
