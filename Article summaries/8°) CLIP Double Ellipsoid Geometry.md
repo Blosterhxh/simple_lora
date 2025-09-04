@@ -1,3 +1,5 @@
+Article : https://arxiv.org/pdf/2411.14517.
+
 The CLIP embedding space has a dimension of 512 and contains both text embeddings and image embeddings.
 
 # 1/ Thin shell theory :
