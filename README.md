@@ -65,26 +65,29 @@ On voit que à 1e-5 seule l'apparence est apprise, et qu'ensuite d'autres featur
 va donc choisir un learning rate de 1e-5.
 
 
-# 3/ Régularisation
+# 3/ Regularization
 
-## A) Utilité de la régularisation pour le modèle de diffusion
+## A) Usefulness of regularization in diffusion model
 
-### a.1) La régularisation dans styleGAN
+### a.1) Regularization in styleGAN
 
-Lorsque qu'on finetune G sur un latent wp, le finetuning va déborder sur les latents aux alentours,ce débordement
-diminuant avec la distance. Le problème, c'est qu'on a qu'un seul modèle, donc on ne peut pas se permettre
-de perdre toute la capacité de génération de visages de G juste pour apprendre une seule personne.
-Il faut donc éviter ce débordement.
+When fine-tuning G on a latent $w_{p}$, the fine-tuning will affect the nearby latents, this propagation
+decreasing with distance. The problem is that we only have one model, so we cannot afford to
+lose all of G's face generation capacity just to learn about a single person.
+We must therefore avoid this propagation.
 
-Pour cela, on ajoute un terme de régularisation, qui force G à coller au modèle de base sur les latents proches de wp.
-Si on prend un latent où on régularise wr, et qu'on note tr le terme de régularisation et te le terme d'entrainement,
-tout va se passer comme suit :
-grad(G(wp)) = 0.1\*grad(tr) + 0.9\*grad(te)
-grad(G(wr)) = 0.1\*grad(te) + 0.9\*grad(tr)
-(les coefficients 0.1/0.9 ne sont pas exacts c'est juste pour montrer que selon le gradient un terme où l'autre va plus être pris en compte).
-Ainsi les modifications de G sur wr par te vont être négligeables devant la régularisation, et le freinage de 
-l'apprentissage de G sur wp par tr sera négligeable devant le terme d'entrainement. On peut donc
-préserver les visages situés autour du pivot sans trop freiner l'apprentissage.
+To do this, we add a regularization term, which forces G to stick to the base model on latents close to $w_{p}$.
+If we take a latent where we regularize $w_{r}$, and we denote the regularization term as $t_{r}$ and the training term as $t_{e}$,
+everything will happen as follows:
+
+$ \nabla G(w_{p}) = 0.1 \cdot \nabla(t_{r}) + 0.9 \cdot \nabla(t_{e}) $
+
+$ \nabla G(w_{r}) = 0.1 \cdot \nabla(t_{e}) + 0.9 \cdot \nabla(t_{r}) $
+
+(the coefficients 0.1/0.9 are not exact; they are just to show that, depending on the gradient, one term or the other will be more taken into account).
+Thus, the changes in $G$ on $w_{r}$ by $t_{e}$ will be negligible compared to the regularization, and the slowing down of 
+the learning of $G$ on $w_{p}$ by $t_{r}$ will be negligible compared to the training term. We can therefore
+preserve the faces located around the pivot without slowing down the learning too much.
 
 ### a.2) Regularization on styleGAN = regularization on diffusion model ?
 
