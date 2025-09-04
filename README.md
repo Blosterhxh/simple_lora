@@ -127,7 +127,7 @@ However, this is only true for the last sentence/image token embeddings, which a
 the CLIP loss is based. We know nothing about the other embeddings. Yet it is these other embeddings that are passed
 in matrix form to the diffusion model.
 
-Since character/$\langle tok1 \rangle$ are in the middle of the sentence at index 5, we can try to see if the embeddings at index 5
+Since character/ $\langle tok1 \rangle$ are in the middle of the sentence at index 5, we can try to see if the embeddings at index 5
 of a sentence follow the same distribution in space as the end embeddings. To do this, I took
 the same dataset used by the researchers to determine the manifold of end embeddings (MS-COCO 2014),
 and I calculated the mean norm and the variance of this norm. In the end, I obtained the same result
