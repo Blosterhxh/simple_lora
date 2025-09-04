@@ -1,4 +1,4 @@
-# Structure of the github
+# 1/ Structure of the github
 
 This github project was aimed at providing a complete understanding of pivotal tuning for diffusion model so that one could easily understand how to tune hyperparameters depending on what he is looking for.
 
@@ -12,7 +12,7 @@ useful to make experiment like CLIP Double ellispoid geometry. They are numbered
 Next, i will present the different results i have been able to shade light on with reading articles/experiments, which provide an understanding of pivotal tuning for diffusion model.
 
 
-# A few words about incoming experiments
+# 2/ A few words about incoming experiments
 
 For the next experiments, I will summarize what I have gleaned from the articles without justification; for details of the reasoning, see the individual summaries of the articles.
 
@@ -20,7 +20,7 @@ For training config, we take a constant number of steps of 1000 so as not to pro
 
 The images dataset is in the dataset folder, it consists of only 5 images as advised by : https://arxiv.org/pdf/2208.01618.
 
-# Choice of learning rate for inversion
+# 3/ Choice of learning rate for inversion
 
 In our case, unlike
 styleGAN,
@@ -49,7 +49,7 @@ Here are some images generated with the three learning rates to visualize the di
 ![img/inversion5e-5.png](img/inversion5e-5.png)
 > LR = 5e-5
 
-# Choix du learning rate pour le finetuning
+# 4/ Choix du learning rate pour le finetuning
 
 In the styleGAN, they say that they 
 apply “light” finetuning, which
@@ -74,7 +74,7 @@ we start learning the positions, and we stop just before that. We take measureme
 We can see that at 1e-5, only appearance is learned, and then other features such as position and environment are added to the learning process. We
 will therefore choose a learning rate of 1e-5.
 
-# 3/ Regularization
+# 5/ Regularization
 
 ## A) Usefulness of regularization in diffusion model
 
@@ -108,12 +108,12 @@ Actually, it's not, because with LORAs we can easily load/unload a configuration
 
 However, regularization can be useful in another way.
 During finetuning, the embedding $\langle tok1 \rangle$ will learn all the features of the dataset: appearance, position, environment, etc.
-(When I say “the embedding $\langle tok1 \rangle$ will learn,” it's a shortcut for saying that G will change its values on $\langle tok1 \rangle$).
+(When I say “the embedding $\langle tok1 \rangle$ will learn,” it's a shortcut for saying that $G$ will change its values on $\langle tok1 \rangle$).
 To prevent it from learning useless features, we could add a regularization term that forces $\langle tok1 \rangle$, on the features
 we don't want to learn, to remain identical to the version before finetuning.
 
 This way, we would no longer have to limit the distance 
-traveled by $G with a small learning rate to avoid learning parasitic features.
+traveled by $G$ with a small learning rate to avoid learning parasitic features.
 We can increase the learning rate so that $G$ covers a larger area of the function space
 and find a better reconstruction.
 
