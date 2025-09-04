@@ -12,16 +12,11 @@ useful to make experiment like CLIP Double ellispoid geometry. They are numbered
 Next, i will present the different results i have been able to shade light on with reading articles/experiments, which allow for an understanding of pivotal tuning for diffusion model
 
 
-# Introduction
+# A few words about incoming experiments
 
-Je présente les résultats importants que j'ai pu déduire de la lecture des articles et des tests effectués avec les notebooks pour parfaire le pivotal tuning d'un modèle de diffusion. 
+For the next experiments, I will summarize what I have gleaned from the articles without justification; for details of the reasoning, see the individual summaries of the articles.
 
-A chaque étape je résume ce que j'ai tiré des articles sans justification, pour voir les détails du raisonnement tout est dans les résumés individuels des articles.
-
-Pour toutes ces étapes, on prend un nombre
-de steps constant de 1000 pour ne pas
-éterniser l entrainement, et on étudiera 
-l'influence des autres parametres.
+For training config, we take a constant number of steps of 1000 so as not to prolong the training, and we will study the influence of the other parameters.
 
 # Choice of learning rate for inversion
 
