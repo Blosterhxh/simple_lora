@@ -180,6 +180,48 @@ $$
 
 mais ce n'est pas le cas car le token  $\langle tok1 \rangle$  a été associé à l'apparence **et** à l'environnement du dataset.
 
+We begin by modeling our situation mathematically.
+
+We model a prompt/image using two variables, $x$ : appearance, and $y$ : other features, which summarize the information contained in the prompt/image.
+In what follows, we consider that the other features are solely the environment, $y$: environment, which does not change the reasoning and allows for better visualization.
+
+The function $G$ is the Unet that transforms a prompt into an image:
+
+$$
+G(x_t, y_t) = G_1(x_t),G_2(y_t)
+$$
+
+where $G_1$ transforms the text appearance into image appearance and  $G_2$ transforms the text environment into image environment.
+
+Let's take the training prompt: “an anime illustration of \<tok1>”.
+
+Initially, the function $G$, which we will annotate as $G_a$, is:  
+
+$$
+G_a(\text{“an anime illustration of \<tok1>”}) = G_a(x_t = \langle tok1 \rangle,\, y_t = \langle tok1 \rangle) 
+= G_{a1}(\langle tok1 \rangle),G_{a2}(\langle tok1 \rangle) 
+= G_{a1}(\langle tok1 \rangle),\text{random}
+$$
+
+This is because the appearance and environment information are included in  $\langle tok1 \rangle$.  
+In terms of appearance, it resembles our target character thanks to inversion.  
+In terms of environment, it is generated randomly because  $\langle tok1 \rangle$ does not contain any information about the environment.
+
+At the end of training:  
+
+$$
+G_b(x_t = \langle tok1 \rangle,\, y_t = \langle tok1 \rangle) 
+= G_{b1}(\langle tok1 \rangle),G_{b2}(\langle tok1 \rangle)
+$$
+
+We would like:  
+
+$$
+G_{b2}(\langle tok1 \rangle) = \text{random}
+$$
+
+but this is not the case because the token  $\langle tok1 \rangle$  has been associated with both the appearance **and** the environment of the dataset.
+
 
 ### c.2) Existence du prompt apparence
 
