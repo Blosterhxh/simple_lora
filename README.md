@@ -338,7 +338,7 @@ the dataset.
 
 Unfortunately the above method did not prevent overfitting at lr =  1e-4. Moreover we do not see the garden as an environment. 
 
-![img/results.PNG](img/results.PNG)
+![img/results.png](img/results.png)
 
 For improvement, we could try increasing the coefficient, like from 2 to 10, among other things that are for now left for future work.
 
