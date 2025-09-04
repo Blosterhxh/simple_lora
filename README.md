@@ -1,3 +1,17 @@
+# Structure of the github
+
+This github project was aimed at providing a complete understanding of pivotal tuning for diffusion model so that one could easily understand how to tune hyperparameters depending on what he is looking for.
+
+This github is composed of two folders :
+
+- Article summaries, which correspond to summaries of papers from the creation of styleGAN to the application of pivotal tuning to diffusion model, along with other paper that can be
+useful to make experiment like CLIP Double ellispoid geometry. They are numbered in an specific order so that they can be read one after the other.
+
+- The notebook folder, which contains several notebooks used to train diffusion model, load a config and conduct experiments on it. Many parts of the code was inspired by this repository : . The main differences are that it was simplified to remove advanced options so it focuses on the core concepts of pivotal tuning, and it was commented and reunited in a single notebook si it's more easily understandable and executable.
+
+Next, i will present the different results i have been able to shade light on with reading articles/experiments, which allow for an understanding of pivotal tuning for diffusion model
+
+
 # Introduction
 
 Je présente les résultats importants que j'ai pu déduire de la lecture des articles et des tests effectués avec les notebooks pour parfaire le pivotal tuning d'un modèle de diffusion. 
@@ -9,25 +23,25 @@ de steps constant de 1000 pour ne pas
 éterniser l entrainement, et on étudiera 
 l'influence des autres parametres.
 
-# Choix du learning rate pour l'inversion
+# Choice of learning rate for inversion
 
-Dans notre cas contrairement
-au styleGAN,
-l'inversion n'est pas gratuite. En effet en s'éloignant du token de départ, on perd en editability, là où dans le styleGAN avec l'inversion on reste en permanence dans W. Dans l'idéal, il faudrait qu'il y ait une première période où en s'éloignant du token de 
-départ on gagne beaucoup en reconstruction et on perd peu en editability, et une seconde période où le gain en reconstruction est plus
-faible et la parte en editability plus importante. Il faudrait alors inverser à la distance limite entre ces deux périodes.
+In our case, unlike
+styleGAN,
+inversion is not free. In fact, by moving away from the starting token, we lose editability, whereas in styleGAN with inversion, we remain permanently in W. Ideally, there should be an initial period where moving away from the starting token 
+results in significant gains in reconstruction and little loss in editability, and a second period where the gains in reconstruction are smaller
+and the loss in editability is greater. We would then need to reverse at the boundary between these two periods.
 
-Il faut donc qu'on mesure l'évolution de la reconstruction et de l'editability en fonction de l'éloignement au token, pour voir à quelle distance on doit inverser. Pour parcourir différentes distances, on utilise le fait que la distance parcouru vaut environ nb steps x learning rate, ce qu'on pourra confirmer en calculant la norme euclidienne entre le token obtenu avec l'entrainement et le token de départ. On réalise les mesures sur 3 learnings rates : 5e-3, 5e-4 et 5e-5.
+We therefore need to measure the evolution of reconstruction and editability as a function of distance from the token, to see at what distance we should reverse. To cover different distances, we use the fact that the distance traveled is approximately nb steps x learning rate, which we can confirm by calculating the Euclidean norm between the token obtained with training and the starting token. We perform the measurements on three learning rates: 5e-3, 5e-4, and 5e-5.
 
 ![inversionconfigs.png](inversionconfigs.png)
 
-L'intersection entre les deux périodes qu'on avait prévues se trouve à 5e-4, on va donc utiliser ce learning rate.
+The intersection between the two periods we had predicted is at 5e-4, so we will use this learning rate.
 
-De plus on peut confirmer que le token s'éloigne bien avec l'augmentation du learning rate : 
+In addition, we can confirm that the token does indeed move away as the learning rate increases: 
 
 ![graphe2.png](graphe2.png)
 
-Voici quelques images générées avec les trois learning rates pour visualiser les différences :
+Here are some images generated with the three learning rates to visualize the differences:
 
 ![inversion5e-3.png](inversion5e-3.png)
 > LR = 5e-3
@@ -37,7 +51,6 @@ Voici quelques images générées avec les trois learning rates pour visualiser 
 
 ![inversion5e-5.png](inversion5e-5.png)
 > LR = 5e-5
-
 
 # Choix du learning rate pour le finetuning
 
