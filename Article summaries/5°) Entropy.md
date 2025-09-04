@@ -10,7 +10,7 @@ detail them here and will just talk about “code” in general.
 
 For any code, the average length (sum of the lengths of the sequences weighted by pi)
 has a lower bound called entropy.
-![th1.PNG](th1.PNG)
+![img/th1.PNG](img/th1.PNG)
 
 # Theorem 2
 
@@ -21,13 +21,13 @@ of another sequence) without increasing the average length
 
 If the lengths of the sequences li satisfy this inequality, there exists a prefix code with such lengths
 to encode the n symbols. 
-![th2.PNG](th2.PNG)
+![img/th2.PNG](img/th2.PNG)
 
 # Theorem 4
 
 For any probability distribution on n, taking for ni a sequence of length li = log2(qi) satisfies
 the Kraft-Millman theorem and is therefore a valid code.
-![th3.PNG](th3.PNG)
+![img/th3.PNG](img/th3.PNG)
 
 # Theorem 5
 
@@ -35,7 +35,7 @@ Using the original distribution for lengths, i.e., li = log2(pi), we obtain the 
 
 # Example of an optimal code for a set of 4 symbols
 
-![th6.PNG](th6.PNG)
+![img/th6.PNG](img/th6.PNG)
 
 
 
