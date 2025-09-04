@@ -138,48 +138,6 @@ Avant de pouvoir trouver le terme de régularisation, on va démontrer une propr
 
 ### c.1) Modélisation du problème
 
-On commence par modéliser notre situation mathématiquement.
-
-On modélise un prompt/une image par deux variables, $x$ : apparence,  $y$ : autres features,  qui résument les informations contenues par le prompt/l'image.  
-Dans la suite on considère que les autres features sont uniquement l'environnement,  $y$ : environnement,  ce qui ne change rien au raisonnement et permet de mieux visualiser.
-
-La fonction $G$ est l'Unet qui transforme un prompt en image :
-
-$$
-G(x_t, y_t) = G_1(x_t) + G_2(y_t)
-$$
-
-où $G_1$ transforme l'apparence texte en apparence d'image et  $G_2$ transforme l'environnement texte en environnement d'image.
-
-Prenons le prompt d'entraînement : "an anime illustration of \<tok1>".
-
-Au départ, la fonction $G$, qu'on annotera $G_a$, vaut :  
-
-$$
-G_a(\text{prompt}) = G_a(x_t = \langle tok1 \rangle,\, y_t = \langle tok1 \rangle) 
-= G_{a1}(\langle tok1 \rangle) + G_{a2}(\langle tok1 \rangle) 
-= G_{a1}(\langle tok1 \rangle) + \text{random}
-$$
-
-En effet, les informations d'apparence et d'environnement sont incluses dans  $\langle tok1 \rangle$.  
-Pour l'apparence, elle ressemble à notre personnage cible grâce à l'inversion.  
-Pour l'environnement, il est généré de manière aléatoire car  $\langle tok1 \rangle$ ne contient pas d'information sur l'environnement.
-
-À la fin de l'entraînement :  
-
-$$
-G_b(x_t = \langle tok1 \rangle,\, y_t = \langle tok1 \rangle) 
-= G_{b1}(\langle tok1 \rangle) + G_{b2}(\langle tok1 \rangle)
-$$
-
-On aimerait que :  
-
-$$
-G_{b2}(\langle tok1 \rangle) = \text{random}
-$$
-
-mais ce n'est pas le cas car le token  $\langle tok1 \rangle$  a été associé à l'apparence **et** à l'environnement du dataset.
-
 We begin by modeling our situation mathematically.
 
 We model a prompt/image using two variables, $x$ : appearance, and $y$ : other features, which summarize the information contained in the prompt/image.
@@ -225,74 +183,61 @@ but this is not the case because the token  $\langle tok1 \rangle$  has been ass
 
 ### c.2) Existence du prompt apparence
 
-On aimerait démontrer qu'il existe un prompt $(x_t, y_t)$, tel que :  
+We would like to demonstrate that there exists a prompt $(x_t, y_t)$, such that:  
 
 $$
-G_b(x_t, y_t) = G_{a1}(\texttt{char1}) + G_{b2}(\langle tok1 \rangle)
+G_b(x_t, y_t) = G_{a1}(\text{char1}) + G_{b2}(\langle tok1 \rangle)
 $$
 
-où $G_{a1}(\texttt{char1})$ est une apparence de personnage telle que :  
+where $G_{a1}(\text{char1})$ is a character appearance known by $G_{a}$, with $G_{a1}(\text{char1})  \neq  G_{b1}(\langle tok1 \rangle)$
+so it is not affected by the finetuning.
+
+Let's take the prompt, which we will call **appearance prompt**: $\text{“an anime illustration of } \langle tok1 \rangle \text{ woman with long blue hair”}$
+
+We take:  
 
 $$
-\langle G_{a1}(\texttt{char1}) \mid G_{b1}(\langle tok1 \rangle) \rangle = 0
+\text{char1} = \text{“woman with long blue hair”}
 $$  
 
-Autrement dit, les deux apparences n'ont rien en commun.
-
-
-Prenons le prompt, qu'on appellera **prompt apparence** :  "an anime illustration of <tok1> woman with long blue hair"
-
-
-On prend :  
+We have :   
 
 $$
-\texttt{char1} = \text{"woman with long blue hair"}
+G_b(\text{“an anime illustration of } \langle tok1 \rangle \text{ woman with long blue hair”}) = 
+\big( p \cdot G_{b1}(\langle tok1 \rangle) + (1-p) G_{b1}(\text{char1}), G_{b2}(\langle tok1 \rangle) \big)
 $$  
 
-On a déjà :  
+which can also be written as:  
 
 $$
-\langle G_{a1}(\texttt{char1}) \mid G_{b1}(\langle tok1 \rangle) \rangle = 0
+G_b(\text{“an anime illustration of } \langle tok1 \rangle \text{ woman with long blue hair”}) = 
+\big( p \cdot G_{b1}(\langle tok1 \rangle) + (1-p) G_{a1}(\text{char1}),G_{b2}(\langle tok1 \rangle) \big)
 $$  
 
-De plus :  
+since $G$ does not change its values on $char1$ with training.
 
-$$
-G_b(x_t, y_t) = 
-\big( p \cdot G_{b1}(\langle tok1 \rangle) + (1-p) G_{b1}(\texttt{char1}), G_{b2}(\langle tok1 \rangle) \big)
-$$  
+The model constructs the appearance with a percentage taken from  $\langle tok1 \rangle\$ and a percentage taken from   $char1$
 
-ce qui peut aussi s’écrire :  
-
-$$
-G_b(x_t, y_t) = 
-\big( p \cdot G_{b1}(\langle tok1 \rangle) + (1-p) G_{a1}(\texttt{char1}),\; G_{b2}(\langle tok1 \rangle) \big)
-$$  
-
-comme $G$ ne change pas ses valeurs sur $char1$ avec l'entrainement.
-
-Le modèle construit l'apparence avec un pourcentage pris de  $\langle tok1 \rangle\$ et un pourcentage pris de   $char1$
-
-Si on arrivait à avoir $p = 0$, le prompt satisferait la propriété.  En testant ce prompt sur le modèle entraîné à $10^{-4}$,  on voit qu'au contraire on a $p = 1$ .
+If we could get $p = 0$, the prompt would satisfy the property.  By testing this prompt on the model trained at $10^{-4}$,  we see that, on the contrary, we have $p = 1$.
 
 ![apparence1.png](apparence1.png)
 
-Pour diminuer ce pourcentage, on peut essayer d'augmenter l'editability, en interpolant entre $\langle tok1 \rangle\$ et character.
-En effet le finetuning fait perdre en editability $\langle tok1 \rangle\$, et cette perte décroît avec l'éloignement. Toutefois l'effet
-du finetuning décroit avec l'éloignement, il faut s'assurer que même en s'éloignant on a toujours :
+To reduce this percentage, we can try to increase editability by interpolating between $\langle tok1 \rangle$ and character.
+In fact, fine-tuning causes a loss in $\langle tok1 \rangle$ editability, and this loss decreases with distance. However, the effect
+of fine-tuning decreases with distance, so we must ensure that even with distance, we still have:
 
 $$
-G_{b2}(embed) = G_{b2}(\langle tok1 \rangle\)
+G_{b2}(interpolation) = G_{b2}(\langle tok1 \rangle\)
 $$
 
-On va donc interpoler entre tok1 et character, mesurer l'influence du finetuning et l'editability,
-et choisir un point optimal. Pour mesurer l'influence du finetuning, on calcule la cosine similarity
-des images générées avec celles du dataset. Pour mesurer l'editability, on génère à partir du point
-interpolé, le prompt simple et le prompt apparence, et on calcule la cosine
-similarity entre les deux. La baisse de similarité dans ce cas sera dû à la prise en compte
-des termes d'apparence du prompt apparence.
-Comme on compte régulariser le finetuning à 1e-4, on réalise ces mesures sur le modèle finetuné
-à 1e-4.
+We will therefore interpolate between tok1 and character, measure the influence of fine-tuning and editability,
+and choose an optimal point. To measure the influence of fine-tuning, we calculate the cosine similarity
+of the generated images with those in the dataset. To measure editability, we generate images using the simple prompt and the appearance prompt from the interpolated point
+and calculate the cosine
+similarity between the two. The decrease in similarity in this case will be due to the inclusion
+of the appearance terms in the appearance prompt.
+Since we plan to regularize fine-tuning at 1e-4, we perform these measurements on the model fine-tuned
+at 1e-4.
 
 ### c.3) Résultats de l'interpolation
 
