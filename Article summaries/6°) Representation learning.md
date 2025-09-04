@@ -11,7 +11,7 @@ To construct g(x) from an image x, we create C embeddings zi, one for each class
 between these embeddings to find a probability distribution. For example, the probability that x belongs
 to class i is: 
 
-![representation1.PNG](representation1.PNG)
+![img/representation1.PNG](img/representation1.PNG)
 
 # Unsupervised representation learning: instance discrimination
 
@@ -24,7 +24,7 @@ To construct g(x) from an image x, we construct a single embedding zi for each i
 (instead of C) and
 the entropy (which is -log p where p is the probability that x belongs to its own class) is : 
 
-![representation2.png](representation2.png)
+![img/representation2.png](img/representation2.png)
 
 The numerator cannot be improved, but the denominator can be reduced by moving z away from the 
 other zi, which allows the embeddings to be pushed back into the latent space.
@@ -35,7 +35,7 @@ described in the article, but I haven't read the justifications yet. In summary,
 in a bank M so they do not have to recalculate gtheta(xi) at each step, and reduce the denominator of the softmax from N
 to K<<N drawn uniformly from N, probably because many terms have a contribution close to zero.
 
-![representation3.PNG](representation3.PNG)
+![img/representation3.PNG](img/representation3.PNG)
 
 # Unsupervised representation learning: local aggregation
 
@@ -59,8 +59,8 @@ x, and since we are using a softmax, the elements outside the cluster will move 
 the case where an element is in the cluster but is not a close neighbor of x. In this case, it will be a 
 close neighbor of another embedding and will be moved by its loss.
 
-![representation4.PNG](representation4.PNG)
-![representation5.PNG](representation5.PNG)
+![img/representation4.PNG](img/representation4.PNG)
+![img/representation5.PNG](img/representation5.PNG)
 
 # Loss NT-Xent:
 
@@ -74,10 +74,10 @@ probabilities at the same time prevents the vectors from randomly moving away fr
 if we maximized the probability of a single pair. Here, each vector moves away from the others, taking into account
 the fact that it must not approach another pair.
 
-![representation6.png](representation6.png)
+![img/representation6.png](img/representation6.png)
 
 This loss is not written exactly as it is in the article, but it is worth exactly the same; however, it shows more
 explicitly the maximization of the two probabilities for each modality. To be convinced of this, we can simply make
 the variable change j=k on the second expectation of this formula which comes from the article.
 
-![representation7.PNG](representation7.PNG)
+![img/representation7.PNG](img/representation7.PNG)
