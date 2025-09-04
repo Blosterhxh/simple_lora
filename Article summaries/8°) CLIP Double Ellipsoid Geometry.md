@@ -7,24 +7,24 @@ Before doing so, they provide definitions.
 
 ## a) Isotropic random vector:
 
-![ellipse01.PNG](ellipse01.PNG)
+![img/ellipse01.PNG](img/ellipse01.PNG)
 
 ## b) Log-concave distribution:
 
-![ellipse02.PNG](ellipse02.PNG)
+![img/ellipse02.PNG](img/ellipse02.PNG)
 
 ## c) First result:
 
 For an isotropic distribution, the mean norm of x is sqrt(n), n being the number of dimensions. Elementary events
 are therefore on a sphere with sqrt(n) radius.
 
-![ellipse1.PNG](ellipse1.PNG)
+![img/ellipse1.PNG](img/ellipse1.PNG)
 
 ## d) Second result:
 
 For an isotropic and log-concave distribution, the thickness of the sphere's shell is bounded according to this formula : 
 
-![ellipse2.PNG](ellipse2.PNG)
+![img/ellipse2.PNG](img/ellipse2.PNG)
 
 ## e) Third result:
 
@@ -32,7 +32,7 @@ If we only know that the coordinates of the random variable X all have a mean of
 of the norm of x around its mean are small compared to this mean, then the mean norm of x
 is approximately equal to the root of the trace of the covariance matrix.
 
-![ellipse3.PNG](ellipse3.PNG)
+![img/ellipse3.PNG](img/ellipse3.PNG)
 
 We can use an example to represent this in 2d. Let's take the case where x and y have a mean of zero,
 different variances, and zero covariance (covariance only changes the orientation of the ellipse, which is not relevant
@@ -44,7 +44,7 @@ the difference in variance between x and y have to be small relative to this mea
 points are on an ellipse, and approximately on a circle
 with radius equal to the root of the trace of the covariance matrix.
 
-![ellipse4.png](ellipse4.png)
+![img/ellipse4.png](img/ellipse4.png)
 
 In this example, the x and y coordinates follow a uniform distribution over their possible values. For example, for x, for every possible value xi, there are two corresponding points (xi,+yi) and (xi,-yi).
 In CLIP, we will see that the coordinates individually follow approximately a normal distribution
@@ -61,24 +61,24 @@ The authors then begin to analyze the embedding space to deduce its properties.
 Image and text vectors do not follow the same distribution. For example, for features 93 and 134, 
 the researchers obtain these distributions.
 
-![ellipse5.PNG](ellipse5.PNG)
+![img/ellipse5.PNG](img/ellipse5.PNG)
 
 With these two features alone, they are able to linearly separate all image vectors from
 text vectors.
 
-![ellipse6.PNG](ellipse6.PNG)
+![img/ellipse6.PNG](img/ellipse6.PNG)
 
 However, not all features are easily separable. They found nine that stand out, including 93 and 
 134.
 
-![ellipse7.PNG](ellipse7.PNG)
-![ellipse8.PNG](ellipse8.PNG)
+![img/ellipse7.PNG](img/ellipse7.PNG)
+![img/ellipse8.PNG](img/ellipse8.PNG)
 
 ## b) Shape of the two distributions:
 
 Taking the first 10 features of each distribution, they find that the values peak at 0.
 
-![ellipse9.PNG](ellipse9.PNG)
+![img/ellipse9.PNG](img/ellipse9.PNG)
 
 Conversely, the norm has a non-zero average value, with a much lower variance than the individual coordinates.
 
@@ -87,7 +87,7 @@ The authors conclude:
 We know that with the third result, the average norm is root(tr(C)). For now, I don't understand when 
 this information was useful in the article.
 
-![ellipse10.PNG](ellipse10.PNG)
+![img/ellipse10.PNG](img/ellipse10.PNG)
 
 ## c) Ellipsoidal shell:
 
@@ -102,7 +102,7 @@ not be able to be constant as well.
 However, when we look at the graph of feature variances, we see that the variances average around
 0.1, and that higher variances are rare.
 
-![ellipse11.PNG](ellipse11.PNG)
+![img/ellipse11.PNG](img/ellipse11.PNG)
 
 Thus, by deforming space with Malahanodis, the points
 restricted to the features with the variance close to 0.1 will remain on a sphere, as all coordinates will have been stretched almost equally.
@@ -119,20 +119,20 @@ The authors calculate the off-diagonal dominance for each row of the covariance 
 the diagonal is dominant compared to the rest of the coefficients, in other words, whether the variables are correlated
 or not. 
 
-![ellipse12.PNG](ellipse12.PNG)
+![img/ellipse12.PNG](img/ellipse12.PNG)
 
 They observe significant values, meaning that the variables are correlated and therefore the ellipses
 are tilted (as in 2 dimensions, where covariance implies that the axis of the ellipse is oriented according to this
 covariance).
 
-![ellipse13.PNG](ellipse13.PNG)
+![img/ellipse13.PNG](img/ellipse13.PNG)
 
 ## e) Center of the ellipsoids:
 
 The authors want to evaluate the distance from the center of the ellipsoids to the origin. To do this, they compare the standard deviation
 to the mean vector.
 
-![ellipse14.PNG](ellipse14.PNG)
+![img/ellipse14.PNG](img/ellipse14.PNG)
 
 They find the same order of magnitude. This means that the ellipsoids are significantly distant from the origin.
 
@@ -174,7 +174,7 @@ Thus, the information extracted by the two encoders for
 the same pair is not always identical: the text may have been very descriptive for a simple image, and the image encoder
 seeing a simple image will extract little information, unlike the text encoder.
 
-![ellipse15.PNG](ellipse15.PNG)
+![img/ellipse15.PNG](img/ellipse15.PNG)
 
 Here, the Ci/Ct indicate the average cosine similarity of the embedding with the other vectors of its modality. We can see that an image and
 text from the same pair can have very different Ci/Ct, indicating that one encoder extracts common information related to
@@ -197,7 +197,7 @@ case for isotropic log-concave distributions.
 
 The authors rewrite the loss with an alignment term and a uniformity term.
 
-![representation7.PNG](representation7.PNG)
+![img/representation7.PNG](img/representation7.PNG)
 
 The alignment term brings the
 vectors of the same pair closer together, and the uniformity term pushes the vectors of different pairs further apart. To reduce the loss,
@@ -206,12 +206,12 @@ we want to increase the alignment and decrease the uniformity.
 To understand the shift of the ellipsoids, they move the ellipsoid of the images relative to the origin to see 
 the evolution of the loss and specifically of these two terms.
 
-![ellipse16.PNG](ellipse16.PNG)
+![img/ellipse16.PNG](img/ellipse16.PNG)
 
 We observe that alignment increases as we move away from the origin, while uniformity decreases as we move closer to it.
 The optimal loss corresponds to an ellipsoid centered on the mean vector that was found with training.
 
-![ellipse17.PNG](ellipse17.PNG)
+![img/ellipse17.PNG](img/ellipse17.PNG)
 
 These different evolutions of alignment and uniformity can be explained.
 The difference stems from the fact that for image encoder embeddings, the possible directions increase as they
@@ -233,7 +233,7 @@ The problem with centering the ellipsoid at the origin is that a small shift in 
 rapid drop in cosine similarity. Indeed, if we calculate the gradient of a cosine similarity with respect to a 
 vector, we see that this gradient is inversely proportional to the norm of this vector.
 
-![ellipse18.PNG](ellipse18.PNG)
+![img/ellipse18.PNG](img/ellipse18.PNG)
 
 This means that it is difficult to have a high cosine similarity for false negatives, as they cannot be as close as true pairs are.
 By moving the ellipsoid away from the origin, we decrease the gradient of the cosine similarity and thus increase the cosine
@@ -249,7 +249,7 @@ and rare images. However, by moving the ellipsoid away from the origin, an embed
 will have a higher average cosine similarity with the other embeddings than an embedding with an extreme direction.
 The diagram below shows a simplified example with a sphere, but the same reasoning applies to an ellipsoid.
 
-![ellipse19.PNG](ellipse19.PNG)
+![img/ellipse19.PNG](img/ellipse19.PNG)
 
 Thus, common images can be placed in embeddings directed towards the center and rare images in 
 embeddings at the extreme directions of the ellipsoid.
