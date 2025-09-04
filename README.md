@@ -49,7 +49,7 @@ Here are some images generated with the three learning rates to visualize the di
 ![img/inversion5e-5.png](img/inversion5e-5.png)
 > LR = 5e-5
 
-# 4/ Choix du learning rate pour le finetuning
+# 4/ Choice of learning rate for finetuning
 
 In the styleGAN, they say that they 
 apply “light” finetuning, which
