@@ -11,13 +11,13 @@ This is illustrated in this graph from the article, where we can see that the sp
 (changing direction changes the orientation of the face), and the appearance of G in this space has changed slightly
 to resemble the original image.
 
-![pivotaltuning.PNG](pivotaltuning.PNG)
+![img/pivotaltuning.PNG](img/pivotaltuning.PNG)
 
 ## Inversion
 
 We take a latent w in W and a noise n through optimization to produce an image close to the target.
 
-![inversionpivotal.PNG](inversionpivotal.PNG)
+![img/inversionpivotal.PNG](img/inversionpivotal.PNG)
 
 Here, noise is an integral part of the inputs because it defines the random patterns at several stages of synthesis,
 for example, the overall shape of the hair at the first layer of synthesis, and then the more precise patterns of the 
@@ -31,18 +31,18 @@ random values, and not semantic information, which is reserved for w.
 For tuning, we have a term for the difference between the target image and the image generated with the latent, and a
 regularization term that aims to force the tuning to remain local around w.
 
-![tuningloss.PNG](tuningloss.PNG)
+![img/tuningloss.PNG](img/tuningloss.PNG)
 
 For the regularization term, we draw a vector in Z, transform it into latent wz, and perform an interpolation between
 wp (the pivot) and wz, whose distance from wp is measured by an alpha coefficient.
 
-![interpolation.PNG](interpolation.PNG)
+![img/interpolation.PNG](img/interpolation.PNG)
 
 The idea behind this interpolation is that if wz is too far from wp, the effect of fine-tuning will be weak on wz, so the regularization term
 will have little effect, and conversely, if it is too close to wp, the main term of the loss will force fine-tuning of the point and regularization will be weak. It is therefore necessary to find a point at the right distance. By testing several alphas, the researchers found that
 an alpha of 60 gave an image almost identical to wz, and that an alpha of 30 gave a good compromise between wz and wp.
 
-![alpha60.PNG](alpha60.PNG)
+![img/alpha60.PNG](img/alpha60.PNG)
 
 Reconstruction tests show that the loss between images generated for wz by the new and old generators is lower
 in the alpha 30 case.
