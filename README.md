@@ -2,7 +2,7 @@
 
 This github project was aimed at providing a complete understanding of pivotal tuning for diffusion model so that one could easily understand how to tune hyperparameters depending on what he is looking for.
 
-This github is composed of two folders :
+This github is composed of two main folders :
 
 - Article summaries, which correspond to summaries of papers from the creation of styleGAN to the application of pivotal tuning to diffusion model, along with other paper that can be
 useful to make experiment like CLIP Double ellispoid geometry. They are numbered in an specific order so that they can be read one after the other.
@@ -17,6 +17,8 @@ Next, i will present the different results i have been able to shade light on wi
 For the next experiments, I will summarize what I have gleaned from the articles without justification; for details of the reasoning, see the individual summaries of the articles.
 
 For training config, we take a constant number of steps of 1000 so as not to prolong the training, and we will study the influence of the other parameters.
+
+The images dataset is in the dataset folder, it consists of only 5 images as advised by : https://arxiv.org/pdf/2208.01618.
 
 # Choice of learning rate for inversion
 
