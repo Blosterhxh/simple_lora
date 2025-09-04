@@ -78,7 +78,7 @@ will therefore choose a learning rate of 1e-5.
 
 ## A) Usefulness of regularization in diffusion model
 
-### a.1) Regularization in styleGAN
+### a.1) Regularization on styleGAN
 
 When fine-tuning $G$ on a latent $w_{p}$, the fine-tuning will affect the nearby latents, this propagation
 decreasing with distance. The problem is that we only have one model, so we cannot afford to
