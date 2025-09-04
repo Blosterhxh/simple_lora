@@ -47,4 +47,4 @@ an alpha of 60 gave an image almost identical to wz, and that an alpha of 30 gav
 Reconstruction tests show that the loss between images generated for wz by the new and old generators is lower
 in the alpha 30 case.
 
-![alpha30.PNG](alpha30.PNG)
+![img/alpha30.PNG](img/alpha30.PNG)
