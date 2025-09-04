@@ -86,57 +86,51 @@ Ainsi les modifications de G sur wr par te vont être négligeables devant la r�
 l'apprentissage de G sur wp par tr sera négligeable devant le terme d'entrainement. On peut donc
 préserver les visages situés autour du pivot sans trop freiner l'apprentissage.
 
-### a.2) Régularisation sur styleGAN = régularisation sur modèle de diffusion ?
+### a.2) Regularization on styleGAN = regularization on diffusion model ?
 
-Pour appliquer la régularisation au modèle de diffusion, on se place dans l'espace des embeddings après le transformer
-de CLIP qui est entrainé pour avoir une relation entre la géométrie et la sémantique, contrairement à l'espace 
-d'embeddings après les tokens. 
-Il faut ensuite se demander si la régularisation appliquée telle quelle comme dans le styleGAN a une utilité pour nous.
-En réalité, elle n'en a pas, car avec les loras, on peut facilement charger/décharger une config
-donc ce n'est pas un problème si l'apprentissage déborde sur les autres embeddings, contrairement au styleGAN.
+To apply regularization to the diffusion model, we work in the embedding space after the CLIP transformer, which is trained to establish a relationship between geometry and semantics, unlike the embedding space after the tokens.
+We might then wonder whether regularization applied exactly as in StyleGAN is useful to us.
+Actually, it's not, because with LORAs we can easily load/unload a configuration so it is not a problem if learning affect nearby embeddings.
 
-### a.3) Sélectionner les features apprises grâce à la régularisation
+### a.3) Select features learned through regularization
 
-Cependant, on peut trouver une autre utilité à la régularisation.
-Durant le finetuning, l'embedding \<tok1> va apprendre toutes les features du dataset : apparence, position, environnement ...
-(quand je dis "l'embedding tok1 va apprendre", c'est un raccourci pour dire que G va changer ses valeurs sur tok1).
-Pour l'empêcher d'apprendre des features inutiles, on pourrait ajouter un terme de régularisation qui force \<tok1>, sur les features
-qu'on ne souhaite pas apprendre, à rester identique à la version avant le finetuning.
+However, regularization can be useful in another way.
+During fine-tuning, the embedding $\langle tok1 \rangle$ will learn all the features of the dataset: appearance, position, environment, etc.
+(When I say “the embedding tok1 will learn,” it's a shortcut for saying that G will change its values on tok1).
+To prevent it from learning useless features, we could add a regularization term that forces $\langle tok1 \rangle$, on the features
+we don't want to learn, to remain identical to the version before fine-tuning.
 
-Ainsi, on aurait plus à limiter la distance 
-parcourue par G avec un petit learning rate pour éviter l'apprentissage de feature parasites.
-On peut augmenter le learning rate pour que G parcourt une plus grande zone de l'espace des fonctions
-et trouver une meilleure reconstruction.
+This way, we would no longer have to limit the distance 
+traveled by G with a small learning rate to avoid learning parasitic features.
+We can increase the learning rate so that G covers a larger area of the function space
+and find a better reconstruction.
 
-La limite de l'overfitting où les positions et l'environnement étaient appris se trouvaient à lr = 1e-4.
-Dans la suite, on va utiliser ce learning rate et voir si on arrive à annuler l'apprentissage des positions et de l'environnement.
+The overfitting limit where the positions and environment were learned was found to be at lr = 1e-4.
+Next, we will use this learning rate and see if we can cancel out the learning of positions and environment.
 
-## B) Interpoler entre deux embeddings
+## B) Interpolate between two embeddings
 
-Pour trouver le terme de régularisation, on va avoir besoin d'interpoler entre \<tok1> et character.
-Voyons comme cela est possible.
+We know that the manifold of text embeddings in CLIP is an ellipsoid
+that can be approximated by a sphere, as most coordinates have the same variance.
+This sphere is offset from the origin. 
+However, this is only true for the last sentence/image token embeddings, which are the ones on which
+the CLIP loss is based. We know nothing about the other embeddings. Yet it is these other embeddings that are passed
+in matrix form to the diffusion model.
 
-On sait que le manifold des embeddings de texte dans CLIP est une ellispoïde
-qu'on peut approximer par une sphère comme la majorité des coordonées ont la même variance.
-Cette sphère est décalée de l'origine. 
-Cependant, ceci n'est vrai que pour les embeddings de token de fin d'une phrase/image qui sont ceux sur lesquelles
-la loss de CLIP porte. Pour les autres embeddings on ne sait rien. Or ce sont ces autres embeddings qui sont passés
-sous forme de matrice au modèle de diffusion.
+Since character/$\langle tok1 \rangle$ are in the middle of the sentence at index 5, we can try to see if the embeddings at index 5
+of a sentence follow the same distribution in space as the end embeddings. To do this, I took
+the same dataset used by the researchers to determine the manifold of end embeddings (MS-COCO 2014),
+and I calculated the mean norm and the variance of this norm. In the end, I obtained the same result
+as for the end embeddings: norm of 24 and variance of 1. We will therefore be able to perform a vSLERP for our embeddings at position 5, as 
+the researchers do on the end embeddings.
 
-Comme character/tok1 sont en milieu de phrase à l'indice 5, on peut essayer de voir si les embeddings à l'indice 5
-d'une phrase suivent la même répartition dans l'espace que les embeddings de fin. Pour cela, j'ai pris
-le même dataset que celui utilisé par les chercheurs pour déterminer le manifold des embeddings de fin (MS-COCO 2014),
-et j'ai calculé la norme moyenne et la variance de cette norme. Au final, j'ai obtenu le même résultat
-que sur les embeddings de fin : norme de 24 et variance 1. On va donc pouvoir faire une vSLERP pour nos embeddings à la position 5 comme 
-les chercheurs font sur les embeddings de fin.
+However, there is a problem in my code because when calculating the mean norm and variance for the end token (I should therefore have the same result as in the article), I get a lower variance with the basic embeddings than with the centered embeddings, which is not consistent with the shift of the text ellipsoid from the origin that the authors showed. I get exactly 27 for the norm and 0.1 for the variance with non centered embeddings. So I will do a SLERP and not a vSLERP until this problem is resolved.
 
-Toutefois il y a un problème dans mon code car en calculant la norme moyenne et la variance pour le token de fin (je devrai donc avoir le même résultat que l'article), j'obtiens une variance plus faible avec les embeddings de base plutôt qu'avec les embeddings centrés, ce qui n'est pas cohérent avec le décalage de l'ellipsoïde texte de l'origine que les auteurs ont montré. J'ai exactement 27 de norme et 0.1 de variance. Je vais donc faire une SLERP et pas une vSLERP tant que ce problème n'est pas résolu.
+## C) The appearance prompt
 
-## C) Le prompt apparence
+Before we can find the term for regularization, we will demonstrate a property.
 
-Avant de pouvoir trouver le terme de régularisation, on va démontrer une propriété.
-
-### c.1) Modélisation du problème
+### c.1) Problem modeling
 
 We begin by modeling our situation mathematically.
 
@@ -151,7 +145,7 @@ $$
 
 where $G_1$ transforms the text appearance into image appearance and  $G_2$ transforms the text environment into image environment.
 
-Let's take the training prompt: “an anime illustration of \<tok1>”.
+Let's take the training prompt: “an anime illustration of $\langle tok1 \rangle$ ".
 
 Initially, the function $G$, which we will annotate as $G_a$, is:  
 
@@ -181,7 +175,7 @@ $$
 but this is not the case because the token  $\langle tok1 \rangle$  has been associated with both the appearance **and** the environment of the dataset.
 
 
-### c.2) Existence du prompt apparence
+### c.2) Exitence of the appearance prompt
 
 We would like to demonstrate that there exists a prompt $(x_t, y_t)$, such that:  
 
@@ -239,7 +233,7 @@ of the appearance terms in the appearance prompt.
 Since we plan to regularize fine-tuning at 1e-4, we perform these measurements on the model fine-tuned
 at 1e-4.
 
-### c.3) Résultats de l'interpolation
+### c.3) Interpolation results
 
 We have these evolutions of the influence of fine-tuning and editability with interpolation.
 
@@ -272,15 +266,13 @@ and regularize at t = 1, where we see that appearance is indeed modified and tha
 fine-tuning, even though I am unable to
 find a formula to substantiate this observation.
 
-## D) Le terme de régularisation
+## D) The regularization term
 
-### d.1) Trouver le terme de régularisation
+### d.1) Finding the regularization term
 
 The two previous points allowed us to find a prompt $(x_t,y_t)$ where 
 
-$G_{b1}(x_t) = G_{a1}(\text{char1})$ and $G_{b2}(y_t) = G_{b2}(\langle tok1 \rangle)$
-
-with $\langle G_{a1}(\text{char1}) \mid G_{b1}(\langle tok1 \rangle) \rangle = 0$.
+$G_{b1}(x_t) = G_{a1}(\text{char1})$ and $G_{b2}(y_t) = G_{b2}(\langle tok1 \rangle)$ with $G_{a1}(\text{char1}) \neq G_{b1}(\langle tok1 \rangle)$.
 
 We denote $G_e$ as the function $G$ trained from $G_a$ to $G_b$.  
 
@@ -295,7 +287,7 @@ $G_{a1}(\text{char1})$ is not affected by the finetuning.
 We will modify the loss by adding a second term relating to the appearance prompt:
 
 $$
-\text{Loss} = \| G_e(\text{“an anime illustration of }\langle tok1 \rangle\text[{"}) - \text{dataset} \|
+\text{Loss} = \| G_e(\text{“an anime illustration of }\langle tok1 \rangle\text{"}) - \text{dataset} \|
 +
  \| G_e(\text{“an anime illustration of character woman with long blue hair”}) - G_a(\text{“an anime illustration of character woman with long blue hair”}) \|
 $$
@@ -309,7 +301,7 @@ $$
 Expanding:  
 
 $$
-= \| G_{a1}(\textttt{char1}),G_{b2}(\langle tok1 \rangle) - (G_{a1}(\textttt{char1}),\text{random}) \|
+= \| G_{a1}(\text{char1}),G_{b2}(\langle tok1 \rangle) - (G_{a1}(\text{char1}),\text{random}) \|
 $$
 
 $$
@@ -324,7 +316,7 @@ the second term decreases. So we don't know how the model will evolve to decreas
 We will therefore weight the second term by a coefficient, such as *2, so that keeping the initial environment
 decreases the loss more than learning the dataset environment.
 
-The second problem is that in the term $\| G_{b2}(\langle tok1 \rangle) - \text{random} \|$, we do not know if learning the dataset environment will actually increase the term.
+The second problem is that in the term $\| 0,G_{b2}(\langle tok1 \rangle) - \text{random} \|$, we do not know if learning the dataset environment will actually increase the term.
 In fact, the base model generates a random environment, so comparing two generations of random environments potentially gives as much error 
 as comparing a fixed environment (the one learned from the dataset) with random environments.
 
@@ -332,7 +324,7 @@ For now, we will set aside problem 2 by setting an environment in the regulariza
 hair in a garden,“ and we will see if the term $\| 0,G_{b2}(\langle tok1 \rangle) - G_{a2}(garden) \|$ actually allows us to learn the environment ”a garden" rather than the one from
 the dataset.
 
-### d.2) Résultats de la régularisation
+### d.2) Regularization results
 
 
 
