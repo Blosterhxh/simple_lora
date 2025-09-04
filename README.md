@@ -41,19 +41,19 @@ Voici quelques images générées avec les trois learning rates pour visualiser 
 
 # Choix du learning rate pour le finetuning
 
-Dans le styleGAN ils disent qu'ils 
-appliquent un "léger" finetuning qui
-leur permet de gagner en reconstruction
-sans perdre en editability. Il faut donc définir qu'est-ce qu'un finetuning léger
-avant de pouvoir trouver le bon learning
-rate. Pour cela on va expliquer le fonctionnement général du finetuning.
+In the styleGAN, they say that they 
+apply “light” finetuning, which
+allows them to improve reconstruction
+without losing editability. We therefore need to define what light fine-tuning is
+before we can find the right learning
+rate. To do this, we will explain how fine-tuning works in general.
 
-Lors d'un finetuning une fonction apprend différents concepts. Par exemple en finetunant notre fonction sur un personnage, la fonction apprend son apparence, mais aussi des éléments non voulus comme sa position, l'environnement dans lequel il se situe. Les concepts dont la différence est la plus faible entre l'état de base et le dataset de finetuning seront améliorés les premiers car la fonction G dans l'espace des fonctions aura moins de distance à parcourir pour les améliorer. Par exemple, si un personnage dans le dataset contient plusieurs positions différentes, pour apprendre ces positions le modèle devra déjà abandonner le fait qu'il produit des positions aléatoires pour le token associé à ce personnage, et en plus il ne pourra apprendre une position donnée que lorsqu'il passe sur l'image du dataset avec cette position. Pour l'apparence, l'état de base de la fonction est déjà proche de l'état d'arrivée grâce à l'inversion, et chaque image du dataset contribue également à améliorer l'apparence donc elle sera améliorée beaucoup plus vite que la position.
+During finetuning, a function learns different concepts. For example, by finetuning our function on a character, the function learns its appearance, but also unwanted elements such as its position and the environment in which it is located. The concepts with the smallest difference between the baseline state and the fine-tuning dataset will be improved first because the function G in the function space will have less distance to travel to improve them. For example, if a character in the dataset contains several different positions, in order to learn these positions, the model will already have to abandon the fact that it produces random positions for the token associated with this character, and in addition, it will only be able to learn a given position when it passes over the image in the dataset with that position. For appearance, the baseline state of the function is already close to the final state thanks to inversion, and each image in the dataset also contributes to improving appearance, so it will be improved much faster than position.
 
-Si on veut améliorer un concept précis comme l'apparence, il faut donc qu'on se déplace pas plus loin que la distance permettant de modifier ce concept et pas les autres. C'est cela que les auteurs du pivotal tuning veulent dire quand ils parlent de finetuning léger. 
+If we want to improve a specific concept such as appearance, we must therefore not move further than the distance that allows us to modify this concept and not the others. This is what the authors of pivotal tuning mean when they talk about light finetuning. 
 
-Pour trouver la bonne distance de finetuning, on essaie différents learning rate pour trouver la distance limite où
-on commence a apprendre les positions, et on s'arrête juste avant. On réalise les mesures sur 2 learnings rates : 1e-4 et 1e-5.
+To find the right finetuning distance, we try different learning rates to find the limit distance where
+we start learning the positions, and we stop just before that. We take measurements on two learning rates: 1e-4 and 1e-5.
 
 ![finetuning1e-4.png](finetuning1e-4.png)
 > LR = 1e-4
@@ -61,9 +61,8 @@ on commence a apprendre les positions, et on s'arrête juste avant. On réalise 
 ![finetuning1e-5.png](finetuning1e-5.png)
 > LR = 1e-5
 
-On voit que à 1e-5 seule l'apparence est apprise, et qu'ensuite d'autres features comme la position et l'environnement se rajoute à l'apprentissage. On
-va donc choisir un learning rate de 1e-5.
-
+We can see that at 1e-5, only appearance is learned, and then other features such as position and environment are added to the learning process. We
+will therefore choose a learning rate of 1e-5.
 
 # 3/ Regularization
 
@@ -80,9 +79,9 @@ To do this, we add a regularization term, which forces G to stick to the base mo
 If we take a latent where we regularize $w_{r}$, and we denote the regularization term as $t_{r}$ and the training term as $t_{e}$,
 everything will happen as follows:
 
-$ \nabla G(w_{p}) = 0.1 \cdot \nabla(t_{r}) + 0.9 \cdot \nabla(t_{e}) $
+$$\nabla G(w_{p}) = 0.1 \cdot \nabla(t_{r}) + 0.9 \cdot \nabla(t_{e})$$
 
-$ \nabla G(w_{r}) = 0.1 \cdot \nabla(t_{e}) + 0.9 \cdot \nabla(t_{r}) $
+$$\nabla G(w_{r}) = 0.1 \cdot \nabla(t_{e}) + 0.9 \cdot \nabla(t_{r})$$
 
 (the coefficients 0.1/0.9 are not exact; they are just to show that, depending on the gradient, one term or the other will be more taken into account).
 Thus, the changes in $G$ on $w_{r}$ by $t_{e}$ will be negligible compared to the regularization, and the slowing down of 
