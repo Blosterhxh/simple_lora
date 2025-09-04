@@ -21,7 +21,7 @@ Even though the model is trained to represent the image of the object as a whole
 its composition and can make it interact with other objects. For example, if we teach it about a specific bowl, it will be able to contain
 objects inside it, just like any other bowl.
 
-![capacite1.PNG](capacite1.PNG)
+![img/capacite1.PNG](img/capacite1.PNG)
 
 
 ## b) Abstract ideas
@@ -29,7 +29,7 @@ objects inside it, just like any other bowl.
 The model is not limited to learning about concrete objects, but can also grasp abstract ideas such as
 a drawing style with this type of prompt: “A painting in the style of s\*”
 
-![capacite2.PNG](capacite2.PNG)
+![img/capacite2.PNG](img/capacite2.PNG)
 
 # C/ Limitations:
 
@@ -83,7 +83,7 @@ not be exactly the same in our case, but they still give an idea of the starting
 The authors observed the existence of an editability/reconstruction curve, and the further the vector(s) taken in the embedding space
 move away from the initial embedding of the class (e.g., lion, tiger, etc.), the more reconstruction is gained while losing editability. 
 
-![tradeoff.PNG](tradeoff.PNG)
+![img/tradeoff.PNG](img/tradeoff.PNG)
 
 In this graph, an increase in image similarity indicates better reconstruction, and an increase in text similarity indicates better editability (in line with
 the two evaluation methods seen previously). There is therefore a curve at the top right on which the different configurations are positioned, with each configuration favoring reconstruction/editability to a greater or lesser extent than the others.
@@ -135,7 +135,7 @@ des points de W. Pour le modèle de diffusion, on peut appliquer cette même mé
 modifier la sémantique dans l'espace des embeddings mais seulement modifier l'apparence de certains embeddings ce qui est géré par l'unet).
 Toutefois, les auteurs de l'article ont observé  qu'appliquer cette méthode dans le cas du modèle de diffusion n'est pas aussi efficace et fait perdre l'editability qui aurait du être préservée par le finetuning. Ils proposent des idées pour modifier ce finetuning, mais qu'ils n'ont pas encore exploré.
 
-![pivotaltuningdiffusion.PNG](pivotaltuningdiffusion.PNG)
+![img/pivotaltuningdiffusion.PNG](img/pivotaltuningdiffusion.PNG)
 
 Ces images correspondent à la génération d'un prompt étant censé placée la sculpture dans un tableau, avec à chaque fois un guidance scale s (paramètre qui influe sur a quel point
 l'unet va prendre en compte le prompt pour générer l'image) plus élevé : 1,2 et 5. Au final le modèle est incapable de placer la statue dans un tableau donc on a perdu en editability.
@@ -149,7 +149,7 @@ of the points in W. For the diffusion model, we can apply this same method by fi
 modify the semantics in the embedding space, but only modify the appearance of certain embeddings, which is handled by the unet).
 However, the authors of the article observed  that applying this method in the case of the diffusion model is not as effective and results in a loss of editability that should have been preserved by fine-tuning. They propose ideas for modifying this fine-tuning, but have not yet explored them.
 
-![pivotaltuningdiffusion.PNG](pivotaltuningdiffusion.PNG)
+![img/pivotaltuningdiffusion.PNG](img/pivotaltuningdiffusion.PNG)
 
 These images correspond to the generation of a prompt that is supposed to place the sculpture in a painting, each time with a higher guidance scale s (a parameter that influences the extent to which
 the model will take the prompt into account to generate the image): 1, 2, and 5. In the end, the model is unable to place the statue in a painting, so we have lost editability.
@@ -158,4 +158,4 @@ the model will take the prompt into account to generate the image): 1, 2, and 5.
 
 The number of images has little effect on reconstruction; an optimal number of 5 has been found for editability.
 
-![datasetsize.PNG](datasetsize.PNG)
+![img/datasetsize.PNG](img/datasetsize.PNG)
