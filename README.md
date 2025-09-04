@@ -9,7 +9,7 @@ useful to make experiment like CLIP Double ellispoid geometry. They are numbered
 
 - The notebook folder, which contains several notebooks used to train diffusion model, load a config and conduct experiments on it. Many parts of the code was inspired by this repository : . The main differences are that it was simplified to remove advanced options so it focuses on the core concepts of pivotal tuning, and it was commented and reunited in a single notebook si it's more easily understandable and executable.
 
-Next, i will present the different results i have been able to shade light on with reading articles/experiments, which allow for an understanding of pivotal tuning for diffusion model
+Next, i will present the different results i have been able to shade light on with reading articles/experiments, which allow for an understanding of pivotal tuning for diffusion model.
 
 
 # A few words about incoming experiments
@@ -78,12 +78,12 @@ will therefore choose a learning rate of 1e-5.
 
 ### a.1) Regularization in styleGAN
 
-When fine-tuning G on a latent $w_{p}$, the fine-tuning will affect the nearby latents, this propagation
+When fine-tuning $G$ on a latent $w_{p}$, the fine-tuning will affect the nearby latents, this propagation
 decreasing with distance. The problem is that we only have one model, so we cannot afford to
-lose all of G's face generation capacity just to learn about a single person.
+lose all of $G$'s face generation capacity just to learn about a single person.
 We must therefore avoid this propagation.
 
-To do this, we add a regularization term, which forces G to stick to the base model on latents close to $w_{p}$.
+To do this, we add a regularization term, which forces $G$ to stick to the base model on latents close to $w_{p}$.
 If we take a latent where we regularize $w_{r}$, and we denote the regularization term as $t_{r}$ and the training term as $t_{e}$,
 everything will happen as follows:
 
@@ -105,14 +105,14 @@ Actually, it's not, because with LORAs we can easily load/unload a configuration
 ### a.3) Select features learned through regularization
 
 However, regularization can be useful in another way.
-During fine-tuning, the embedding $\langle tok1 \rangle$ will learn all the features of the dataset: appearance, position, environment, etc.
-(When I say “the embedding tok1 will learn,” it's a shortcut for saying that G will change its values on tok1).
+During finetuning, the embedding $\langle tok1 \rangle$ will learn all the features of the dataset: appearance, position, environment, etc.
+(When I say “the embedding $\langle tok1 \rangle$ will learn,” it's a shortcut for saying that G will change its values on $\langle tok1 \rangle$).
 To prevent it from learning useless features, we could add a regularization term that forces $\langle tok1 \rangle$, on the features
-we don't want to learn, to remain identical to the version before fine-tuning.
+we don't want to learn, to remain identical to the version before finetuning.
 
 This way, we would no longer have to limit the distance 
-traveled by G with a small learning rate to avoid learning parasitic features.
-We can increase the learning rate so that G covers a larger area of the function space
+traveled by $G with a small learning rate to avoid learning parasitic features.
+We can increase the learning rate so that $G$ covers a larger area of the function space
 and find a better reconstruction.
 
 The overfitting limit where the positions and environment were learned was found to be at lr = 1e-4.
@@ -134,7 +134,7 @@ and I calculated the mean norm and the variance of this norm. In the end, I obta
 as for the end embeddings: norm of 24 and variance of 1. We will therefore be able to perform a vSLERP for our embeddings at position 5, as 
 the researchers do on the end embeddings.
 
-However, there is a problem in my code because when calculating the mean norm and variance for the end token (I should therefore have the same result as in the article), I get a lower variance with the basic embeddings than with the centered embeddings, which is not consistent with the shift of the text ellipsoid from the origin that the authors showed. I get exactly 27 for the norm and 0.1 for the variance with non centered embeddings. So I will do a SLERP and not a vSLERP until this problem is resolved.
+However, there is a problem in my code (see Notebooks/manifold_of_text_embeddings.ipynb) because when calculating the mean norm and variance for the end token (I should therefore have the same result as in the article), I get a lower variance with the basic embeddings than with the centered embeddings, which is not consistent with the shift of the text ellipsoid from the origin that the authors showed. I get exactly 27 for the norm and 0.1 for the variance with non centered embeddings. So I will do a SLERP and not a vSLERP until this problem is resolved.
 
 ## C) The appearance prompt
 
@@ -172,7 +172,7 @@ In terms of environment, it is generated randomly because  $\langle tok1 \rangle
 At the end of training:  
 
 $$
-G_b(x_t = \langle tok1 \rangle,\, y_t = \langle tok1 \rangle) 
+G_b(x_t = \langle tok1 \rangle, y_t = \langle tok1 \rangle) 
 = G_{b1}(\langle tok1 \rangle),G_{b2}(\langle tok1 \rangle)
 $$
 
@@ -185,12 +185,12 @@ $$
 but this is not the case because the token  $\langle tok1 \rangle$  has been associated with both the appearance **and** the environment of the dataset.
 
 
-### c.2) Exitence of the appearance prompt
+### c.2) Existence of the appearance prompt
 
 We would like to demonstrate that there exists a prompt $(x_t, y_t)$, such that:  
 
 $$
-G_b(x_t, y_t) = G_{a1}(\text{char1}) + G_{b2}(\langle tok1 \rangle)
+G_b(x_t, y_t) = G_{a1}(\text{char1}),G_{b2}(\langle tok1 \rangle)
 $$
 
 where $G_{a1}(\text{char1})$ is a character appearance known by $G_{a}$, with $G_{a1}(\text{char1})  \neq  G_{b1}(\langle tok1 \rangle)$
@@ -234,13 +234,13 @@ $$
 G_{b2}(interpolation) = G_{b2}(\langle tok1 \rangle\)
 $$
 
-We will therefore interpolate between tok1 and character, measure the influence of fine-tuning and editability,
+We will therefore interpolate between $\langle tok1 \rangle\$  and character, measure the influence of finetuning and editability,
 and choose an optimal point. To measure the influence of fine-tuning, we calculate the cosine similarity
 of the generated images with those in the dataset. To measure editability, we generate images using the simple prompt and the appearance prompt from the interpolated point
 and calculate the cosine
 similarity between the two. The decrease in similarity in this case will be due to the inclusion
 of the appearance terms in the appearance prompt.
-Since we plan to regularize fine-tuning at 1e-4, we perform these measurements on the model fine-tuned
+Since we plan to regularize finetuning at 1e-4, we perform these measurements on the model fine-tuned
 at 1e-4.
 
 ### c.3) Interpolation results
@@ -318,7 +318,7 @@ $$
 = \| 0,G_{b2}(\langle tok1 \rangle) - \text{random} \|
 $$
 
-Thus, the first term of the loss pushes G to resemble the dataset on $\langle tok1 \rangle$, and the second term forces $\langle tok1 \rangle$ not to store environmental information.
+Thus, the first term of the loss pushes $G$ to resemble the dataset on $\langle tok1 \rangle$, and the second term forces $\langle tok1 \rangle$ not to store environmental information.
 
 That said, there are still two problems. 
 First, by learning the dataset environment, the first term decreases, and by keeping the original environment,
@@ -336,7 +336,7 @@ the dataset.
 
 ### d.2) Regularization results
 
-Unfortunately the above method did not prevent overfitting at lr =  1e-4. Moreover we do not see the garden as an environment. 
+Unfortunately the above method did not prevent overfitting at lr =  1e-4, we do not see the garden as an environment. 
 
 ![img/results.png](img/results.png)
 
