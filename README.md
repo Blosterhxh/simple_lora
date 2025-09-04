@@ -1,3 +1,6 @@
+The code is licensed under GPLv3 (see LICENSE-CODE).
+The article summaries and the readme are licensed under CC0 (see LICENSE-TEXT).
+
 # 1/ Structure of the github
 
 This github project was aimed at providing a complete understanding of pivotal tuning for diffusion model so that one could easily understand how to tune hyperparameters depending on what he is looking for.
