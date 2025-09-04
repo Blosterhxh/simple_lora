@@ -14,7 +14,7 @@ which provides the generator with a basis for constructing randomness at each st
 to construct hair). Without this, it would have to find a way to construct randomness itself using 
 its weights, which would reduce the other reconstruction capabilities.
 
-![styleGAN.PNG](styleGAN.PNG)
+![img/styleGAN.PNG](img/styleGAN.PNG)
 
 ## The latent space W
 
@@ -42,5 +42,5 @@ to the dataset. It can therefore freely choose the values that G takes on each a
 
 The article uses this diagram to depict the problem:
 
-![styleganW.PNG](styleganW.PNG)
+![img/styleganW.PNG](img/styleganW.PNG)
 
