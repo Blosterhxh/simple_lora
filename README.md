@@ -276,45 +276,6 @@ find a formula to substantiate this observation.
 
 ### d.1) Trouver le terme de régularisation
 
-Les deux points précédents nous ont permis de trouver un prompt $(x_t,y_t)$ où 
-
-$G_{b1}(x_t) = G_{a1}(\texttt{char1})$ et $G_{b2}(y_t) = G_{b2}(\langle tok1 \rangle)$
-
-avec $\langle G_{a1}(\texttt{char1}) \mid G_{b1}(\langle tok1 \rangle) \rangle = 0$.
-
-On note $G_e$ la fonction $G$ entraînée de $G_a$ à $G_b$.  
-
-Sur le prompt apparence :  
-
-- $G_{e1}(x_t) = G_{e1}(\texttt{char1})$ car l’editability de $G_e$ est plus grande que celle de $G_b$,  puis $G_{e1}(\texttt{char1}) = G_{a1}(\texttt{char1})$.
-
-- $G_{e2}(y_t) = G_{e2}(\langle tok1 \rangle)$, car seul $\langle tok1 \rangle$ contient des informations d’environnement.  
-
-
-On va modifier la loss en ajoutant un deuxième terme portant sur le prompt apparence :  
-
-$$
-\text{Loss} = \| G_e(\text{"an anime illustration of tok1"}) - \text{dataset} \|
-+
- \| G_e(\text{"an anime illustration of character woman with long blue hair"}) - G_a(\text{"an anime illustration of character woman with long blue hair"}) \|
-$$
-
-On détaille le deuxième terme :  
-
-$$
-\| G_e(\text{"an anime illustration of character woman with long blue hair"}) - G_a(\text{"an anime illustration of character woman with long blue hair"}) \|
-$$
-
-En développant :  
-
-$$
-= \| G_{a1}(\texttt{char1}) + G_{b2}(\langle tok1 \rangle) - (G_{a1}(\texttt{char1}) + \text{random}) \|
-$$
-
-$$
-= \| G_{b2}(\langle tok1 \rangle) - \text{random} \|
-$$
-
 The two previous points allowed us to find a prompt $(x_t,y_t)$ where 
 
 $G_{b1}(x_t) = G_{a1}(\text{char1})$ and $G_{b2}(y_t) = G_{b2}(\langle tok1 \rangle)$
