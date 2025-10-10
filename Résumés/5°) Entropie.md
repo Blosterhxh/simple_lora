@@ -8,30 +8,21 @@ Dans les codes décodables, il existe un code particulier appelé code préfixe.
 
 # Entropie
 
-On a un ensemble de n symboles qu'on observe et souhaite communiquer. Chaque symbole ni à la probabilité pi
-d'apparaître. On veut créer un code de manière à pouvoir communiquer ces n symboles, de sorte que les séquences
-utilisées pour coder les symboles les plus fréquents soient les plus petites (on diminue ainsi le coût en calcul
-avec moins de bits traités). Il y a certaines propriétés qu'un code doit vérifier pour être décodable, on ne va
-pas détailler lesquelles ici et on parlera juste de "code" en général sans entrer dans ces détails.
+On suppose maintenant que les symboles ont des probabilités d'apparition différentes, un symbole ni à ainsi une probabilité pi d'apparaître. On veut créer un code de sorte que les séquences
+utilisées pour coder les symboles les plus fréquents soient les plus petites, afin d'avoir une transmission moins coûteuse. Cela revient a minimiser l'espérance de la longueur d'une séquence.
 
-# Théorème 1 
+# Théorème 1
 
-Pour tout code, la longueur moyenne (somme des longueurs des séquences pour ni pondérées par pi)
-a une borne inférieure appelée entropie.
-![th1.PNG](th1.PNG)
+Tout code décodable peut être transformée en code préfixe sans augmenter la longueur moyenne. Ainsi, pour résoudre notre problème, il suffit de trouver le minimum de l'espérance sur les codes préfixes seulement.
 
-# Théorème 2
 
-Tout code peut être transformée en code préfixe (un code préfixe est un code ou aucune séquence est le préfixe
-d'une autre séquence) sans augmenter la longueur moyenne
-
-# Théorème 3 : Kraft-Millman
+# Théorème 2 : Kraft-Millman
 
 Si les longueurs des séquences li vérifient cette inégalité, il existe un code préfixe avec de tels longueurs
 pour coder les n symboles. 
 ![th2.PNG](th2.PNG)
 
-# Théorème 4 
+# Théorème 3 
 
 Pour toute distribution de probabilité sur n, prendre pour ni une séquence de longueur li = log2(qi) vérifie
 le théorème de Kraft-Millman et est donc un code valide.
