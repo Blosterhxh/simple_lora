@@ -9,7 +9,7 @@ Dans les codes décodables, il existe un code particulier appelé code préfixe.
 # Entropie
 
 On suppose maintenant que les symboles ont des probabilités d'apparition différentes, un symbole ni à ainsi une probabilité pi d'apparaître. On veut créer un code de sorte que les séquences
-utilisées pour coder les symboles les plus fréquents soient les plus petites, afin d'avoir une transmission moins coûteuse. Cela revient a minimiser l'espérance de la longueur d'une séquence.
+utilisées pour coder les symboles les plus fréquents soient les plus petites, afin d'avoir une transmission moins coûteuse. Cela revient a minimiser l'espérance de la longueur d'une séquence. Ce minimum est appelé entropie.
 
 # Théorème 1
 
