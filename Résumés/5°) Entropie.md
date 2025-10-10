@@ -1,3 +1,11 @@
+# Code
+On veut communiquer n symboles observés. Pour cela on a besoin d'un code pour chaque symbole. Un code est une suite de chiffre binaires 0 ou 1. Par exemple si on prend deux symboles A et B, on peut coder A par 0 et B par 1.
+
+Pour communiquer les differents symboles, les codes de chaque symbole sont envoyés les uns a la suite des autres. On ne peut donc pas coder les symboles n'importe comment, sinon le code sera indécodable. Par exemple si on code un symbole C avec 01, alors 01 peut être décodé à la fois en AB et en C. On appelera un code décodable un code qui peut être décodé de façon unique. 
+
+Dans les codes décodables, il existe un code particulier appelé code préfixe. Un code est préfixe si aucun code n'est le préfixe d'un autre. Par exemple dans notre cas avec A, B et C, le code n'était pas préfixe car A (0) est préfixe de C(01).
+
+
 # Entropie
 
 On a un ensemble de n symboles qu'on observe et souhaite communiquer. Chaque symbole ni à la probabilité pi
