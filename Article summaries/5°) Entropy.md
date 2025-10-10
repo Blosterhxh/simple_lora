@@ -6,6 +6,10 @@ used to encode the most frequent symbols are the smallest (thus reducing the com
 with fewer bits processed). There are certain properties that a code must verify in order to be decodable, but we will not
 detail them here and will just talk about “code” in general.
 
+# Example of an optimal code for a set of 4 symbols
+
+![img/th6.PNG](img/th6.PNG)
+
 # Theorem 1
 
 For any code, the average length (sum of the lengths of the sequences weighted by pi)
@@ -33,9 +37,7 @@ the Kraft-Millman theorem and is therefore a valid code.
 
 Using the original distribution for lengths, i.e., li = log2(pi), we obtain the minimum length for a code, which is entropy.
 
-# Example of an optimal code for a set of 4 symbols
 
-![img/th6.PNG](img/th6.PNG)
 
 
 
