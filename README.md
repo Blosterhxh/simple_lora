@@ -283,7 +283,7 @@ and regularize at t = 1, where we see that appearance is indeed modified and tha
 fine-tuning, even though I am unable to
 find a formula to substantiate this observation.
 
-To sum up, using directly the token character in the sentence "an anime illustration of \langle tok \rangle woman with long blue hair" instead of an interpolation between \langle tok1 \rangle and character yields the best compromise between editability and influence of the finetuning.
+To sum up, using directly the token character in the sentence "an anime illustration of $\langle tok \rangle$ woman with long blue hair" instead of an interpolation between $\langle tok1 \rangle$ and character yields the best compromise between editability and influence of the finetuning.
 
 ## D) The regularization term
 
