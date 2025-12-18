@@ -83,6 +83,8 @@ will therefore choose a learning rate of 1e-5.
 
 ### a.1) Regularization on styleGAN
 
+Now we leave for a time our objective of finetuning and go back to the styleGAN of the article which aims at generating several faces, and seeks to finetune
+some of them while preserving the others.
 When fine-tuning $G$ on a latent $w_{p}$, the fine-tuning will affect the nearby latents, this propagation
 decreasing with distance. The problem is that we only have one model, so we cannot afford to
 lose all of $G$'s face generation capacity just to learn about a single person.
@@ -147,10 +149,10 @@ Before we can find the term for regularization, we will demonstrate a property.
 
 ### c.1) Problem modeling
 
-We begin by modeling our situation mathematically.
+We begin by modeling our situation.
 
 We model a prompt/image using two variables, $x$ : appearance, and $y$ : other features, which summarize the information contained in the prompt/image.
-In what follows, we consider that the other features are solely the environment, $y$: environment, which does not change the reasoning and allows for better visualization.
+In what follows, we consider that the other features are solely the environment, $y$: environment, which does not change the reasoning and simplifies what follows.
 
 The function $G$ is the Unet that transforms a prompt into an image:
 
@@ -165,7 +167,7 @@ Let's take the training prompt: “an anime illustration of $\langle tok1 \rangl
 Initially, the function $G$, which we will annotate as $G_a$, is:  
 
 $$
-G_a(\text{“an anime illustration of \<tok1>”}) = G_a(x_t = \langle tok1 \rangle,\, y_t = \langle tok1 \rangle) 
+G_a(\text{“an anime illustration of \<tok1> ”}) = G_a(x_t = \langle tok1 \rangle,\, y_t = \langle tok1 \rangle) 
 = G_{a1}(\langle tok1 \rangle),G_{a2}(\langle tok1 \rangle) 
 = G_{a1}(\langle tok1 \rangle),\text{random}
 $$
