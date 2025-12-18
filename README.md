@@ -272,16 +272,18 @@ One explanation is that by moving away from $\langle tok1 \rangle$, the generato
 
 Thus, editability will decrease significantly between t= 0 and 
 t = 0.5 because the cosine similarity will be decreased by the randomness of instance, even if the appearance is only slightly modified by the appearance prompt. To verify this, we change the measure of editability. We calculate the cosine similarity
-between images generated with the same prompt, and we compare it with the cosine similarity of images generated with the simple prompt and the appearance prompt.
+between images generated with the simple prompt, and we compare it with the cosine similarity of images generated with the simple prompt and the appearance prompt, and we do so for each value of interpolation t.
 By calculating the difference between these two cosine similarities, we should be able to
 quantify only the evolution of the consideration of appearance in the generation, without being confused by the increase in randomness.
 
 ![img/interpolation1.PNG](img/interpolation1.png)
 
-Ultimately, the evolution of editability is still not representative of the consideration of appearance terms. I therefore decided to follow my observation
+Ultimately, the evolution of editability is still not representative of the consideration of appearance terms since it peaks at t=0.5 instead of t=1. I therefore decided to follow my observation
 and regularize at t = 1, where we see that appearance is indeed modified and that other features such as environment and positions remain influenced by
 fine-tuning, even though I am unable to
 find a formula to substantiate this observation.
+
+To sum up, using directly the token character in the sentence "an anime illustration of \langle tok \rangle woman with long blue hair" instead of an interpolation between \langle tok1 \rangle and character yields the best compromise between editability and influence of the finetuning.
 
 ## D) The regularization term
 
@@ -293,10 +295,9 @@ $G_{b1}(x_t) = G_{a1}(\text{char1})$ and $G_{b2}(y_t) = G_{b2}(\langle tok1 \ran
 
 We denote $G_e$ as the function $G$ trained from $G_a$ to $G_b$.  
 
-On the prompt appearance:
+On the appearance prompt:
 
-- $G_{e1}(x_t) = G_{e1}(\text{char1})$ because the editability of $G_e$ is greater than that of $G_b$,  then $G_{e1}(\text{char1}) = G_{a1}(\text{char1})$ because
-$G_{a1}(\text{char1})$ is not affected by the finetuning.
+- $G_{e1}(x_t) = G_{a1}(\text{char1})$ because the editability of $G_e$ is greater than that of $G_b$
 
 - $G_{e2}(y_t) = G_{e2}(\langle tok1 \rangle)$, because only $\langle tok1 \rangle$ contains environmental information.
 
