@@ -10,7 +10,7 @@ This github is composed of two main folders :
 - Article summaries, which correspond to summaries of papers from the creation of styleGAN to the application of pivotal tuning to diffusion model, along with other paper that can be
 useful to make experiment like CLIP Double ellispoid geometry. They are numbered in an specific order so that they can be read one after the other.
 
-- The notebook folder, which contains several notebooks used to train diffusion model, load a config and conduct experiments on it. Many parts of the code was inspired by this repository : https://github.com/cloneofsimo/lora . The main differences are that it was simplified to remove advanced options so it focuses on the core concepts of pivotal tuning, and it was commented and reunited in a single notebook so it's more easily understandable and executable. Some functions were also added to control different steps of executions, and allow new experiments.
+- The notebook folder, which contains several notebooks used to train diffusion model, load a config and conduct experiments on it. Many parts of the code was inspired by this repository : https://github.com/cloneofsimo/lora . The main differences are that it was simplified to remove advanced options so it focuses on the core concepts of pivotal tuning, and it was commented and reunited in a single notebook so it's more easily understandable and executable (particularly on colab). Some functions were also added to control different steps of executions, and allow new experiments.
 
 Next, i will present the different results i have been able to shade light on with reading articles/experiments, which provide an understanding of pivotal tuning for diffusion model.
 
