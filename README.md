@@ -167,7 +167,7 @@ Let's take the training prompt: “an anime illustration of $\langle tok1 \rangl
 Initially, the function $G$, which we will annotate as $G_a$, is:  
 
 $$
-G_a(\text{“an anime illustration of \<tok1> ”}) = G_a(x_t = \langle tok1 \rangle,\, y_t = \langle tok1 \rangle) 
+G_a(\text{“an anime illustration of \langle tok1 \rangle ”}) = G_a(x_t = \langle tok1 \rangle,\, y_t = \langle tok1 \rangle) 
 = G_{a1}(\langle tok1 \rangle),G_{a2}(\langle tok1 \rangle) 
 = G_{a1}(\langle tok1 \rangle),\text{random}
 $$
