@@ -259,4 +259,4 @@ embeddings at the extreme directions of the ellipsoid.
 ## f) Why interpolating using the ellipsoids, and not the sphere after L2 normalization of embeddings
 
 In CLIP, these embeddings on the ellipsoids are then normalized so that they are all on a sphere of radius 1. The problem with this, is that interpolating on the 
-sphere can make the embedding go in "semantic dead zones" where the probability of an embedding being there is low, whereas it is not the case in vSLERP. For now i don't know how to demostrate this. It might be possible using the fact that z1, z2 follows N(0,C) and computing the density of the zint as a formula of the one of z1 and z2.
+sphere can make the embedding go in "semantic dead zones" where the probability of an embedding being there is low, whereas it is not the case in vSLERP. For now i don't know how to demostrate this. It might be possible using the fact that z1, z2 follows N(0,C) and computing the probability of zint as a formula of the one of z1 and z2.
